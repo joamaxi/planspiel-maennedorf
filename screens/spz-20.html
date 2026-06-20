@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Variable Kosten – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#fff; }
+    * { box-sizing:border-box; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 60px 32px 24px 32px;
+      display: flex;
+      gap: 60px;
+      align-items: flex-start;
+    }
+
+    /* ══ LINKE SPALTE ══════════════════════════════════════════════════════ */
+    .col-left {
+      width: 300px;
+      flex-shrink: 0;
+    }
+
+    .decision-card {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 20px 28px 20px;
+      background: #fff;
+      margin-top: 120px;
+    }
+
+    .card-illustration {
+      position: absolute;
+      top: -28px;
+      right: 12px;
+      height: 52px;
+      width: auto;
+      display: block;
+      background: #fff;
+    }
+
+    .card-title {
+      font-weight: 800;
+      color: var(--color-accent);
+      margin: 0 0 12px 0;
+      line-height: 1.1;
+    }
+
+    .card-text {
+      font-size: 0.86rem;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ══ RECHTE SPALTE ═════════════════════════════════════════════════════ */
+    .col-right {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* L-Rahmen */
+    .var-wrapper {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 20px 28px 20px;
+      margin-top: 120px;
+    }
+
+    .var-wrapper-title {
+      position: absolute;
+      top: -60px;
+      left: 0;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--color-label);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      padding: 0 0 0 20px;
+    }
+
+    .var-wrapper-subtitle {
+      position: absolute;
+      top: -26px;
+      left: 0;
+      font-size: 0.78rem;
+      color: var(--color-label-light);
+      padding: 0 0 0 22px;
+      white-space: nowrap;
+    }
+
+    /* Inneres Layout */
+    .var-inner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Beschriftung links */
+    .var-row-label {
+      flex-shrink: 0;
+      text-align: right;
+      min-width: 110px;
+    }
+
+    .var-row-main {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      line-height: 1.4;
+    }
+
+    /* Boxen-Spalte */
+    .var-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Obere Reihe: 4 Boxen */
+    .var-grid {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Untere Reihe: Label + Total */
+    .var-total-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .var-total-label {
+      flex: 3;
+      text-align: right;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      line-height: 1.4;
+      padding-right: 4px;
+    }
+
+    /* Farbige Markt-Box (wie spz-19) */
+    .var-box {
+      flex: 1;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      overflow: hidden;
+    }
+
+    .var-box-name {
+      padding:  8px 6px;
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+
+    .var-body {
+      padding: 10px 10px 12px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .var-badge {
+      width: 100%;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    /* Gesamtes Spital Box */
+    .var-box.total-box {
+      background: #fff;
+      border-color: #fff;
+      border-radius: 10px 10px 10px 10px;
+      flex: 0 0 110px;
+    }
+
+    .var-box.total-box .var-box-name {
+      background: transparent;
+      color: var(--color-accent);
+      border-bottom: 1px solid #d8e8f0;
+      padding: 8px 8px;
+    }
+
+    .var-box.total-box .var-body {
+      background: transparent;
+      padding: 10px 10px 12px;
+    }
+
+    .var-box.total-box .var-badge {
+      background: var(--color-accent);
+    }
+  </style>
+</head>
+
+<body
+  class="bg-white min-h-screen flex flex-col items-center"
+  data-prev="spz-19.html"
+  data-next="spz-21.html"
+  data-spielzug-label="Spielzug 20"
+  data-step-current="20"
+  data-step-total="20"
+  data-wirkung="00-wirkungen.png"
+  data-disable-handbuch="true"
+  data-disable-ereignis="true"
+>
+  <div id="app-header" class="w-full"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <!-- ══ LINKE SPALTE ══ -->
+      <div class="col-left">
+        <div class="decision-card">
+          <img id="card-picto-1" src="../assets/pictos/picto_aufgabe.png"
+               class="card-illustration" alt="" />
+          <h1 class="card-title" id="art-1">Aufgabe</h1>
+          <p class="card-text" id="text-1"></p>
+        </div>
+      </div>
+
+      <!-- ══ RECHTE SPALTE ══ -->
+      <div class="col-right">
+
+        <div class="var-wrapper">
+
+          <span class="var-wrapper-title">Variable Kosten</span>
+          <span class="var-wrapper-subtitle">Kosten der stationären und ambulanten Patienten, die in dieser Periode abgerechnet werden</span>
+
+          <div class="var-inner">
+            <div class="var-col">
+
+              <!-- Obere Reihe: 4 Boxen -->
+              <div class="var-grid">
+
+                <div class="var-box" style="border-color:rgb(230,51,41);">
+                  <div class="var-box-name" style="background:rgb(230,51,41);">Medizin</div>
+                  <div class="var-body">
+                    <div class="var-badge" id="val-medizin">–</div>
+                  </div>
+                </div>
+
+                <div class="var-box" style="border-color:rgb(249,178,51);">
+                  <div class="var-box-name" style="background:rgb(249,178,51);">Chirurgie</div>
+                  <div class="var-body">
+                    <div class="var-badge" id="val-chirurgie">–</div>
+                  </div>
+                </div>
+
+                <div class="var-box" style="border-color:rgb(58,170,53);">
+                  <div class="var-box-name" style="background:rgb(58,170,53);">Geburtshilfe</div>
+                  <div class="var-body">
+                    <div class="var-badge" id="val-geburtshilfe">–</div>
+                  </div>
+                </div>
+
+                <div class="var-box" style="border-color:rgb(37,117,176);">
+                  <div class="var-box-name" style="background:rgb(37,117,176);">Ambulant</div>
+                  <div class="var-body">
+                    <div class="var-badge" id="val-ambulant">–</div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Untere Reihe: Label links + Gesamtes Spital unter Ambulant -->
+              <div class="var-total-row">
+                <span class="var-total-label">Variable Kosten für Diagnostik/<br>Therapie, Pflege/Hotel</span>
+                <div class="var-box total-box" style="flex:1;">
+                    <div class="var-body">
+                    <div class="var-badge" id="val-total">–</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="app-footer" class="w-full bg-transparent"></div>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    function getLS(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+    }
+    function setLS(key, val) {
+      localStorage.setItem(key, JSON.stringify(val));
+    }
+    function boldQuotes(text) {
+      return text.replace(/"([^"]+)"/g, '<strong>"$1"</strong>');
+    }
+
+    /* ══ Spielaufgaben → linke Karte ══════════════════════════════════════ */
+    (function() {
+      const data = getLS('spielaufgaben');
+      if (!data) return;
+      const arr  = data.spielaufgaben || data;
+      const item = arr.find(e => e.Spielzug === 'spz-20');
+      if (!item) return;
+
+      if (item.AufgabenArt_1) document.getElementById('art-1').textContent = item.AufgabenArt_1;
+      const parts = (item.Aufgabe_1 || '').split('\r');
+      const body  = parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim();
+      document.getElementById('text-1').innerHTML = boldQuotes(body);
+
+      if (item.Picto1)
+        document.getElementById('card-picto-1').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
+    })();
+
+    /* ══ Variable Kosten berechnen ════════════════════════════════════════ */
+    (function() {
+
+      /* kostenTotal-Lookup aus patienten JSON: { marktName+versicherung → kostenTotal } */
+      const raw       = getLS('patienten');
+      const eintraege = raw
+        ? (Array.isArray(raw) ? raw : (Array.isArray(raw.patienten) ? raw.patienten : []))
+        : [];
+
+      /* Kosten-Tabelle aufbauen */
+      const kostenLookup = {};
+      eintraege.forEach(e => {
+        const key = `${e.marktName}|${e.versicherung}`;
+        kostenLookup[key] = Number(e.kostenTotal) || 0;
+      });
+
+      /* Patientenzahlen aus spz-14 (patientenAufnahme) */
+      const aufnahme = getLS('patientenAufnahme') || {};
+
+      function anzahlBereich(name) {
+        const b = aufnahme[name];
+        if (!b) return 0;
+        if (typeof b === 'object') return (Number(b.PHP) || 0) + (Number(b.Allgemein) || 0);
+        return Number(b) || 0;
+      }
+
+      function kostenBereich(name) {
+        const b = aufnahme[name];
+        if (!b || typeof b !== 'object') return 0;
+        const php  = (Number(b.PHP)       || 0) * (kostenLookup[`${name}|Halbprivat/Privat`] || 0);
+        const allg = (Number(b.Allgemein) || 0) * (kostenLookup[`${name}|Allgemein`]          || 0);
+        return php + allg;
+      }
+
+      /* Fallback-Kostensätze für Ambulant (falls kein Lookup) */
+      const AMBULANT_KOSTEN = kostenLookup['Ambulant|Ambulant'] || kostenLookup['Ambulant|'] || 5;
+      const ambulantAnzahl  = Number(aufnahme.Ambulant) || 0;
+
+      const medizin      = kostenBereich('Medizin')      || 0;
+      const chirurgie    = kostenBereich('Chirurgie')     || 0;
+      const geburtshilfe = kostenBereich('Geburtshilfe') || 0;
+      const ambulant     = ambulantAnzahl * AMBULANT_KOSTEN;
+      const total        = medizin + chirurgie + geburtshilfe + ambulant;
+
+      /* Anzeige */
+      document.getElementById('val-medizin').textContent      = medizin      || '–';
+      document.getElementById('val-chirurgie').textContent    = chirurgie    || '–';
+      document.getElementById('val-geburtshilfe').textContent = geburtshilfe || '–';
+      document.getElementById('val-ambulant').textContent     = ambulant     || '–';
+      document.getElementById('val-total').textContent        = total        || '–';
+
+      /* Total speichern für Transfer */
+      if (total > 0) localStorage.setItem('spz20_varKosten', total);
+    })();
+
+    /* ══ Transfer beim Next-Klick ════════════════════════════════════════ */
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#nav-next')) return;
+      if (localStorage.getItem('done_spz20_varkosten') === 'true') return;
+
+      const total = Number(localStorage.getItem('spz20_varKosten')) || 0;
+      if (total === 0) { localStorage.setItem('done_spz20_varkosten', 'true'); return; }
+
+      /* Bilanz: FluessigeMittel -= total */
+      const bilanzData = getLS('bilanzStart');
+      if (bilanzData) {
+        const arr    = bilanzData.Anfangsbilanz || bilanzData;
+        const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
+        const idx    = arr[teamNr] !== undefined ? teamNr : (arr[teamNr-1] !== undefined ? teamNr-1 : 0);
+        const entry  = arr[idx];
+        if (entry && entry.Bilanz) {
+          entry.Bilanz.FluessigeMittel = (Number(entry.Bilanz.FluessigeMittel) || 0) - total;
+          arr[idx] = entry;
+          localStorage.setItem('bilanzStart', JSON.stringify(
+            bilanzData.Anfangsbilanz ? { ...bilanzData, Anfangsbilanz: arr } : arr
+          ));
+        }
+      }
+
+      /* Erfolgsrechnung: Variable_Kosten_Spital */
+      const er = getLS('erfolgsrechnung') || {};
+      er.Variable_Kosten_Spital = total;
+      setLS('erfolgsrechnung', er);
+
+      /* Protokoll */
+      const teamNr    = Number(localStorage.getItem('teamNumber')) || 1;
+      const teamLabel = localStorage.getItem('klinikName') || `Team ${teamNr}`;
+      const protokoll = getLS('protokoll') || [];
+      protokoll.push({
+        zeit:     new Date().toISOString(),
+        spielzug: 'spz-20',
+        aktion:   'Variable Kosten Spitalbetrieb',
+        von:      'Flüssige Mittel',
+        nach:     'Erfolgsrechnung',
+        betrag:   total,
+        team:     teamLabel
+      });
+      setLS('protokoll', protokoll);
+
+      localStorage.setItem('done_spz20_varkosten', 'true');
+    }, true);
+  </script>
+</body>
+</html>

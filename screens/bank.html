@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bankdarlehen</title>
+
+    <link rel="stylesheet" href="../assets/css/app.css" />
+    <link rel="stylesheet" href="../assets/css/tailwind.css" />
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Planspiel" />
+    <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+    <style>
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        * { box-sizing: border-box; }
+
+        .page-shell {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .bank-wrap {
+            width: fit-content;
+            display: grid;
+            grid-template-columns: 500px 500px;
+            gap: 12px;
+            justify-content: center;
+            align-items: start;
+            margin: 0 auto;
+            transform: translate(50px, -70px);
+        }
+
+        .bank-card {
+            position: relative;
+            width: 400px;
+            min-height: 240px;
+            background: #ffffff;
+            border-right:  2px solid var(--color-accent);
+            border-bottom: 2px solid var(--color-accent);
+            border-bottom-right-radius: 28px;
+            border-bottom-left-radius:  28px;
+            border-top-right-radius:    28px;
+            padding: 34px 30px 28px 30px;
+        }
+
+        .bank-icon-wrap {
+            position: absolute;
+            top: -28px;
+            right: 22px;
+            width: 78px;
+            height: 78px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .bank-icon {
+            max-width: 65px;
+            max-height: 65px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .bank-title {
+            margin: 0 82px 14px 0;
+            color: var(--color-accent);
+            font-size: 1.18rem;
+            line-height: 1.08;
+            font-weight: 700;
+        }
+
+        .bank-text {
+            color: var(--color-label);
+            font-size: 0.92rem;
+            line-height: 1.28;
+            font-weight: 400;
+            margin: 0;
+        }
+
+        .bank-text strong {
+            font-weight: 700;
+            color: #5a8aaa;
+        }
+
+        .bank-bottom {
+            margin-top: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .bank-label {
+            color: var(--color-label);
+            font-size: 0.88rem;
+            line-height: 1.2;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        .bank-input {
+            width: 120px;
+            height: 40px;
+            border: 1.5px solid var(--color-accent);
+            border-radius: 8px;
+            background: #ffffff;
+            color: var(--color-accent);
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            padding: 0 12px;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .bank-input:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px rgba(37,117,176,0.12);
+        }
+
+        .bank-input::placeholder {
+            color: #c0d8e8;
+            font-weight: 400;
+        }
+        .bank-input::-webkit-inner-spin-button,
+        .bank-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .bank-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+        .bank-total {
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: var(--color-label);
+            text-align: right;
+        }
+        .bank-total strong {
+            color: var(--color-accent);
+            font-size: 0.95rem;
+        }
+
+        .bank-schulden {
+            margin-top: 6px;
+            font-size: 0.82rem;
+            color: var(--color-label);
+            text-align: right;
+        }
+        .bank-schulden strong {
+            color: var(--color-accent);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 980px) {
+            html, body { overflow: auto; }
+
+            .page-shell {
+                height: auto;
+                min-height: 100vh;
+                align-items: flex-start;
+            }
+
+            .bank-wrap {
+                grid-template-columns: 1fr;
+                gap: 28px;
+                padding: 14px 12px 20px 12px;
+                transform: none;
+            }
+
+            .bank-card {
+                width: 100%;
+                min-height: auto;
+                padding: 28px 18px 18px 18px;
+                border-bottom-right-radius: 22px;
+                border-bottom-left-radius:  22px;
+                border-top-right-radius:    22px;
+            }
+
+            .bank-icon-wrap {
+                top: -20px;
+                right: 14px;
+                width: 60px;
+                height: 60px;
+            }
+
+            .bank-icon { max-width: 42px; max-height: 42px; }
+
+            .bank-title { margin: 0 62px 12px 0; font-size: 1rem; }
+
+            .bank-text { font-size: 0.84rem; line-height: 1.26; }
+
+            .bank-bottom {
+                margin-top: 22px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .bank-label { font-size: 0.82rem; white-space: normal; }
+
+            .bank-input {
+                width: 100%;
+                max-width: 180px;
+                height: 42px;
+                font-size: 0.88rem;
+                border-radius: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-shell">
+        <div class="bank-wrap">
+
+            <!-- Darlehen aufnehmen -->
+            <section class="bank-card" id="aufnahme-card">
+                <div class="bank-icon-wrap">
+                    <img src="../assets/pictos/bank.svg" alt="Bank" class="bank-icon" />
+                </div>
+
+                <h2 class="bank-title">Darlehen aufnehmen</h2>
+
+                <p class="bank-text">
+                    Nehmen Sie den Betrag von der Bank und legen Sie ihn
+                    in <strong>«Flüssige Mittel»</strong> sowie in
+                    <strong>«Darlehen Bank»</strong> auf dem Spielbrett.
+                </p>
+
+                <div class="bank-bottom">
+                    <label class="bank-label" for="input-aufnahme">Darlehensbetrag eintragen</label>
+                    <input id="input-aufnahme" class="bank-input" type="number"
+                           inputmode="decimal" autocomplete="off" placeholder="0" min="0" step="1" />
+                </div>
+                <div class="bank-total">
+                    Total aufgenommen: <strong id="total-aufnahme">0</strong> Mio
+                </div>
+                <div class="bank-schulden">
+                    Aktuelle Bankschulden: <strong id="val-schulden">–</strong> Mio
+                </div>
+            </section>
+
+            <!-- Darlehen zurückzahlen -->
+            <section class="bank-card" id="rueckzahlung-card">
+                <div class="bank-icon-wrap">
+                    <img src="../assets/pictos/bank.svg" alt="Bank" class="bank-icon" />
+                </div>
+
+                <h2 class="bank-title">Darlehen zurückzahlen</h2>
+
+                <p class="bank-text">
+                    Nehmen Sie den Betrag von <strong>«Flüssige Mittel»</strong>
+                    und legen Sie ihn in <strong>«Darlehen Bank»</strong>
+                    auf dem Spielbrett zurück.
+                </p>
+
+                <div class="bank-bottom">
+                    <label class="bank-label" for="input-rueckzahlung">Rückzahlungsbetrag eintragen</label>
+                    <input id="input-rueckzahlung" class="bank-input" type="number"
+                           inputmode="decimal" autocomplete="off" placeholder="0" min="0" step="1" />
+                </div>
+                <div class="bank-total">
+                    Total zurückbezahlt: <strong id="total-rueckzahlung">0</strong> Mio
+                </div>
+                <div class="bank-schulden">
+                    Aktuelle Bankschulden: <strong id="val-schulden-2">–</strong> Mio
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+    const STORAGE_KEY = 'bankValues';
+
+    const inputAufnahme    = document.getElementById('input-aufnahme');
+    const inputRueckzahlung = document.getElementById('input-rueckzahlung');
+
+    function toNumber(value) {
+        const normalized = String(value || '').replace(/\s+/g, '').replace(',', '.');
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    function readBankValues() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return { aufnahme: 0, rueckzahlung: 0 };
+            const parsed = JSON.parse(raw);
+            return {
+                aufnahme:    toNumber(parsed.aufnahme),
+                rueckzahlung: toNumber(parsed.rueckzahlung)
+            };
+        } catch (err) {
+            return { aufnahme: 0, rueckzahlung: 0 };
+        }
+    }
+
+    function saveBankValues() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            aufnahme:    toNumber(inputAufnahme.value),
+            rueckzahlung: toNumber(inputRueckzahlung.value)
+        }));
+    }
+
+    function closeOverlay() {
+        try {
+            if (window.parent && window.parent !== window) {
+                if (window.parent.closeBankOverlay) {
+                    window.parent.closeBankOverlay();
+                } else {
+                    const parentDoc = window.parent.document;
+                    const overlay = parentDoc.getElementById('bank-overlay');
+                    const frame   = parentDoc.getElementById('bank-frame');
+                    const btn     = parentDoc.getElementById('nav-bank');
+                    if (overlay) overlay.classList.remove('show');
+                    if (frame)   frame.src = '';
+                    if (btn)     btn.classList.remove('active');
+                    if (window.parent.__restoreFooter) window.parent.__restoreFooter();
+                }
+            }
+        } catch (e) {
+            console.warn('closeOverlay:', e);
+        }
+    }
+
+    function handleKeydown(event) {
+        if (event.key !== 'Enter') return;
+        const val = toNumber(event.target.value);
+        if (val !== 0) {
+            saveBankValues();
+            closeOverlay();
+        }
+    }
+
+    function getCurrentSchulden() {
+        try {
+            const bilanzData = JSON.parse(localStorage.getItem('bilanzStart'));
+            if (!bilanzData) return null;
+            const arr    = bilanzData.Anfangsbilanz || bilanzData;
+            const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
+            const idx    = arr[teamNr] !== undefined ? teamNr : (arr[teamNr-1] !== undefined ? teamNr-1 : 0);
+            const entry  = arr[idx];
+            if (entry && entry.Bilanz) return Number(entry.Bilanz.Darlehen_Bank) || 0;
+        } catch(e) {}
+        return null;
+    }
+
+    function updateDisplay() {
+        try {
+            const applied = JSON.parse(localStorage.getItem('bankApplied') || '{}');
+            document.getElementById('total-aufnahme').textContent    = Number(applied.aufnahme)    || 0;
+            document.getElementById('total-rueckzahlung').textContent = Number(applied.rueckzahlung) || 0;
+        } catch(e) {}
+
+        const schulden = getCurrentSchulden();
+        const display  = schulden !== null ? schulden : '–';
+        document.getElementById('val-schulden').textContent   = display;
+        document.getElementById('val-schulden-2').textContent = display;
+    }
+
+    function init() {
+        inputAufnahme.value    = '';
+        inputRueckzahlung.value = '';
+
+        updateDisplay();
+
+        [inputAufnahme, inputRueckzahlung].forEach(input => {
+            input.addEventListener('input',   saveBankValues);
+            input.addEventListener('keydown', handleKeydown);
+            input.addEventListener('touchend', e => {
+                e.preventDefault();
+                input.focus();
+                input.click();
+            });
+        });
+    }
+
+    init();
+    </script>
+</body>
+</html>

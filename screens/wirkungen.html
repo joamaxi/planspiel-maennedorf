@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wirkungsgefüge – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; min-height: 100%;
+      background: #fff;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    * { box-sizing: border-box; }
+
+    /* ── Fixierte Steuerung oben rechts ── */
+    .controls {
+      position: fixed;
+      top: 12px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 500;
+    }
+
+    .btn-alle {
+      display: none;                        /* nur sichtbar wenn Detail angezeigt */
+      padding: 0 18px;
+      height: 40px;
+      background: var(--color-accent);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.80rem;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(37,117,176,0.35);
+      transition: background 0.15s;
+    }
+    .btn-alle:hover { background: var(--color-accent-dark); }
+    .btn-alle.visible {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-close {
+      width: 40px;
+      height: 40px;
+      border-radius: 15%;
+      background: rgba(255,255,255,0.92);
+      border: 1.5px solid var(--color-border);
+      color: var(--color-accent);
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-close:hover {
+      background: var(--color-accent);
+      color: #fff;
+      border-color: var(--color-accent);
+    }
+
+    /* ── Bild-Container ── */
+    .img-container {
+      position: relative;
+      width: 100%;
+      display: block;
+      line-height: 0;
+    }
+    .img-container img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* ── Hotspot-Overlay ── */
+    .hotspot {
+      position: absolute;
+      cursor: pointer;
+      background: transparent;
+      border-radius: 6px;
+      transition: background 0.15s, box-shadow 0.15s;
+      -webkit-tap-highlight-color: rgba(37,117,176,0.2);
+    }
+    .hotspot:hover,
+    .hotspot:active {
+      background: rgba(37, 117, 176, 0.18);
+      box-shadow: inset 0 0 0 0px rgba(37,117,176,0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fixierte Steuerung -->
+  <div class="controls">
+    <button class="btn-alle" id="btn-alle">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <rect x="0.5" y="0.5" width="5" height="5" rx="1" fill="white" opacity="0.85"/>
+        <rect x="8.5" y="0.5" width="5" height="5" rx="1" fill="white" opacity="0.85"/>
+        <rect x="0.5" y="8.5" width="5" height="5" rx="1" fill="white" opacity="0.85"/>
+        <rect x="8.5" y="8.5" width="5" height="5" rx="1" fill="white" opacity="0.85"/>
+      </svg>
+      alle
+    </button>
+    <button class="btn-close" id="btn-close">&times;</button>
+  </div>
+
+  <!-- Bild + Hotspots -->
+  <div class="img-container" id="img-container">
+    <img id="wirkung-img" src="" alt="Wirkungsgefüge" />
+
+    <!--
+      Koordinaten als % des Bildbereichs (left / top / width / height).
+      Gemessen anhand der vom User markierten Nummerierungs-Übersicht.
+      Nur aktiv wenn die Übersicht (00-wirkungen.png) angezeigt wird.
+    -->
+    <div id="hotspot-layer">
+
+      <!-- 01 – Qualität Küche & Caféteria -->
+      <div class="hotspot" data-file="01_qualitaet_kueche.png"
+           style="left:6.5%;  top:44%; width:6%;  height:3.2%;"></div>
+
+      <!-- 02 – Spitalhygiene -->
+      <div class="hotspot" data-file="02_spitalhygiene.png"
+           style="left:44.3%;   top:66%; width:6%;    height:3%;"></div>
+
+      <!-- 03 – Strategie, Kommunikation und Entwicklung -->
+      <div class="hotspot" data-file="03_strategie-kom-entwicklung.png"
+           style="left:35%; top:36.5%;   width:9%;    height:5.5%;"></div>
+
+      <!-- 04 – Prozessoptimierung -->
+      <div class="hotspot" data-file="04_prozessoptimierung.png"
+           style="left:73.8%; top:74%;   width:10%;  height:6.2%;"></div>
+
+      <!-- 05 – Marktpositionierung -->
+      <div class="hotspot" data-file="05_marktpositionierung.png"
+           style="left:78.2%; top:51.6%; width:7.7%;    height:5.3%;"></div>
+
+      <!-- 06 – Ärztliches Weiterbildungszentrum -->
+      <div class="hotspot" data-file="06_aerzlches_weiterbildungszentrum.png"
+           style="left:55.5%; top:36.7%;   width:8.5%;  height:5.7%;"></div>
+
+      <!-- 07 – Erweiterung Station Kapazitäten -->
+      <div class="hotspot" data-file="07_erweiterung_station_kapazitaeten.png"
+           style="left:19%;   top:36.5%;   width:8.3%;    height:5.5%;"></div>
+
+      <!-- 08 – Erweiterung Gebäude ambulant -->
+      <div class="hotspot" data-file="08_erweiterung_gebaeude_ambulant.png"
+           style="left:71.5%;   top:65.5%; width:9.5%;  height:5%;"></div>
+
+      <!-- 09 – Ausbau interdisziplinäre Zentren -->
+      <div class="hotspot" data-file="09_ausbau_interdis_zentren.png"
+           style="left:62.6%; top:56.5%; width:7.7%;  height:5.3%;"></div>
+
+      <!-- 10 – Modernisierung Geräte -->
+      <div class="hotspot" data-file="10_modernisierung_geraete.png"
+           style="left:9%;    top:60.5%;   width:7.5%;  height:5%;"></div>
+
+      <!-- 11 – Individuelle Mitarbeiterförderung -->
+      <div class="hotspot" data-file="11_indivduelle_mitarbeit_foerderung.png"
+           style="left:68.5%; top:85.5%; width:8%;  height:5%;"></div>
+
+      <!-- 12 – Wertebasierte Förderung -->
+      <div class="hotspot" data-file="12_wertebasierte_foerderung.png"
+           style="left:17.5%; top:75.5%; width:8%;   height:4.3%;"></div>
+
+      <!-- 13 – Mitarbeiter Employer Branding -->
+      <div class="hotspot" data-file="13_mitarbeit_employer_brandng.png"
+           style="left:19.8%; top:48.5%; width:8.5%;  height:5.9%;"></div>
+
+      <!-- 14 – Ausbau Medizin-Controlling -->
+      <div class="hotspot" data-file="14_ausbau_med_controll.png"
+           style="left:69%; top:36.8%;   width:9%;  height:5.7%;"></div>
+
+      <!-- 15a – (Datei noch nicht vorhanden) -->
+      <div class="hotspot" data-file="15_mitarbeiter_patienten.png"
+           style="left:46.5%;   top:81.5%; width:8.5%;    height:2.7%;"></div>
+
+      <!-- 15b – (Datei noch nicht vorhanden) -->
+      <div class="hotspot" data-file="15_mitarbeiter_patienten.png"
+           style="left:49.8%;   top:85%;   width:7.3%;    height:3%;"></div>
+
+    </div>
+  </div>
+
+  <script>
+    /* ── URL-Parameter ── */
+    const params    = new URLSearchParams(window.location.search);
+    const fromPage  = params.get('from') || '';
+    const initFile  = params.get('file') || '00-wirkungen.png';
+
+    const OVERVIEW  = '00-wirkungen.png';
+    const BASE      = '../data/wirkungen/';
+
+    const img       = document.getElementById('wirkung-img');
+    const layer     = document.getElementById('hotspot-layer');
+    const btnAlle   = document.getElementById('btn-alle');
+    const btnClose  = document.getElementById('btn-close');
+
+    /* ── Bild wechseln ── */
+    function switchImage(file) {
+      if (!file) return;                    // Platzhalter ohne Datei: ignorieren
+      img.src = BASE + file + '?v=' + Date.now();
+      const isOverview = (file === OVERVIEW);
+      layer.style.display = isOverview ? 'block' : 'none';
+      btnAlle.classList.toggle('visible', !isOverview);
+    }
+
+    /* ── Hotspot-Klicks ── */
+    layer.querySelectorAll('.hotspot').forEach(el => {
+      el.addEventListener('click', () => {
+        const file = el.dataset.file;
+        if (file) switchImage(file);
+      });
+    });
+
+    /* ── «alle Wirkungen» → Übersicht ── */
+    btnAlle.addEventListener('click', () => switchImage(OVERVIEW));
+
+    /* ── X → zurück zur Ursprungsseite ── */
+    btnClose.addEventListener('click', () => {
+      if (fromPage) window.location.href = fromPage;
+      else          history.back();
+    });
+
+    /* ── Init ── */
+    switchImage(initFile);
+  </script>
+</body>
+</html>

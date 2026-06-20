@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+.AppleDouble
+
+# MAMP Logs
+*.log
+
+# FileMaker Datenbank (grosses Binärfile)
+*.fmp12
+
+# Laufzeit-Daten (werden vom Server generiert)
+scores/
+
+# Design-Quelldateien (optional – entfernen falls gewünscht)
+design-elemente-buelach/

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spielbrett-Aufgabe – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#fff; }
+    * { box-sizing:border-box; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 36px 32px 24px 32px;
+      display: flex;
+      gap: 48px;
+      align-items: flex-start;
+    }
+
+    /* ══ LINKE SPALTE ══════════════════════════════════════════════════════ */
+    .col-left {
+      width: 340px;
+      flex-shrink: 0;
+      margin-right: 50px; 
+    }
+
+    .decision-card {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 24px 28px 20px;
+      background: #fff;
+      margin-top: 26px;
+    }
+
+    .decision-card {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 24px 28px 20px;
+      background: #fff;
+      margin-top: 26px;
+    }
+    .decision-card + .decision-card {
+      margin-top: 28px;
+    }
+
+    .card-illustration {
+      position: absolute;
+      top: -30px;
+      right: 12px;
+      width: auto;
+      height: 55px;
+      display: block;
+      background: #fff;
+    }
+
+    .card-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--color-accent);
+      margin: 0 0 12px 0;
+      line-height: 1.1;
+    }
+
+    .card-text {
+      font-size: 0.86rem;
+      color: #333;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    /* ══ RECHTE SPALTE ═════════════════════════════════════════════════════ */
+    .col-right {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+    }
+
+    /* ── Patienten-Bereich ─────────────────────────────────────── */
+    .section-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .section-header-label {
+      font-size: 0.88rem;
+      color: var(--color-accent);
+    }
+
+    .value-badge {
+      min-width: 44px;
+      height: 32px;
+      background: var(--color-accent);
+      color: #fff;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 0 10px;
+    }
+
+    .markt-grid {
+      display: flex;
+      gap: 10px;
+      padding: 4px 0;
+    }
+
+    .markt-box {
+      flex: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid transparent;
+    }
+
+    .markt-header {
+      padding: 6px 10px;
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+
+    .markt-body {
+      background: #fff;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .markt-versicherung {
+      font-size: 0.82rem;
+      color: #888;
+    }
+
+    .markt-anzahl {
+      min-width: 34px;
+      height: 28px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.92rem;
+      font-weight: 700;
+      background: #fff;
+      padding: 0 8px;
+      /* border und color werden per JS gesetzt */
+    }
+
+    .section-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .section-footer-label {
+      font-size: 0.88rem;
+      color: var(--color-accent);
+    }
+
+    /* ── Zufriedenheits-Bereich ─────────────────────────────────── */
+    .zuf-title {
+      font-size: 0.88rem;
+      color: var(--color-accent);
+      margin-bottom: 10px;
+    }
+
+    .zuf-box {
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      overflow: hidden;
+    }
+
+    .zuf-col-header {
+      display: flex;
+      justify-content: flex-end;
+      padding: 8px 14px 4px 14px;
+    }
+
+    .zuf-col-label {
+      font-size: 0.78rem;
+      color: #aaa;
+      min-width: 110px;
+      text-align: center;
+    }
+
+    .zuf-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 14px;
+      border-top: 1px solid var(--color-border-light);
+    }
+
+    .zuf-row-label {
+      font-size: 0.85rem;
+      color: var(--color-accent);
+    }
+
+    .zuf-row-value {
+      min-width: 52px;
+      height: 30px;
+      background: var(--color-accent);
+      color: #fff;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-white min-h-screen flex flex-col items-center"
+  data-prev="spz-01.html"
+  data-next="spz-03.html"
+  data-spielzug-label="Spielzug 2"
+  data-step-current="2"
+  data-step-total="20"
+  data-wirkung="00-wirkungen.png"
+  data-disable-handbuch="true"
+  data-disable-bank="true"
+  data-disable-ereignis="true"
+>
+  <div id="app-header" class="w-full"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <!-- ══ LINKE SPALTE ══ -->
+      <div class="col-left">
+
+        <!-- Karte 1: Erklärung -->
+        <div class="decision-card">
+          <img id="card-picto-1" src="../assets/pictos/picto_info.png"
+               class="card-illustration" alt="" />
+          <h1 class="card-title" id="art-1">Erklärung</h1>
+          <p class="card-text" id="text-1"></p>
+        </div>
+
+        <!-- Karte 2: Aufgabe -->
+        <div class="decision-card">
+          <img id="card-picto-2" src="../assets/pictos/picto_aufgabe.png"
+               class="card-illustration" alt="" />
+          <h1 class="card-title" id="art-2">Aufgabe</h1>
+          <p class="card-text" id="text-2"></p>
+        </div>
+
+      </div>
+
+      <!-- ══ RECHTE SPALTE ══ -->
+      <div class="col-right">
+
+        <!-- Patienten -->
+        <div>
+          <div class="section-header-row">
+            <span class="section-header-label">Anzahl Patienten zu Beginn der Periode in der Klinik</span>
+            <span class="value-badge" id="total-patienten">–</span>
+          </div>
+
+          <div class="markt-grid" id="markt-grid">
+            <!-- wird per JS befüllt -->
+          </div>
+
+          <div class="section-footer-row">
+            <span class="section-footer-label">Kosten der «Aktiven Rechnungsabgrenzung»</span>
+            <span class="value-badge" id="total-kosten">–</span>
+          </div>
+        </div>
+
+        <!-- Zufriedenheits-Indices -->
+        <div>
+          <p class="zuf-title">Zufriedenheits-Indices bei Beginn der Periode</p>
+          <div class="zuf-box">
+            <div class="zuf-col-header">
+              <span class="zuf-col-label">Gesamtes Spital</span>
+            </div>
+            <div id="zuf-rows">
+              <!-- wird per JS befüllt -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <div id="app-footer" class="w-full bg-transparent"></div>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    /* ── Hilfsfunktion: localStorage-JSON lesen ── */
+    function getLS(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+    }
+
+    /* ── Versicherungs-Kürzel ── */
+    function kuerzel(v) {
+      if (!v) return '';
+      const map = { 'Allgemein': 'Allg', 'Halbprivat': 'HP', 'Privat': 'Priv' };
+      return map[v] || v.slice(0, 4);
+    }
+
+    /* ══ Spielaufgaben → linke Karte ══════════════════════════════════════ */
+    (function() {
+      const data = getLS('spielaufgaben');
+      if (!data) return;
+      const arr  = data.spielaufgaben || data;
+      const item = arr.find(e => e.Spielzug === 'spz-02');
+      if (!item) return;
+
+      function parseAufgabe(text) {
+        const parts = (text || '').split('\r');
+        return { label: parts[0] || '', body: parts.slice(1).join(' ').trim() };
+      }
+
+      const a1 = parseAufgabe(item.Aufgabe_1);
+      const a2 = parseAufgabe(item.Aufgabe_2);
+
+      function boldQuotes(text) {
+        return text.replace(/"([^"]+)"/g, '<strong>"$1"</strong>');
+      }
+
+      // Titel aus AufgabenArt, Text aus Aufgabe (nach \r)
+      if (item.AufgabenArt_1)
+        document.getElementById('art-1').textContent = item.AufgabenArt_1;
+      document.getElementById('text-1').innerHTML    = boldQuotes(a1.body);
+
+      if (item.AufgabenArt_2)
+        document.getElementById('art-2').textContent = item.AufgabenArt_2;
+      document.getElementById('text-2').innerHTML    = boldQuotes(a2.body);
+
+      // Pictos aus JSON
+      if (item.Picto1)
+        document.getElementById('card-picto-1').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
+      if (item.Picto2)
+        document.getElementById('card-picto-2').src = `../assets/pictos/${item.Picto2.toLowerCase()}`;
+    })();
+
+    /* ══ Start-Patienten → Patienten-Bereich ══════════════════════════════ */
+    (function() {
+      const teamNr   = Number(localStorage.getItem('teamNumber')) || 0;
+      const spData   = getLS('startPatienten');
+      const mktData  = getLS('marktStart');
+
+      if (!spData) return;
+
+      const alle = (spData.startauftrag || spData);
+      // Filter: nur eigenes Team (falls teamNr gesetzt), sonst alle
+      // Fallback auf alle Einträge wenn Filter kein Ergebnis liefert
+      let patienten = teamNr
+        ? alle.filter(p => Number(p.teamNr) === teamNr)
+        : alle;
+      if (patienten.length === 0) patienten = alle;
+
+      // Markt-Farben aus markt_starteinstellung
+      const marktColor = {};
+      if (mktData) {
+        (mktData.markt || mktData).forEach(m => {
+          marktColor[m.marktName] = m.rgb;
+        });
+      }
+
+      // Totale
+      const totalAnzahl = patienten.reduce((s, p) => s + Number(p.anzahl || 0), 0);
+      const totalKosten = patienten.reduce((s, p) => s + Number(p.kosten  || 0), 0);
+
+      document.getElementById('total-patienten').textContent = totalAnzahl;
+      document.getElementById('total-kosten').textContent    = totalKosten;
+
+      // Gruppieren nach marktName
+      const gruppen = {};
+      patienten.forEach(p => {
+        if (!gruppen[p.marktName]) gruppen[p.marktName] = [];
+        gruppen[p.marktName].push(p);
+      });
+
+      // Markt-Boxen rendern
+      const grid = document.getElementById('markt-grid');
+      Object.entries(gruppen).forEach(([markt, items]) => {
+        const rgb   = marktColor[markt] || '37,117,176';
+        const anzahl = items.reduce((s, p) => s + Number(p.anzahl || 0), 0);
+        const versicherungen = [...new Set(items.map(p => p.versicherung))];
+
+        const box = document.createElement('div');
+        box.className = 'markt-box';
+        box.style.borderColor = `rgb(${rgb})`;
+
+        // Jede Versicherungsgruppe als Zeile
+        const zeilen = versicherungen.map(v => {
+          const cnt = items.filter(p => p.versicherung === v)
+                           .reduce((s, p) => s + Number(p.anzahl || 0), 0);
+          return `
+            <div class="markt-body">
+              <span class="markt-versicherung">${kuerzel(v)}</span>
+              <span class="markt-anzahl"
+                    style="border:1px solid rgb(${rgb}); color:rgb(${rgb});">${cnt}</span>
+            </div>`;
+        }).join('');
+
+        box.innerHTML = `
+          <div class="markt-header" style="background:rgb(${rgb})">${markt}</div>
+          ${zeilen}
+        `;
+        grid.appendChild(box);
+      });
+    })();
+
+    /* ══ Zufriedenheits-Indices ════════════════════════════════════════════ */
+    (function() {
+      const data = getLS('zufriedenheiten');
+      if (!data) return;
+      const arr  = data.Zufriedenheiten || data;
+      const container = document.getElementById('zuf-rows');
+
+      arr.forEach(z => {
+        const row = document.createElement('div');
+        row.className = 'zuf-row';
+        row.innerHTML = `
+          <span class="zuf-row-label">
+            ${z.Zufriedenheit_Name} (${z.Zufriedenheit_Kuerzel})
+          </span>
+          <span class="zuf-row-value">${z.Zufriedenheit_Wert}</span>
+        `;
+        container.appendChild(row);
+      });
+    })();
+  </script>
+</body>
+</html>

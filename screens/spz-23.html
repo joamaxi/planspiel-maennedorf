@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Erträge Periode – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#fff; }
+    * { box-sizing:border-box; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 60px 32px 24px 32px;
+      display: flex;
+      gap: 60px;
+      align-items: flex-start;
+    }
+
+    /* ══ LINKE SPALTE ══════════════════════════════════════════════════════ */
+    .col-left {
+      width: 300px;
+      flex-shrink: 0;
+    }
+
+    .decision-card {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 20px 28px 20px;
+      background: #fff;
+      margin-top: 120px;
+    }
+
+    .card-illustration {
+      position: absolute;
+      top: -28px;
+      right: 12px;
+      height: 52px;
+      width: auto;
+      display: block;
+      background: #fff;
+    }
+
+    .card-title {
+      font-weight: 800;
+      color: var(--color-accent);
+      margin: 0 0 12px 0;
+      line-height: 1.1;
+    }
+
+    .card-text {
+      font-size: 0.86rem;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ══ RECHTE SPALTE ═════════════════════════════════════════════════════ */
+    .col-right {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* L-Rahmen */
+    .er-wrapper {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 24px 28px 24px;
+      margin-top: 120px;
+    }
+
+    .er-wrapper-title {
+      position: absolute;
+      top: -60px;
+      left: 0;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--color-label);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      padding: 0 0 0 20px;
+    }
+
+    .er-wrapper-subtitle {
+      position: absolute;
+      top: -26px;
+      left: 0;
+      font-size: 0.78rem;
+      color: var(--color-label-light);
+      padding: 0 0 0 22px;
+      white-space: nowrap;
+    }
+
+    /* Zeilen */
+    .er-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .er-row:last-child { border-bottom: none; }
+
+    .er-row.subtotal {
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      margin-top: 4px;
+      padding: 8px 0;
+    }
+
+    .er-row.spacer {
+      border: none;
+      padding: 6px 0 2px;
+    }
+
+    .er-label {
+      font-size: 0.86rem;
+      color: var(--color-accent);
+      line-height: 1.35;
+      flex: 1;
+    }
+
+    .er-row.subtotal .er-label {
+      font-weight: 700;
+    }
+
+    /* Badge */
+    .er-badge {
+      flex-shrink: 0;
+      min-width: 80px;
+      height: 38px;
+      border-radius: 8px;
+      background: var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      padding: 0 14px;
+    }
+
+    .er-row.subtotal .er-badge {
+      min-width: 90px;
+      height: 42px;
+      font-size: 1.12rem;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-white min-h-screen flex flex-col items-center"
+  data-prev="spz-22.html"
+  data-next="spz-24.html"
+  data-spielzug-label="Spielzug 23"
+  data-step-current="23"
+  data-step-total="20"
+  data-wirkung="00-wirkungen.png"
+  data-disable-handbuch="true"
+  data-disable-bank="true"
+  data-disable-ereignis="true"
+>
+  <div id="app-header" class="w-full"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <!-- ══ LINKE SPALTE ══ -->
+      <div class="col-left">
+        <div class="decision-card">
+          <img id="card-picto-1" src="../assets/pictos/picto_aufgabe.png"
+               class="card-illustration" alt="" />
+          <h1 class="card-title" id="art-1">Aufgabe</h1>
+          <p class="card-text" id="text-1"></p>
+        </div>
+      </div>
+
+      <!-- ══ RECHTE SPALTE ══ -->
+      <div class="col-right">
+        <div class="er-wrapper">
+
+          <span class="er-wrapper-title">Ertragsrechnung</span>
+          <span class="er-wrapper-subtitle">Erträge der laufenden Periode</span>
+
+          <div class="er-row">
+            <span class="er-label">Erträge aus Klinikbetrieb aller ausgetretenen Patienten</span>
+            <div class="er-badge" id="val-ertraege">–</div>
+          </div>
+
+          <div class="er-row">
+            <span class="er-label">Andere betriebliche Erträge (5%)</span>
+            <div class="er-badge" id="val-andere">–</div>
+          </div>
+
+          <div class="er-row subtotal">
+            <span class="er-label">Betrieblicher Gesamtertrag (gerundet)</span>
+            <div class="er-badge" id="val-gesamtertrag">–</div>
+          </div>
+
+          <div class="er-row spacer"></div>
+
+          <div class="er-row">
+            <span class="er-label">Variable Kosten für Diagnostik/Therapie und Pflege/Hotellerie</span>
+            <div class="er-badge" id="val-varspital">–</div>
+          </div>
+
+          <div class="er-row">
+            <span class="er-label">Variable Kosten für Medikamente und Material</span>
+            <div class="er-badge" id="val-varmed">–</div>
+          </div>
+
+          <div class="er-row subtotal">
+            <span class="er-label">Deckungsbeitrag I (gerundet)</span>
+            <div class="er-badge" id="val-db1">–</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="app-footer" class="w-full bg-transparent"></div>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    function getLS(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+    }
+    function setLS(key, val) {
+      localStorage.setItem(key, JSON.stringify(val));
+    }
+    function boldQuotes(text) {
+      return text.replace(/"([^"]+)"/g, '<strong>"$1"</strong>');
+    }
+
+    /* ══ Spielaufgaben → linke Karte ══════════════════════════════════════ */
+    (function() {
+      const data = getLS('spielaufgaben');
+      if (!data) return;
+      const arr  = data.spielaufgaben || data;
+      const item = arr.find(e => e.Spielzug === 'spz-23');
+      if (!item) return;
+
+      if (item.AufgabenArt_1) document.getElementById('art-1').textContent = item.AufgabenArt_1;
+      const parts = (item.Aufgabe_1 || '').split('\r');
+      const body  = parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim();
+      document.getElementById('text-1').innerHTML = boldQuotes(body);
+      if (item.Picto1)
+        document.getElementById('card-picto-1').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
+    })();
+
+    /* ══ Erträge berechnen ════════════════════════════════════════════════ */
+    (function() {
+
+      /* Ertrag-Lookup aus patienten JSON: { marktName|versicherung → ertrag } */
+      const raw       = getLS('patienten');
+      const eintraege = raw
+        ? (Array.isArray(raw) ? raw : (Array.isArray(raw.patienten) ? raw.patienten : []))
+        : [];
+
+      const ertragLookup = {};
+      eintraege.forEach(e => {
+        const key = `${e.marktName}|${e.versicherung}`;
+        ertragLookup[key] = Number(e.ertrag) || 0;
+      });
+
+      /* Patientenzahlen aus spz-14 (patientenAufnahme) */
+      const aufnahme = getLS('patientenAufnahme') || {};
+
+      function ertraegeBereich(name) {
+        const b = aufnahme[name];
+        if (!b || typeof b !== 'object') return 0;
+        const php  = (Number(b.PHP)       || 0) * (ertragLookup[`${name}|Halbprivat/Privat`] || 0);
+        const allg = (Number(b.Allgemein) || 0) * (ertragLookup[`${name}|Allgemein`]          || 0);
+        return php + allg;
+      }
+
+      const ambulantErtrag = ertragLookup['Ambulant|Ambulant'] || ertragLookup['Ambulant|'] || 0;
+      const ambulantAnzahl = Number(aufnahme.Ambulant) || 0;
+
+      const medizin      = ertraegeBereich('Medizin');
+      const chirurgie    = ertraegeBereich('Chirurgie');
+      const geburtshilfe = ertraegeBereich('Geburtshilfe');
+      const ambulant     = ambulantAnzahl * ambulantErtrag;
+
+      const ertraege      = Math.round(medizin + chirurgie + geburtshilfe + ambulant);
+      const andereErtraege = Math.round(ertraege * 0.05);
+      const gesamtertrag  = ertraege + andereErtraege;
+
+      /* Variable Kosten aus Erfolgsrechnung */
+      const er          = getLS('erfolgsrechnung') || {};
+      const varSpital   = Number(er.Variable_Kosten_Spital)      || 0;
+      const varMed      = Number(er.Variable_Kosten_Medikamente) || 0;
+      const db1         = Math.round(gesamtertrag - varSpital - varMed);
+
+      /* Anzeige */
+      document.getElementById('val-ertraege').textContent    = ertraege;
+      document.getElementById('val-andere').textContent      = andereErtraege;
+      document.getElementById('val-gesamtertrag').textContent = gesamtertrag;
+      document.getElementById('val-varspital').textContent   = varSpital || '–';
+      document.getElementById('val-varmed').textContent      = varMed    || '–';
+      document.getElementById('val-db1').textContent         = db1;
+
+      /* Werte für Transfer speichern */
+      localStorage.setItem('spz23_ertraege',      ertraege);
+      localStorage.setItem('spz23_andereErtraege', andereErtraege);
+      localStorage.setItem('spz23_gesamtertrag',  gesamtertrag);
+      localStorage.setItem('spz23_db1',           db1);
+    })();
+
+    /* ══ Transfer beim Next-Klick ════════════════════════════════════════ */
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#nav-next')) return;
+      if (localStorage.getItem('done_spz23_ertraege') === 'true') return;
+
+      const ertraege      = Number(localStorage.getItem('spz23_ertraege'))      || 0;
+      const andereErtraege = Number(localStorage.getItem('spz23_andereErtraege')) || 0;
+      const gesamtertrag  = ertraege + andereErtraege;
+
+      if (gesamtertrag === 0) { localStorage.setItem('done_spz23_ertraege', 'true'); return; }
+
+      /* Bilanz: FluessigeMittel += gesamtertrag */
+      const bilanzData = getLS('bilanzStart');
+      if (bilanzData) {
+        const arr    = bilanzData.Anfangsbilanz || bilanzData;
+        const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
+        const idx    = arr[teamNr] !== undefined ? teamNr : (arr[teamNr-1] !== undefined ? teamNr-1 : 0);
+        const entry  = arr[idx];
+        if (entry && entry.Bilanz) {
+          entry.Bilanz.FluessigeMittel = (Number(entry.Bilanz.FluessigeMittel) || 0) + gesamtertrag;
+          arr[idx] = entry;
+          setLS('bilanzStart', bilanzData.Anfangsbilanz ? { ...bilanzData, Anfangsbilanz: arr } : arr);
+        }
+      }
+
+      /* Erfolgsrechnung */
+      const er = getLS('erfolgsrechnung') || {};
+      er.Ertraege_Spitalbetrieb = ertraege;
+      er.Andere_Ertraege        = andereErtraege;
+      setLS('erfolgsrechnung', er);
+
+      /* Protokoll */
+      const teamNr    = Number(localStorage.getItem('teamNumber')) || 1;
+      const teamLabel = localStorage.getItem('klinikName') || `Team ${teamNr}`;
+      const protokoll = getLS('protokoll') || [];
+      protokoll.push({
+        zeit:     new Date().toISOString(),
+        spielzug: 'spz-23',
+        aktion:   'Erträge Klinikbetrieb',
+        von:      'Forderungen',
+        nach:     'Flüssige Mittel',
+        betrag:   gesamtertrag,
+        team:     teamLabel
+      });
+      setLS('protokoll', protokoll);
+
+      localStorage.setItem('done_spz23_ertraege', 'true');
+    }, true);
+  </script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spielstart – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#e8f2f9; }
+    * { box-sizing:border-box; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 36px 32px 24px 32px;
+    }
+
+    /* ── Top-Zeile: Team Nr. + Spielleiter IP ── */
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      gap: 24px;
+    }
+    .top-field {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .top-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      white-space: nowrap;
+    }
+    .top-select,
+    .top-input {
+      height: 38px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      background: #fff;
+      color: #444;
+      font-size: 0.92rem;
+      padding: 0 12px;
+      outline: none;
+    }
+    .top-select { width: 100px; }
+    .top-input  { width: 240px; }
+    .top-select:focus,
+    .top-input:focus  { border-color: var(--color-accent); }
+
+    /* ── Zwei-Spalten-Grid ── */
+    .import-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 40px;
+    }
+
+    /* ── Einzelner Import-Slot ── */
+    .import-slot {
+      margin-bottom: 18px;
+    }
+    .slot-label {
+      font-size: 0.78rem;
+      color: var(--color-label);
+      margin-bottom: 5px;
+      padding-left: 2px;
+    }
+    .slot-row {
+      display: flex;
+      align-items: center;
+      border: 1.5px solid var(--color-border);
+      border-radius: 10px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .slot-input {
+      flex: 1;
+      min-width: 0;
+      height: 48px;
+      border: none;
+      outline: none;
+      padding: 0 14px;
+      font-size: 0.88rem;
+      color: var(--color-accent);
+      font-weight: 500;
+      background: transparent;
+    }
+    .slot-input::placeholder { color: #bcd3e4; font-weight: 400; }
+
+    .btn-import {
+      flex-shrink: 0;
+      height: 48px;
+      padding: 0 22px;
+      background: var(--color-accent);
+      color: #fff;
+      border: none;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: background 0.15s;
+      white-space: nowrap;
+      border-radius: 0 8px 8px 0;
+    }
+    .btn-import:hover    { background: var(--color-accent-dark); }
+    .btn-import.loaded   { background: #27ae60; cursor: default; }
+    .btn-import:disabled { background: #b0c8dc; cursor: not-allowed; }
+
+    /* ── Gesperrt-Banner ── */
+    .locked-banner {
+      display: none;
+      background: #fff3cd;
+      border: 1.5px solid #f0c040;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      font-size: 0.92rem;
+      color: #7a6000;
+      font-weight: 600;
+    }
+
+    /* ── Aktionszeile ── */
+    .action-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 28px;
+      margin-bottom: 8px;
+    }
+    .btn-start {
+      padding: 16px 60px;
+      background: var(--color-accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-start:hover    { background: var(--color-accent-dark); }
+    .btn-start:active   { transform: scale(0.97); }
+    .btn-start:disabled { background: #aac4d8; cursor: not-allowed; }
+
+    .btn-reset {
+      display: none;
+      padding: 16px 40px;
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-reset:hover  { background: #c0392b; }
+    .btn-reset:active { transform: scale(0.97); }
+
+    /* ── Passwort-Modal ── */
+    .pw-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .pw-backdrop.visible { display: flex; }
+    .pw-box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 36px 40px 32px;
+      width: 320px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .pw-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      text-align: center;
+    }
+    .pw-input {
+      width: 100%;
+      height: 44px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0 14px;
+      font-size: 1.1rem;
+      text-align: center;
+      letter-spacing: 0.2em;
+      outline: none;
+    }
+    .pw-input:focus { border-color: var(--color-accent); }
+    .pw-input.shake {
+      animation: shake 0.3s ease;
+      border-color: #e74c3c;
+    }
+    .pw-btn {
+      width: 100%;
+      height: 44px;
+      background: var(--color-accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-6px); }
+      75%      { transform: translateX(6px); }
+    }
+  </style>
+</head>
+
+<body
+  class="min-h-screen flex flex-col items-center"
+  data-prev=""
+  data-next="spz-01.html"
+  data-spielzug-label="Spielzug 0"
+  data-step-current="0"
+  data-step-total="20"
+  data-disable-back="true"
+>
+  <!-- Passwort-Modal -->
+  <div class="pw-backdrop" id="pw-backdrop">
+    <div class="pw-box">
+      <div class="pw-title">Spielleiter-Zugang</div>
+      <input class="pw-input" id="pw-input" type="password"
+             placeholder="Passwort" autocomplete="off" />
+      <button class="pw-btn" id="pw-btn">Weiter</button>
+    </div>
+  </div>
+
+  <div id="app-header" class="w-full bg-white"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <!-- Gesperrt-Banner -->
+      <div class="locked-banner" id="locked-banner">
+        ⚠️ Spiel läuft – Daten können nicht mehr verändert werden.
+        Zum Zurücksetzen alle Daten löschen und neu starten.
+      </div>
+
+      <!-- Team Nr. + Spielleiter IP -->
+      <div class="top-row">
+        <div class="top-field">
+          <span class="top-label">Team Nr.</span>
+          <select id="team-select" class="top-select">
+            <option value="">select</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+          </select>
+        </div>
+        <div class="top-field">
+          <span class="top-label">Spielleiter IP</span>
+          <input type="text" id="server-ip" class="top-input" placeholder="z.B. 192.168.1.218" />
+        </div>
+      </div>
+
+      <!-- Import-Grid -->
+      <div class="import-grid" id="import-grid">
+        <!-- wird per JS befüllt -->
+      </div>
+
+      <!-- Aktionszeile -->
+      <div class="action-row">
+        <button class="btn-start" id="btn-start">Spiel starten &gt;&gt;</button>
+        <button class="btn-reset" id="btn-reset">Alles löschen &amp; neu starten</button>
+      </div>
+
+    </div>
+  </main>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    const PASSWORD = '1234';
+
+    /* ── Passwort-Modal ────────────────────────────────────────────────── */
+    const backdrop = document.getElementById('pw-backdrop');
+    const pwInput  = document.getElementById('pw-input');
+    const pwBtn    = document.getElementById('pw-btn');
+
+    function checkPassword() {
+      if (pwInput.value === PASSWORD) {
+        backdrop.classList.remove('visible');
+        initPage();
+      } else {
+        pwInput.classList.add('shake');
+        pwInput.value = '';
+        setTimeout(() => pwInput.classList.remove('shake'), 400);
+        pwInput.focus();
+      }
+    }
+
+    pwBtn.addEventListener('click', checkPassword);
+    pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+
+    /* Modal sofort anzeigen */
+    backdrop.classList.add('visible');
+    setTimeout(() => pwInput.focus(), 100);
+
+    /* ── Seite initialisieren (nach korrektem Passwort) ───────────────── */
+    function initPage() {
+      const gestartet = localStorage.getItem('spielGestartet') === 'true';
+
+      /* Gesperrt-Banner + Reset-Button */
+      if (gestartet) {
+        document.getElementById('locked-banner').style.display = 'block';
+        document.getElementById('btn-reset').style.display     = 'block';
+        document.getElementById('btn-start').disabled          = true;
+        document.getElementById('team-select').disabled        = true;
+        document.getElementById('server-ip').disabled          = true;
+      }
+
+      buildGrid(gestartet);
+
+      /* Team Nr. */
+      const teamSelect = document.getElementById('team-select');
+      teamSelect.value = localStorage.getItem('teamNumber') || '';
+      teamSelect.addEventListener('change', () => {
+        localStorage.setItem('teamNumber', teamSelect.value);
+        const lbl = document.getElementById('header-team-label');
+        if (lbl) lbl.textContent = teamSelect.value ? `Team ${teamSelect.value}` : '';
+      });
+
+      /* Spielleiter IP */
+      const ipInput = document.getElementById('server-ip');
+      ipInput.value = localStorage.getItem('serverIp') || '';
+      ipInput.addEventListener('change', () => {
+        localStorage.setItem('serverIp', ipInput.value.trim());
+      });
+
+      /* Spiel starten */
+      document.getElementById('btn-start').addEventListener('click', () => {
+        localStorage.setItem('spielGestartet', 'true');
+        window.location.href = document.body.dataset.next;
+      });
+
+      /* Alles löschen & neu starten */
+      document.getElementById('btn-reset').addEventListener('click', () => {
+        if (confirm('Wirklich alle Daten löschen und das Spiel zurücksetzen?')) {
+          localStorage.clear();
+          location.reload();
+        }
+      });
+    }
+
+    /* ── JSON-Slot-Konfiguration ──────────────────────────────────────── */
+    const SLOTS = [
+      { key: 'einstellungen',   label: 'Spieleinstellungen',                    default: 'einstellungen.json' },
+      { key: 'funktionen',      label: 'Funktionen der Geschäftsleitung',        default: 'Funktionen.json' },
+      { key: 'bilanzStart',     label: 'Anfangsbilanz',                          default: 'aBilanz_start.json' },
+      { key: 'zufriedenheiten', label: 'Zufriedenheits Indices',                 default: 'zufriedenheiten.json' },
+      { key: 'spielaufgaben',   label: 'Spielaufgaben',                          default: 'Spielaufgaben.json' },
+      { key: 'marktStart',      label: 'Markt- Servicebereiche',                 default: 'markt_starteinstellung.json' },
+      { key: 'personalKosten',  label: 'Personalkosten der einzelnen Bereiche',  default: 'aPersonal_Kosten.json' },
+      { key: 'startPatienten',  label: 'Anzahl Patienten zu Beginn der Periode', default: 'startPatienten.json' },
+      { key: 'ratioWerte',      label: 'Pflegeintensität',                       default: 'ratioWerte.json' },
+      { key: 'patienten',       label: 'Patienten Kosten und Ertrag',            default: 'aPatienten.json' },
+    ];
+
+    /* ── UTF-16-JSON laden ────────────────────────────────────────────── */
+    async function fetchUTF16Json(url) {
+      const res = await fetch(url + '?v=' + Date.now());
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buf  = await res.arrayBuffer();
+      let   text = new TextDecoder('utf-16le').decode(buf);
+      if (text.startsWith('﻿')) text = text.slice(1);
+      return JSON.parse(text);
+    }
+
+    /* ── Grid aufbauen ────────────────────────────────────────────────── */
+    function buildGrid(locked) {
+      const grid  = document.getElementById('import-grid');
+      const order = [0,5, 1,6, 2,7, 3,8, 4,9];
+
+      order.forEach(i => {
+        const slot = SLOTS[i];
+        const div  = document.createElement('div');
+        div.className = 'import-slot';
+        div.innerHTML = `
+          <div class="slot-label">${slot.label}</div>
+          <div class="slot-row">
+            <input
+              type="text"
+              class="slot-input"
+              id="input-${slot.key}"
+              value="${slot.default}"
+              placeholder="dateiname.json"
+              ${locked ? 'disabled' : ''}
+            />
+            <button
+              class="btn-import"
+              id="btn-${slot.key}"
+              ${locked ? 'disabled' : ''}
+            >${locked ? '–' : 'Import'}</button>
+          </div>
+        `;
+        grid.appendChild(div);
+
+        if (!locked) {
+          /* Bereits geladen markieren */
+          if (slot.default && localStorage.getItem(slot.key)) {
+            markLoaded(slot.key);
+          }
+          document.getElementById(`btn-${slot.key}`)
+            .addEventListener('click', () => importSlot(slot.key));
+        }
+      });
+    }
+
+    /* ── Import-Funktion ──────────────────────────────────────────────── */
+    async function importSlot(key) {
+      const input = document.getElementById(`input-${key}`);
+      const btn   = document.getElementById(`btn-${key}`);
+      const fname = input.value.trim();
+      if (!fname) return;
+
+      btn.disabled    = true;
+      btn.textContent = '…';
+      btn.classList.remove('loaded');
+
+      try {
+        const data = await fetchUTF16Json(`../data/json/${fname}`);
+        localStorage.setItem(key, JSON.stringify(data));
+        markLoaded(key);
+      } catch (err) {
+        btn.disabled    = false;
+        btn.textContent = 'Import';
+        btn.style.background = '#e74c3c';
+        setTimeout(() => { btn.style.background = ''; }, 2000);
+        console.error('Fehler beim Laden:', fname, err);
+      }
+    }
+
+    function markLoaded(key) {
+      const btn = document.getElementById(`btn-${key}`);
+      if (!btn) return;
+      btn.disabled    = false;
+      btn.textContent = 'Geladen';
+      btn.classList.add('loaded');
+    }
+  </script>
+</body>
+</html>

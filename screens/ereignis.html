@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ereignis</title>
+
+    <link rel="stylesheet" href="../assets/css/app.css" />
+    <link rel="stylesheet" href="../assets/css/tailwind.css" />
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Planspiel" />
+    <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+    <style>
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        * { box-sizing: border-box; }
+
+        .page-shell {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .events-wrap {
+            width: fit-content;
+            display: grid;
+            grid-template-columns: 500px 500px;
+            gap: 12px;
+            justify-content: center;
+            align-items: start;
+            margin: 0 auto;
+            transform: translate(50px, -70px);
+        }
+
+        .event-card {
+            position: relative;
+            width: 400px;
+            min-height: 240px;
+            background: #ffffff;
+            border-right:  2px solid var(--color-accent);
+            border-bottom: 2px solid var(--color-accent);
+            border-bottom-right-radius: 28px;
+            border-bottom-left-radius:  28px;
+            border-top-right-radius:    28px;
+            padding: 34px 30px 28px 30px;
+        }
+
+        .event-icon-wrap {
+            position: absolute;
+            top: -28px;
+            right: 22px;
+            width: 78px;
+            height: 78px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .event-icon {
+            max-width: 65px;
+            max-height: 65px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .event-title {
+            margin: 0 82px 14px 0;
+            color: var(--color-accent);
+            font-size: 1.18rem;
+            line-height: 1.08;
+            font-weight: 700;
+        }
+
+        .event-text {
+            color: var(--color-label);
+            font-size: 0.92rem;
+            line-height: 1.28;
+            font-weight: 400;
+            margin: 0;
+        }
+
+        .event-text strong {
+            font-weight: 700;
+            color: #5a8aaa;
+        }
+
+        .event-bottom {
+            margin-top: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .event-label {
+            color: var(--color-label);
+            font-size: 0.88rem;
+            line-height: 1.2;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        .event-input {
+            width: 120px;
+            height: 40px;
+            border: 1.5px solid var(--color-accent);
+            border-radius: 8px;
+            background: #ffffff;
+            color: var(--color-accent);
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            padding: 0 12px;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .event-input:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px rgba(37,117,176,0.12);
+        }
+
+        .event-input::placeholder {
+            color: #c0d8e8;
+            font-weight: 400;
+        }
+        .event-input::-webkit-inner-spin-button,
+        .event-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .event-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+        .event-total {
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: var(--color-label);
+            text-align: right;
+        }
+        .event-total strong {
+            color: var(--color-accent);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 980px) {
+            html, body { overflow: auto; }
+
+            .page-shell {
+                height: auto;
+                min-height: 100vh;
+                align-items: flex-start;
+            }
+
+            .events-wrap {
+                grid-template-columns: 1fr;
+                gap: 28px;
+                padding: 14px 12px 20px 12px;
+                transform: none;
+            }
+
+            .event-card {
+                width: 100%;
+                min-height: auto;
+                padding: 28px 18px 18px 18px;
+                border-bottom-right-radius: 22px;
+                border-bottom-left-radius:  22px;
+                border-top-right-radius:    22px;
+            }
+
+            .event-icon-wrap {
+                top: -20px;
+                right: 14px;
+                width: 60px;
+                height: 60px;
+            }
+
+            .event-icon { max-width: 42px; max-height: 42px; }
+
+            .event-title { margin: 0 62px 12px 0; font-size: 1rem; }
+
+            .event-text { font-size: 0.84rem; line-height: 1.26; }
+
+            .event-bottom {
+                margin-top: 22px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .event-label { font-size: 0.82rem; white-space: normal; }
+
+            .event-input {
+                width: 100%;
+                max-width: 180px;
+                height: 42px;
+                font-size: 0.88rem;
+                border-radius: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-shell">
+        <div class="events-wrap">
+
+            <!-- Positive Ereigniskarte -->
+            <section class="event-card" id="positive-card">
+                <div class="event-icon-wrap">
+                    <img src="../assets/pictos/SmilePOS-8.png" alt="Positives Ereignis" class="event-icon" />
+                </div>
+
+                <h2 class="event-title">Ereigniskarte (positiv)</h2>
+
+                <p class="event-text">
+                    Nehmen Sie den Betrag von der Spielleitung und legen Sie ihn
+                    in das Feld <strong>«Flüssige Mittel»</strong> auf dem Spielbrett.
+                </p>
+
+                <div class="event-bottom">
+                    <label class="event-label" for="event-positive-input">Neuer Erlös eintragen</label>
+                    <input id="event-positive-input" class="event-input" type="number"
+                           inputmode="decimal" autocomplete="off" placeholder="0" min="0" step="1" />
+                </div>
+                <div class="event-total">
+                    Total bisher: <strong id="total-positive">0</strong> Mio
+                </div>
+            </section>
+
+            <!-- Negative Ereigniskarte -->
+            <section class="event-card" id="negative-card">
+                <div class="event-icon-wrap">
+                    <img src="../assets/pictos/SmileNEG-8.png" alt="Negatives Ereignis" class="event-icon" />
+                </div>
+
+                <h2 class="event-title">Ereigniskarte (negativ)</h2>
+
+                <p class="event-text">
+                    Nehmen Sie den Betrag vom Feld <strong>«Flüssige Mittel»</strong>
+                    und legen Sie ihn in das Feld <strong>«Ausserordentlicher Aufwand»</strong>
+                    auf dem Spielbrett.
+                </p>
+
+                <div class="event-bottom">
+                    <label class="event-label" for="event-negative-input">Neue Kosten eintragen</label>
+                    <input id="event-negative-input" class="event-input" type="number"
+                           inputmode="decimal" autocomplete="off" placeholder="0" min="0" step="1" />
+                </div>
+                <div class="event-total">
+                    Total bisher: <strong id="total-negative">0</strong> Mio
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+    const STORAGE_KEY = 'eventCardValues';
+
+    const positiveInput = document.getElementById('event-positive-input');
+    const negativeInput = document.getElementById('event-negative-input');
+
+    function toNumber(value) {
+        const normalized = String(value || '').replace(/\s+/g, '').replace(',', '.');
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    function readEventValues() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return { positive: 0, negative: 0 };
+            const parsed = JSON.parse(raw);
+            return {
+                positive: toNumber(parsed.positive),
+                negative: toNumber(parsed.negative)
+            };
+        } catch (err) {
+            return { positive: 0, negative: 0 };
+        }
+    }
+
+    function saveEventValues() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            positive: toNumber(positiveInput.value),
+            negative: toNumber(negativeInput.value)
+        }));
+    }
+
+    function closeOverlay() {
+        try {
+            if (window.parent && window.parent !== window) {
+                const parentDoc = window.parent.document;
+                const overlay = parentDoc.getElementById('ereignis-overlay');
+                const frame   = parentDoc.getElementById('ereignis-frame');
+                const btn     = parentDoc.getElementById('nav-ereignis');
+                if (overlay) overlay.classList.remove('show');
+                if (frame)   frame.src = '';
+                if (btn)     btn.classList.remove('active');
+                if (window.parent.__restoreFooter) window.parent.__restoreFooter();
+            }
+        } catch (e) {
+            console.warn('closeOverlay:', e);
+        }
+    }
+
+    function handleKeydown(event) {
+        if (event.key !== 'Enter') return;
+        const val = toNumber(event.target.value);
+        if (val !== 0) {
+            saveEventValues();
+            closeOverlay();
+        }
+    }
+
+    function updateTotals() {
+        try {
+            const applied = JSON.parse(localStorage.getItem('eventCardApplied') || '{}');
+            const elPos = document.getElementById('total-positive');
+            const elNeg = document.getElementById('total-negative');
+            if (elPos) elPos.textContent = Number(applied.positive) || 0;
+            if (elNeg) elNeg.textContent = Number(applied.negative) || 0;
+        } catch(e) {}
+    }
+
+    function initEventInputs() {
+        /* Eingabe beginnt immer bei 0 (nach jedem Schliessen zurückgesetzt) */
+        positiveInput.value = '';
+        negativeInput.value = '';
+
+        updateTotals();
+
+        [positiveInput, negativeInput].forEach(input => {
+            input.addEventListener('input',   saveEventValues);
+            input.addEventListener('keydown', handleKeydown);
+            /* iOS: Tastatur in iframe erzwingen */
+            input.addEventListener('touchend', e => {
+                e.preventDefault();
+                input.focus();
+                input.click();
+            });
+        });
+    }
+
+    initEventInputs();
+    </script>
+</body>
+</html>

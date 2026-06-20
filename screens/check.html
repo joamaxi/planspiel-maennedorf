@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Protokoll – Moderatoren-Ansicht</title>
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#f4f8fc; font-family: inherit; }
+    * { box-sizing: border-box; }
+
+    /* ── Hauptinhalt ── */
+    #main-content { display: block; }
+
+    .page-wrap {
+      max-width: 960px; margin: 0 auto;
+      padding: 40px 32px 60px;
+    }
+
+    .page-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      flex-wrap: wrap; gap: 12px;
+    }
+
+    .page-title {
+      font-size: 1.6rem; font-weight: 300;
+      color: var(--color-label); letter-spacing: 0.01em;
+      margin: 0;
+    }
+
+    .page-title strong {
+      font-weight: 700; color: var(--color-accent);
+    }
+
+    .btn-back {
+      height: 38px; padding: 0 18px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px; background: #fff;
+      color: var(--color-accent); font-size: 0.84rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-back:hover { background: #f0f6fc; }
+
+
+    /* ── Protokoll-Tabelle ── */
+    .proto-box {
+      border-top: 1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .proto-empty {
+      padding: 40px; text-align: center;
+      font-size: 0.9rem; color: var(--color-label);
+    }
+
+    table {
+      width: 100%; border-collapse: collapse;
+    }
+    thead th {
+      padding: 10px 14px;
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--color-accent);
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+      background: #f8fbfd;
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f4f8fc; }
+    tbody td {
+      padding: 9px 14px;
+      font-size: 0.83rem;
+      color: #444;
+      vertical-align: middle;
+    }
+    td.td-spielzug {
+      font-weight: 700; color: var(--color-accent);
+      white-space: nowrap;
+    }
+    td.td-betrag {
+      font-weight: 700; color: var(--color-accent);
+      text-align: right; white-space: nowrap;
+    }
+    td.td-zeit {
+      color: var(--color-label); font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    /* ── Erfolgsrechnung ── */
+    .er-section { margin-top: 40px; }
+
+    .er-grid {
+      display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start;
+    }
+    .er-col { flex: 1; min-width: 280px; }
+
+    .er-col-title {
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--color-accent);
+      margin: 0 0 6px 0; padding-bottom: 4px;
+      border-bottom: 1px solid var(--color-border);
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .er-col-title + .er-col-title { margin-top: 18px; }
+
+    .er-row {
+      display: flex; justify-content: space-between;
+      align-items: center; gap: 8px;
+      padding: 5px 8px;
+      font-size: 0.78rem; color: var(--color-accent);
+      border-bottom: 1px solid var(--color-border-light);
+      background: #fff;
+    }
+    .er-row.subtotal {
+      background: #f0f5f9;
+      font-weight: 700;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .er-row.jahresergebnis {
+      background: #fef9e7;
+      font-weight: 700;
+      border-bottom: 1px solid #f0d060;
+    }
+    .er-val {
+      min-width: 36px; text-align: right;
+      font-weight: 600; flex-shrink: 0;
+    }
+    .er-row.subtotal .er-val,
+    .er-row.jahresergebnis .er-val { font-weight: 800; }
+
+    /* ── Bank-Bewegungen ── */
+    .bank-section {
+      margin-top: 40px;
+    }
+    .bank-move-grid {
+      display: flex; gap: 20px; flex-wrap: wrap;
+    }
+    .bank-move-card {
+      flex: 1; min-width: 200px;
+      border-top: 1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      background: #fff;
+      padding: 16px 18px;
+    }
+    .bank-move-label {
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--color-label);
+      margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .bank-move-val {
+      font-size: 1.4rem; font-weight: 800;
+      color: var(--color-accent);
+    }
+    .bank-move-unit {
+      font-size: 0.78rem; font-weight: 400;
+      color: var(--color-label); margin-left: 4px;
+    }
+
+    /* ── Bilanz-Snapshot ── */
+    .bilanz-section {
+      margin-top: 40px;
+    }
+    .section-title {
+      font-size: 1.0rem; font-weight: 700;
+      color: var(--color-accent);
+      margin: 0 0 14px 0;
+    }
+    .bilanz-grid {
+      display: flex; gap: 20px; flex-wrap: wrap;
+    }
+    .bilanz-card {
+      flex: 1; min-width: 260px;
+      border-top: 1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      background: #fff;
+      padding: 16px 18px;
+    }
+    .bilanz-card-title {
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--color-accent);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .bil-row {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 3px 0;
+      font-size: 0.78rem; color: #555;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .bil-row:last-child { border-bottom: none; }
+    .bil-val { font-weight: 600; color: var(--color-accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Hauptinhalt -->
+  <div id="main-content">
+    <div class="page-wrap">
+
+      <div class="page-header">
+        <h1 class="page-title">
+          Protokoll — <strong id="team-name">–</strong>
+        </h1>
+        <button class="btn-back" id="btn-back">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Zurück
+        </button>
+      </div>
+
+      <!-- Protokoll-Tabelle -->
+      <div class="proto-box" id="proto-box">
+        <div class="proto-empty" id="proto-empty">Noch keine Einträge</div>
+        <table id="proto-table" style="display:none;">
+          <thead>
+            <tr>
+              <th>Spielzug</th>
+              <th>Team</th>
+              <th>Aktion</th>
+              <th>Von</th>
+              <th>Nach</th>
+              <th style="text-align:right;">Betrag (TCHF)</th>
+              <th>Zeit</th>
+            </tr>
+          </thead>
+          <tbody id="proto-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Erfolgsrechnung -->
+      <div class="er-section">
+        <p class="section-title">Erfolgsrechnung</p>
+        <div class="er-grid" id="er-grid"></div>
+      </div>
+
+      <!-- Bank-Bewegungen -->
+      <div class="bank-section" id="bank-section" style="display:none;">
+        <p class="section-title">Bankdarlehen</p>
+        <div class="bank-move-grid">
+          <div class="bank-move-card">
+            <div class="bank-move-label">Darlehen aufgenommen</div>
+            <div class="bank-move-val" id="bank-aufnahme">0<span class="bank-move-unit">Mio</span></div>
+          </div>
+          <div class="bank-move-card">
+            <div class="bank-move-label">Darlehen zurückbezahlt</div>
+            <div class="bank-move-val" id="bank-rueckzahlung">0<span class="bank-move-unit">Mio</span></div>
+          </div>
+          <div class="bank-move-card">
+            <div class="bank-move-label">Netto Darlehen</div>
+            <div class="bank-move-val" id="bank-netto">0<span class="bank-move-unit">Mio</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aktueller Bilanz-Snapshot -->
+      <div class="bilanz-section" id="bilanz-section" style="display:none;">
+        <p class="section-title">Aktueller Stand Bilanz</p>
+        <div class="bilanz-grid" id="bilanz-grid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function getLS(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+    }
+
+    /* ── Inhalt laden ── */
+    (function loadContent() {
+
+      /* Team-Name */
+      const klinikName = localStorage.getItem('klinikName') || '–';
+      document.getElementById('team-name').textContent = klinikName;
+
+      /* Protokoll */
+      const protokoll = getLS('protokoll') || [];
+      const tbody = document.getElementById('proto-body');
+      const table = document.getElementById('proto-table');
+      const empty = document.getElementById('proto-empty');
+
+      if (protokoll.length > 0) {
+        protokoll.forEach(p => {
+          const tr = document.createElement('tr');
+          const zeit = p.zeit ? new Date(p.zeit).toLocaleString('de-CH', {
+            day:'2-digit', month:'2-digit', year:'2-digit',
+            hour:'2-digit', minute:'2-digit'
+          }) : '–';
+          tr.innerHTML = `
+            <td class="td-spielzug">${p.spielzug || '–'}</td>
+            <td>${p.team || '–'}</td>
+            <td>${p.aktion || '–'}</td>
+            <td>${p.von || '–'}</td>
+            <td>${p.nach || '–'}</td>
+            <td class="td-betrag">${p.betrag !== undefined ? p.betrag : '–'}</td>
+            <td class="td-zeit">${zeit}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        empty.style.display = 'none';
+        table.style.display = 'table';
+      }
+
+      /* Zurück */
+      document.getElementById('btn-back').addEventListener('click', () => history.back());
+
+      /* ── Erfolgsrechnung ── */
+      (function() {
+        const er   = getLS('erfolgsrechnung') || {};
+        const grid = document.getElementById('er-grid');
+
+        function v(key, def) {
+          const x = er[key];
+          return (x !== undefined && x !== null) ? x : def;
+        }
+        function fmt(n) {
+          return (n === null || n === undefined || n === '') ? '' : n;
+        }
+
+        /* Berechnete Felder */
+        const totalBetrieb   = (v('Ertraege_Spitalbetrieb',0)||0) + (v('Andere_Ertraege',0)||0);
+        const totalVar       = Math.round((v('Variable_Kosten_Spital',0)||0) + (v('Variable_Kosten_Medikamente',0)||0) - (v('Variable_Kostenreduktion',0)||0));
+        const db1            = totalBetrieb - totalVar;
+        const totalFix       = (v('Personalaufwand',0)||0) + (v('Kosten_Projekte',0)||0) + (v('Lebensmittel',0)||0) + (v('Unterhalt',0)||0) + (v('Energie',0)||0) + (v('Buero',0)||0) + (v('Rekrutierung',0)||0) + (v('Ausserordentliche',0)||0);
+        const ebitdar        = db1 - totalFix;
+        const ebit           = ebitdar - (v('Mietzins',0)||0) - (v('Abschreibungen',0)||0);
+        const zinsen         = v('Zinsen_Bank', 0);
+        const ebt            = ebit - zinsen;
+        const steuern        = v('Steuern', 0)||0;
+        const jahresergebnis = ebt - steuern;
+
+        function row(label, val, cls='') {
+          return `<div class="er-row ${cls}">
+            <span>${label}</span>
+            <span class="er-val">${fmt(val)}</span>
+          </div>`;
+        }
+
+        /* Linke Spalte */
+        const colLeft = document.createElement('div');
+        colLeft.className = 'er-col';
+        colLeft.innerHTML = `
+          <p class="er-col-title">Erträge</p>
+          ${row('Erträge aus Spitalbetrieb',       fmt(v('Ertraege_Spitalbetrieb', 0)))}
+          ${row('Andere betriebliche Erträge',      fmt(v('Andere_Ertraege', 0)))}
+          ${row('TOTAL Betriebsertrag (gerundet)',  totalBetrieb, 'subtotal')}
+          <p class="er-col-title" style="margin-top:18px;">Aufwände</p>
+          ${row('Variable Kosten aus Spitalbetrieb',        fmt(v('Variable_Kosten_Spital', 0)))}
+          ${row('Variable Kosten für Medikamente / Material',fmt(v('Variable_Kosten_Medikamente', 0)))}
+          ${row('Variable Kostenreduktion',                 fmt(v('Variable_Kostenreduktion', 0)))}
+          ${row('TOTAL Variable Kosten (gerundet)',         totalVar, 'subtotal')}
+          ${row('DECKUNGSBEITRAG 1',                        db1,      'subtotal')}
+        `;
+
+        /* Rechte Spalte */
+        const colRight = document.createElement('div');
+        colRight.className = 'er-col';
+        colRight.innerHTML = `
+          <p class="er-col-title">Aufwände</p>
+          ${row('Personalaufwand für Mitarbeitende',              fmt(v('Personalaufwand', 0)))}
+          ${row('Kosten aller Projekte des laufenden Jahres',     fmt(v('Kosten_Projekte', null)))}
+          ${row('Lebensmittel und Haushaltaufwand',               fmt(v('Lebensmittel', null)))}
+          ${row('Unterhalt und Reparaturen',                      fmt(v('Unterhalt', null)))}
+          ${row('Energie, Gas, Wasser, Entsorgung',               fmt(v('Energie', null)))}
+          ${row('Büro- und Verwaltungsaufwand',                   fmt(v('Buero', null)))}
+          ${row('Rekrutierungskosten',                            fmt(v('Rekrutierung', null)))}
+          ${row('Ausserordentliche Aufwände',                     fmt(v('Ausserordentliche', null)))}
+          ${row('TOTAL Fixkosten',                                totalFix,  'subtotal')}
+          ${row('EBITDAR – Erfolg vor Zinsen, Steuern, Abschr., Mieten', ebitdar, 'subtotal')}
+          ${row('Mietzinsaufwand',                                fmt(v('Mietzins', null)))}
+          ${row('Abschreibungen (Infrastruktur und Gebäude)',     fmt(v('Abschreibungen', null)))}
+          ${row('EBIT',                                           ebit,      'subtotal')}
+          ${row('Zinsen für Bankdarlehen',                        zinsen)}
+          ${row('EBT – Gewinn vor Steuern',                      ebt,       'subtotal')}
+          ${row('Steuern',                                        steuern)}
+          ${row('Jahresergebnis',                                 jahresergebnis, 'jahresergebnis')}
+        `;
+
+        grid.appendChild(colLeft);
+        grid.appendChild(colRight);
+      })();
+
+      /* Bank-Bewegungen */
+      (function() {
+        const applied = getLS('bankApplied') || {};
+        const auf   = Number(applied.aufnahme)    || 0;
+        const rueck = Number(applied.rueckzahlung) || 0;
+        const netto = auf - rueck;
+        if (auf > 0 || rueck > 0) {
+          document.getElementById('bank-aufnahme').innerHTML    = `${auf}<span class="bank-move-unit">Mio</span>`;
+          document.getElementById('bank-rueckzahlung').innerHTML = `${rueck}<span class="bank-move-unit">Mio</span>`;
+          document.getElementById('bank-netto').innerHTML        = `${netto}<span class="bank-move-unit">Mio</span>`;
+          document.getElementById('bank-section').style.display = 'block';
+        }
+      })();
+
+      /* Bilanz-Snapshot */
+      const bilanzData = getLS('bilanzStart');
+      if (bilanzData) {
+        const arr    = bilanzData.Anfangsbilanz || bilanzData;
+        const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
+        const entry  = arr[teamNr] ?? arr[teamNr-1] ?? arr[0];
+        if (entry && entry.Bilanz) {
+          const b = entry.Bilanz;
+          const grid = document.getElementById('bilanz-grid');
+
+          /* Berechnete Totals */
+          const n = k => Number(b[k]) || 0;
+          const anlage        = n('TOTAL_Anlagevermögen') || n('TOTAL_Anlage');
+          const umlauf        = n('FluessigeMittel') + n('Forderungen') + n('Aktive_Rechnungsabgrenzung') + n('Vorraete');
+          const totalAktiven  = umlauf + anlage;
+          const fremdkapital  = n('Verbindlichkeiten') + n('Passive_Rechnungsabgrenzung') + n('Ruckstellungen') + n('Darlehen_Bank');
+          const totalPassiven = fremdkapital + n('Eigenkapital');
+
+          const aktiva = [
+            ['Flüssige Mittel',            b.FluessigeMittel],
+            ['Forderungen',                b.Forderungen],
+            ['Aktive Rechnungsabgrenzung', b.Aktive_Rechnungsabgrenzung],
+            ['Vorräte',                    b.Vorraete],
+            ['Umlaufvermögen',            umlauf],
+            ['Anlagevermögen',            anlage],
+            ['TOTAL Aktiven',              totalAktiven],
+          ];
+          const passiva = [
+            ['Verbindlichkeiten',          b.Verbindlichkeiten],
+            ['Passive Rechnungsabgrenzung',b.Passive_Rechnungsabgrenzung],
+            ['Rückstellungen',             b.Ruckstellungen],
+            ['Darlehen Bank',              b.Darlehen_Bank],
+            ['Fremdkapital',               fremdkapital],
+            ['Eigenkapital',               b.Eigenkapital],
+            ['TOTAL Passiven',             totalPassiven],
+          ];
+
+          [['AKTIVA', aktiva], ['PASSIVA', passiva]].forEach(([title, rows]) => {
+            const card = document.createElement('div');
+            card.className = 'bilanz-card';
+            card.innerHTML = `<div class="bilanz-card-title">${title}</div>` +
+              rows.map(([l, v]) =>
+                `<div class="bil-row"><span>${l}</span><span class="bil-val">${v ?? '–'}</span></div>`
+              ).join('');
+            grid.appendChild(card);
+          });
+          document.getElementById('bilanz-section').style.display = 'block';
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
