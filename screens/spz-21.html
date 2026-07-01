@@ -19,7 +19,7 @@
       width: 100%;
       max-width: 1024px;
       margin: 0 auto;
-      padding: 80px 120px 24px 120px;
+      padding: 30px 120px 24px 120px;
       display: flex;
       gap: 80px;
       align-items: flex-start;
@@ -97,7 +97,7 @@
 
     .vk-wrapper-picto {
       position: absolute;
-      top: -80px;
+      top: -60px;
       right: 0;
       height: 140px;
       width: auto;
@@ -162,8 +162,7 @@
   data-step-total="20"
   data-wirkung="00-wirkungen.png"
   data-disable-handbuch="true"
-  data-disable-bank="true"
-  data-disable-ereignis="true"
+  
 >
   <div id="app-header" class="w-full"></div>
 
@@ -201,7 +200,7 @@
 
           <div class="vk-input-row">
             <input class="vk-input" id="vk-input" type="number"
-                   min="0" step="1" placeholder="0" />
+                   min="0" step="1" placeholder="" />
             <span class="vk-currency">in Mio</span>
           </div>
 
@@ -262,8 +261,9 @@
     (function() {
       const input = document.getElementById('vk-input');
       const saved = getLS('spz21_materialverbrauch');
-      if (saved !== null && saved !== undefined) input.value = saved;
+      if (saved) input.value = saved;
 
+      input.addEventListener('focus', () => input.select());
       input.addEventListener('input', function() {
         setLS('spz21_materialverbrauch', Math.round(parseFloat(input.value) || 0));
       });

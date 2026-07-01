@@ -1,11 +1,18 @@
 export function renderFooter() {
   const spielzugLabel = document.body?.dataset?.spielzugLabel || 'Spielzug';
   const currentStep   = Number(document.body?.dataset?.stepCurrent || 1);
-  const totalSteps    = Number(document.body?.dataset?.stepTotal   || 20);
 
-  const displaySteps = Math.min(totalSteps, 30);
+  /* Read Spielzug_Betrieb from einstellungen localStorage */
+  let totalSteps = Number(document.body?.dataset?.stepTotal || 20);
+  try {
+    const einst = JSON.parse(localStorage.getItem('einstellungen'));
+    const arr = einst ? (einst.Einstellungen || einst) : [];
+    const sb = Number(Array.isArray(arr) ? arr[0]?.Spielzug_Betrieb : arr.Spielzug_Betrieb);
+    if (sb > 0) totalSteps = sb;
+  } catch(e) { /* fallback to data-step-total */ }
+
   let progressHtml = '';
-  for (let i = 1; i <= displaySteps; i++) {
+  for (let i = 1; i <= totalSteps; i++) {
     progressHtml += `<span class="progress-box${i <= currentStep ? ' active' : ''}"></span>`;
   }
 
@@ -35,7 +42,7 @@ export function renderFooter() {
         <!-- Spielzug + Fortschritt -->
         <div class="footer-divider flex items-center flex-1 min-w-0" style="padding:0 20px;gap:12px;">
           <span class="nav-label flex-shrink-0" style="font-size:0.85rem;">${spielzugLabel}</span>
-          <div class="flex items-center flex-wrap" style="gap:1px;">
+          <div class="flex items-center flex-wrap" style="gap:4px;">
             ${progressHtml}
           </div>
         </div>

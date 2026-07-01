@@ -307,14 +307,18 @@
     function closeOverlay() {
         try {
             if (window.parent && window.parent !== window) {
-                const parentDoc = window.parent.document;
-                const overlay = parentDoc.getElementById('ereignis-overlay');
-                const frame   = parentDoc.getElementById('ereignis-frame');
-                const btn     = parentDoc.getElementById('nav-ereignis');
-                if (overlay) overlay.classList.remove('show');
-                if (frame)   frame.src = '';
-                if (btn)     btn.classList.remove('active');
-                if (window.parent.__restoreFooter) window.parent.__restoreFooter();
+                if (window.parent.closeEreignisOverlay) {
+                    window.parent.closeEreignisOverlay();
+                } else {
+                    const parentDoc = window.parent.document;
+                    const overlay = parentDoc.getElementById('ereignis-overlay');
+                    const frame   = parentDoc.getElementById('ereignis-frame');
+                    const btn     = parentDoc.getElementById('nav-ereignis');
+                    if (overlay) overlay.classList.remove('show');
+                    if (frame)   frame.src = '';
+                    if (btn)     btn.classList.remove('active');
+                    if (window.parent.__restoreFooter) window.parent.__restoreFooter();
+                }
             }
         } catch (e) {
             console.warn('closeOverlay:', e);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Personalplanung – Planspiel Bülach</title>
+  <title>Variable Kosten – Planspiel Bülach</title>
 
   <link rel="stylesheet" href="../assets/css/app.css" />
   <link rel="stylesheet" href="../assets/css/tailwind.css" />
@@ -19,9 +19,9 @@
       width: 100%;
       max-width: 1024px;
       margin: 0 auto;
-      padding: 60px 32px 24px 32px;
+      padding: 50px 120px 24px 120px;
       display: flex;
-      gap: 60px;
+      gap: 80px;
       align-items: flex-start;
     }
 
@@ -75,16 +75,16 @@
     }
 
     /* Wrapper mit L-Rahmen + Titel oben links + Picto oben rechts */
-    .personal-wrapper {
+    .vk-wrapper {
       position: relative;
       border-top:  1px solid var(--color-border);
       border-left: 1px solid var(--color-border);
       border-top-left-radius: 8px;
-      padding: 20px 20px 24px 20px;
-      margin-top: 52px;   /* Platz für Titel + Picto */
+      padding: 28px 24px 28px 24px;
+      margin-top: 52px;
     }
 
-    .personal-wrapper-title {
+    .vk-wrapper-title {
       position: absolute;
       top: -40px;
       left: 0;
@@ -93,138 +93,66 @@
       color: #aaa;
       letter-spacing: 0.01em;
       white-space: nowrap;
-      padding: 0px 0px 0px 20px;
+      padding: 0 0 0 20px;
     }
 
-    .personal-wrapper-picto {
+    .vk-wrapper-picto {
       position: absolute;
-      top: -60px;
+      top: -80px;
       right: 0;
-      height: 72px;
+      height: 140px;
       width: auto;
       display: block;
-      padding: 0px 20px 0px 0px;
+      background: transparent;
+      padding: 0 20px 0 0;
     }
 
-    /* ── Markt-Grid ─────────────────────────────────────────────────────── */
-    .personal-grid {
-      display: flex;
-      gap: 12px;
-    }
-
-    .personal-box {
-      flex: 1;
-      border-radius: 10px;
-      border: 2px solid transparent;
-      overflow: hidden;
-    }
-
-    .personal-header {
-      padding: 8px 12px;
-      text-align: center;
-      font-size: 0.88rem;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: 0.02em;
-    }
-
-    .personal-body {
-      padding: 12px 12px 14px;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    /* Zeile: Label links, Input rechts */
-    .personal-input-row {
+    /* ── Eingabefeld ────────────────────────────────────────────────────── */
+    .vk-input-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 8px;
+      gap: 12px;
+      margin-bottom: 14px;
     }
 
-    .personal-label {
-      font-size: 0.78rem;
-      color: #888;
-      line-height: 1.3;
-      flex: 1;
-    }
-
-    .personal-input {
-      width: 64px;
-      height: 36px;
-      border-radius: 6px;
-      border: 1.5px solid;
-      padding: 0 8px;
-      font-size: 1rem;
+    .vk-input {
+      width: 120px;
+      flex-shrink: 0;
+      height: 52px;
+      border-radius: 8px;
+      border: 2px solid var(--color-accent);
+      padding: 0 16px;
+      font-size: 1.4rem;
       font-weight: 700;
-      text-align: center;
+      color: var(--color-accent);
       outline: none;
       background: #fff;
-      flex-shrink: 0;
+      text-align: right;
     }
-    .personal-input::-webkit-inner-spin-button,
-    .personal-input::-webkit-outer-spin-button {
+    .vk-input::placeholder {
+      color: #c0d8e8;
+      font-weight: 400;
+    }
+    .vk-input::-webkit-inner-spin-button,
+    .vk-input::-webkit-outer-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
-    .personal-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+    .vk-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
-    /* Kostenfeld: gleiche Breite wie Input */
-    .personal-result {
-      height: 36px;
-      width: 64px;
-      align-self: flex-end;
-      border-radius: 6px;
-      background: var(--color-accent);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .vk-currency {
       font-size: 1rem;
-      font-weight: 700;
-    }
-
-    /* ── Total-Zeile ────────────────────────────────────────────────────── */
-    .total-row {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 16px;
-      margin-top: 18px;
-      padding-right: 2px;
-    }
-
-    .total-label-wrap {
-      text-align: right;
-    }
-
-    .total-label {
-      font-size: 1.1rem;
-      font-weight: 700;
       color: #aaa;
+      white-space: nowrap;
     }
 
-    .total-sublabel {
-      font-size: 0.74rem;
+    .vk-description {
+      font-size: 1rem;
       color: #aaa;
-      margin-top: 1px;
+      line-height: 1.5;
+      margin: 0;
     }
 
-    .total-badge {
-      min-width: 80px;
-      height: 40px;
-      background: var(--color-accent);
-      color: #fff;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      font-weight: 800;
-      padding: 0 16px;
-    }
   </style>
 </head>
 
@@ -248,15 +176,15 @@
       <!-- ══ LINKE SPALTE ══ -->
       <div class="col-left">
 
-        <!-- Karte 1: Eingabe -->
+        <!-- Karte 1 -->
         <div class="decision-card">
-          <img id="card-picto-1" src="../assets/pictos/picto_eingabe.png"
+          <img id="card-picto-1" src="../assets/pictos/picto_meeting.png"
                class="card-illustration" alt="" />
-          <h1 class="card-title" id="art-1">Eingabe</h1>
+          <h1 class="card-title" id="art-1">Entscheidung</h1>
           <p class="card-text" id="text-1"></p>
         </div>
 
-        <!-- Karte 2: Aufgabe -->
+        <!-- Karte 2 -->
         <div class="decision-card">
           <img id="card-picto-2" src="../assets/pictos/picto_aufgabe.png"
                class="card-illustration" alt="" />
@@ -269,31 +197,28 @@
       <!-- ══ RECHTE SPALTE ══ -->
       <div class="col-right">
 
-        <div class="personal-wrapper">
+        <div class="vk-wrapper">
 
           <!-- Titel oben links -->
-          <span class="personal-wrapper-title">Personalplanung</span>
+          <span class="vk-wrapper-title">Klinik-Apotheke</span>
 
           <!-- Picto oben rechts -->
-          <img class="personal-wrapper-picto"
-               src="../assets/pictos/personal.png" alt="" />
+          <img class="vk-wrapper-picto"
+               src="../assets/pictos/medikamente.png" alt="" />
 
-          <!-- Markt-Boxen -->
-          <div class="personal-grid" id="personal-grid">
-            <!-- wird per JS befüllt -->
+          <!-- Eingabefeld -->
+          <div class="vk-input-row">
+            <input class="vk-input" id="vk-input" type="number"
+                   min="0" step="1" placeholder="" />
+            <span class="vk-currency">in Mio</span>
           </div>
 
-          <!-- Total -->
-          <div class="total-row">
-            <div class="total-label-wrap">
-              <div class="total-label">TOTAL Personalkosten</div>
-              <div class="total-sublabel">Betrag gerundet in Mio</div>
-            </div>
-            <div class="total-badge" id="total-badge">–</div>
-          </div>
+          <!-- Beschreibung -->
+          <p class="vk-description">Kosten für Aufstockung <br> von Medikamenten und Material</p>
 
         </div>
       </div>
+
     </div>
   </main>
 
@@ -342,104 +267,36 @@
         document.getElementById('card-picto-2').src = `../assets/pictos/${item.Picto2.toLowerCase()}`;
     })();
 
-    /* ══ Personalplanung ═══════════════════════════════════════════════════ */
+    /* ══ Variable Kosten Eingabe ═══════════════════════════════════════════ */
     (function() {
-      const data = getLS('personalKosten');
-      if (!data) return;
-      const bereiche = data.personal || data;
+      const input = document.getElementById('vk-input');
 
-      /* Gespeicherte Eingaben laden */
-      const saved = getLS('personalplanung') || {};
-
-      const grid      = document.getElementById('personal-grid');
-      const totalBadge = document.getElementById('total-badge');
-
-      /* Eingaben + Ergebnisse sammeln für Neuberechnung */
-      const inputs = [];   // { input-Element, preis }
-
-      function recalcTotal() {
-        let sum = 0;
-        inputs.forEach(({ el, preis }) => {
-          const val = parseFloat(el.value) || 0;
-          sum += val * preis;
-        });
-        totalBadge.textContent = Math.round(sum);
-        /* Speichern */
-        const saveObj = {};
-        bereiche.forEach((b, i) => {
-          saveObj[b.marktName] = parseFloat(inputs[i]?.el.value) || 0;
-        });
-        setLS('personalplanung', saveObj);
+      /* Gespeicherten Wert laden */
+      const saved = getLS('variablekosten');
+      if (saved) {
+        input.value = saved;
       }
 
-      bereiche.forEach(b => {
-        /* Farbe: marktFarbe nutzt | als Trenner */
-        const rgb = (b.marktFarbe || '37|117|176').replace(/\|/g, ',');
-        const savedVal = saved[b.marktName] ?? '';
-
-        const box = document.createElement('div');
-        box.className = 'personal-box';
-        box.style.borderColor = `rgb(${rgb})`;
-        box.innerHTML = `
-          <div class="personal-header" style="background:rgb(${rgb});">${b.marktName}</div>
-          <div class="personal-body">
-            <div class="personal-input-row">
-              <span class="personal-label">Personal-<br>Einheiten</span>
-              <input class="personal-input" type="number" min="0" step="1"
-                     value="${savedVal}"
-                     style="border-color:rgb(${rgb}); color:rgb(${rgb});"
-                     placeholder="0" />
-            </div>
-            <div class="personal-result" id="result-${b.marktNr}">–</div>
-          </div>
-        `;
-        grid.appendChild(box);
-
-        const input      = box.querySelector('.personal-input');
-        const resultEl   = box.querySelector('.personal-result');
-        inputs.push({ el: input, preis: b.preis, resultEl });
-
-        /* Einzelergebnis aktualisieren */
-        function updateResult() {
-          const val = parseFloat(input.value) || 0;
-          const res = val * b.preis;
-          resultEl.textContent = res % 1 === 0 ? res : res.toFixed(1);
-          recalcTotal();
-        }
-
-        input.addEventListener('input', updateResult);
-
-        /* Initial berechnen falls Wert bereits gespeichert */
-        if (savedVal !== '') updateResult();
+      input.addEventListener('input', function() {
+        const val = Math.round(parseFloat(input.value) || 0);
+        setLS('variablekosten', val);
       });
-
-      /* Initial-Total setzen */
-      recalcTotal();
+      input.addEventListener('focus', () => input.select());
     })();
 
     /* ══ Transfer beim Next-Klick ════════════════════════════════════════ */
     document.addEventListener('click', function(e) {
       if (!e.target.closest('#nav-next')) return;
-      if (localStorage.getItem('done_spz10_personal') === 'true') return;
+      if (localStorage.getItem('done_spz11_variablekosten') === 'true') return;
 
-      /* Total aus personalplanung × preis berechnen */
-      const planung  = getLS('personalplanung') || {};
-      const pkData   = getLS('personalKosten');
-      if (!pkData) return;
-      const bereiche = pkData.personal || pkData;
+      const betrag = Math.round(parseFloat(getLS('variablekosten')) || 0);
 
-      let total = 0;
-      bereiche.forEach(b => {
-        total += (Number(planung[b.marktName]) || 0) * b.preis;
-      });
-      total = Math.round(total);
-
-      if (total === 0) {
-        localStorage.setItem('done_spz10_personal', 'true');
+      if (betrag === 0) {
+        localStorage.setItem('done_spz11_variablekosten', 'true');
         return;
       }
 
-      /* Bilanz: FluessigeMittel -= total */
+      /* Bilanz: FluessigeMittel -= betrag, Vorraete += betrag */
       const bilanzData = getLS('bilanzStart');
       if (bilanzData) {
         const arr    = bilanzData.Anfangsbilanz || bilanzData;
@@ -447,33 +304,29 @@
         const idx    = arr[teamNr] !== undefined ? teamNr : (arr[teamNr-1] !== undefined ? teamNr-1 : 0);
         const entry  = arr[idx];
         if (entry && entry.Bilanz) {
-          entry.Bilanz.FluessigeMittel = (Number(entry.Bilanz.FluessigeMittel) || 0) - total;
+          entry.Bilanz.FluessigeMittel = (Number(entry.Bilanz.FluessigeMittel) || 0) - betrag;
+          entry.Bilanz.Vorraete        = (Number(entry.Bilanz.Vorraete)        || 0) + betrag;
           arr[idx] = entry;
           setLS('bilanzStart', bilanzData.Anfangsbilanz
             ? { ...bilanzData, Anfangsbilanz: arr } : arr);
         }
       }
 
-      /* Erfolgsrechnung: Personalaufwand setzen */
-      const er = getLS('erfolgsrechnung') || {};
-      er.Personalaufwand = total;
-      setLS('erfolgsrechnung', er);
-
       /* Protokoll */
-      const teamNr   = Number(localStorage.getItem('teamNumber')) || 1;
+      const teamNr    = Number(localStorage.getItem('teamNumber')) || 1;
       const protokoll = getLS('protokoll') || [];
       protokoll.push({
         zeit:     new Date().toISOString(),
         spielzug: 'spz-10',
-        aktion:   'Personalkosten → Personalaufwand',
+        aktion:   'Medikamente/Material Einkauf',
         von:      'Flüssige Mittel',
-        nach:     'Personalaufwand',
-        betrag:   total,
+        nach:     'Vorräte',
+        betrag:   betrag,
         team:     localStorage.getItem('klinikName') || `Team ${teamNr}`
       });
       setLS('protokoll', protokoll);
 
-      localStorage.setItem('done_spz10_personal', 'true');
+      localStorage.setItem('done_spz11_variablekosten', 'true');
 
     }, true);
   </script>

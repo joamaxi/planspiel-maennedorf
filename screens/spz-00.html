@@ -66,7 +66,7 @@
 
     /* ── Einzelner Import-Slot ── */
     .import-slot {
-      margin-bottom: 18px;
+      margin-bottom: 10px;
     }
     .slot-label {
       font-size: 0.78rem;
@@ -168,6 +168,21 @@
     .btn-reset:hover  { background: #c0392b; }
     .btn-reset:active { transform: scale(0.97); }
 
+    .btn-weiter {
+      padding: 16px 40px;
+      background: transparent;
+      color: var(--color-accent);
+      border: 2px solid var(--color-accent);
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+    .btn-weiter:hover  { background: var(--color-accent); color: #fff; }
+    .btn-weiter:active { transform: scale(0.97); }
+
     /* ── Passwort-Modal ── */
     .pw-backdrop {
       display: none;
@@ -261,12 +276,27 @@
         Zum Zurücksetzen alle Daten löschen und neu starten.
       </div>
 
-      <!-- Team Nr. + Spielleiter IP -->
+      <!-- Team Nr. + Spielrunde + Spielleiter IP -->
       <div class="top-row">
         <div class="top-field">
           <span class="top-label">Team Nr.</span>
           <select id="team-select" class="top-select">
-            <option value="">select</option>
+            <option value="">–</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+          </select>
+        </div>
+        <div class="top-field">
+          <span class="top-label">Spielrunde</span>
+          <select id="runde-select" class="top-select">
+            <option value="">–</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -291,8 +321,9 @@
 
       <!-- Aktionszeile -->
       <div class="action-row">
-        <button class="btn-start" id="btn-start">Spiel starten &gt;&gt;</button>
-        <button class="btn-reset" id="btn-reset">Alles löschen &amp; neu starten</button>
+        <button class="btn-start"  id="btn-start">Spiel starten &gt;&gt;</button>
+        <button class="btn-weiter" id="btn-weiter">Weiter &gt;</button>
+        <button class="btn-reset"  id="btn-reset">Alles löschen &amp; neu starten</button>
       </div>
 
     </div>
@@ -337,6 +368,7 @@
         document.getElementById('btn-reset').style.display     = 'block';
         document.getElementById('btn-start').disabled          = true;
         document.getElementById('team-select').disabled        = true;
+        document.getElementById('runde-select').disabled       = true;
         document.getElementById('server-ip').disabled          = true;
       }
 
@@ -349,18 +381,40 @@
         localStorage.setItem('teamNumber', teamSelect.value);
         const lbl = document.getElementById('header-team-label');
         if (lbl) lbl.textContent = teamSelect.value ? `Team ${teamSelect.value}` : '';
+        updateImportState();
+        updateBilanzFilename();
+      });
+
+      /* Spielrunde */
+      const rundeSelect = document.getElementById('runde-select');
+      rundeSelect.value = localStorage.getItem('rundeNumber') || '';
+      rundeSelect.addEventListener('change', () => {
+        localStorage.setItem('rundeNumber', rundeSelect.value);
+        updateBilanzFilename();
       });
 
       /* Spielleiter IP */
       const ipInput = document.getElementById('server-ip');
       ipInput.value = localStorage.getItem('serverIp') || '';
-      ipInput.addEventListener('change', () => {
+      ipInput.addEventListener('input', () => {
         localStorage.setItem('serverIp', ipInput.value.trim());
+        updateImportState();
       });
+
+      /* Gate + Dateiname initial setzen */
+      if (!gestartet) {
+        updateImportState();
+        updateBilanzFilename();
+      }
 
       /* Spiel starten */
       document.getElementById('btn-start').addEventListener('click', () => {
         localStorage.setItem('spielGestartet', 'true');
+        window.location.href = document.body.dataset.next;
+      });
+
+      /* Weiter ohne Änderungen */
+      document.getElementById('btn-weiter').addEventListener('click', () => {
         window.location.href = document.body.dataset.next;
       });
 
@@ -385,22 +439,31 @@
       { key: 'startPatienten',  label: 'Anzahl Patienten zu Beginn der Periode', default: 'startPatienten.json' },
       { key: 'ratioWerte',      label: 'Pflegeintensität',                       default: 'ratioWerte.json' },
       { key: 'patienten',       label: 'Patienten Kosten und Ertrag',            default: 'aPatienten.json' },
+      { key: 'projekte',        label: 'Projekte',                               default: 'projekte.json' },
+      { key: 'betriebskosten',  label: 'Betriebskosten',                         default: 'betriebskosten.json' },
     ];
 
-    /* ── UTF-16-JSON laden ────────────────────────────────────────────── */
+    /* ── JSON laden (UTF-16LE mit BOM oder UTF-8) ────────────────────── */
     async function fetchUTF16Json(url) {
       const res = await fetch(url + '?v=' + Date.now());
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const buf  = await res.arrayBuffer();
-      let   text = new TextDecoder('utf-16le').decode(buf);
-      if (text.startsWith('﻿')) text = text.slice(1);
+      const buf   = await res.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      const isUtf16le = bytes[0] === 0xFF && bytes[1] === 0xFE;
+      let text;
+      if (isUtf16le) {
+        text = new TextDecoder('utf-16le').decode(buf);
+        if (text.startsWith('﻿')) text = text.slice(1);
+      } else {
+        text = new TextDecoder('utf-8').decode(buf);
+      }
       return JSON.parse(text);
     }
 
     /* ── Grid aufbauen ────────────────────────────────────────────────── */
     function buildGrid(locked) {
       const grid  = document.getElementById('import-grid');
-      const order = [0,5, 1,6, 2,7, 3,8, 4,9];
+      const order = [0,6, 1,7, 2,8, 3,9, 4,10, 5,11];
 
       order.forEach(i => {
         const slot = SLOTS[i];
@@ -420,7 +483,7 @@
             <button
               class="btn-import"
               id="btn-${slot.key}"
-              ${locked ? 'disabled' : ''}
+              disabled
             >${locked ? '–' : 'Import'}</button>
           </div>
         `;
@@ -435,6 +498,42 @@
             .addEventListener('click', () => importSlot(slot.key));
         }
       });
+    }
+
+    /* ── Import-Gate: nur aktiv wenn Team Nr + IP gesetzt ─────────────── */
+    function updateImportState() {
+      if (localStorage.getItem('spielGestartet') === 'true') return;
+      const hasTeam = !!document.getElementById('team-select').value;
+      const hasIp   = !!document.getElementById('server-ip').value.trim();
+      const ok = hasTeam && hasIp;
+      SLOTS.forEach(slot => {
+        const btn = document.getElementById(`btn-${slot.key}`);
+        if (btn) btn.disabled = !ok;
+      });
+    }
+
+    /* ── Dateiname Anfangsbilanz je nach Runde anpassen ─────────────────── */
+    function updateBilanzFilename() {
+      const t = document.getElementById('team-select')?.value;
+      const r = document.getElementById('runde-select')?.value;
+
+      const inpBilanz = document.getElementById('input-bilanzStart');
+      if (inpBilanz) {
+        if (!r || r === '1') {
+          inpBilanz.value = 'aBilanz_start.json';
+        } else if (t && r) {
+          inpBilanz.value = `team${t}-runde${r}-aBilanz.json`;
+        }
+      }
+
+      const inpZuf = document.getElementById('input-zufriedenheiten');
+      if (inpZuf) {
+        if (!r || r === '1') {
+          inpZuf.value = 'zufriedenheiten.json';
+        } else if (t && r) {
+          inpZuf.value = `team${t}-runde${r}-zufriedenheiten.json`;
+        }
+      }
     }
 
     /* ── Import-Funktion ──────────────────────────────────────────────── */
@@ -452,8 +551,9 @@
         const data = await fetchUTF16Json(`../data/json/${fname}`);
         localStorage.setItem(key, JSON.stringify(data));
         markLoaded(key);
+        updateImportState();
       } catch (err) {
-        btn.disabled    = false;
+        updateImportState();
         btn.textContent = 'Import';
         btn.style.background = '#e74c3c';
         setTimeout(() => { btn.style.background = ''; }, 2000);
@@ -464,7 +564,6 @@
     function markLoaded(key) {
       const btn = document.getElementById(`btn-${key}`);
       if (!btn) return;
-      btn.disabled    = false;
       btn.textContent = 'Geladen';
       btn.classList.add('loaded');
     }

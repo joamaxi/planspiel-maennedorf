@@ -76,7 +76,7 @@
 <body
   class="bg-white min-h-screen flex flex-col items-center"
   data-prev="spz-04.html"
-  data-next="spz-06.html"
+  data-next="spz-08.html"
   data-spielzug-label="Spielzug 5"
   data-step-current="5"
   data-step-total="20"
@@ -95,7 +95,7 @@
         <img id="card-picto" class="card-picto"
              src="../assets/pictos/picto_aufgabe.png" alt="" />
 
-        <h1 class="card-title">Spielbrett-Aufgabe</h1>
+        <h1 class="card-title" id="card-title">Spielbrett-Aufgabe</h1>
         <p class="card-subtitle" id="card-subtitle">Patienten:</p>
         <p class="card-text" id="card-text"></p>
 
@@ -127,6 +127,7 @@
       const subtitle = parts.length > 1 ? parts[0].trim() : '';
       const body     = parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim();
 
+      if (item.AufgabenArt_1) document.getElementById('card-title').textContent = item.AufgabenArt_1;
       if (subtitle) document.getElementById('card-subtitle').textContent = subtitle;
       document.getElementById('card-text').innerHTML = boldQuotes(body);
 

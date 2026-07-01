@@ -41,7 +41,7 @@
       top: -38px;
       right: 20px;
       width: auto;
-      height: 60px;
+      height: 70px;
       display: block;
       background: #fff;
     }
@@ -73,7 +73,7 @@
 
 <body
   class="bg-white min-h-screen flex flex-col items-center"
-  data-prev="spz-07.html"
+  data-prev="spz-05.html"
   data-next="spz-09.html"
   data-spielzug-label="Spielzug 8"
   data-step-current="8"
@@ -90,11 +90,11 @@
       <div class="aufgabe-card">
 
         <img id="card-picto" class="card-picto"
-             src="../assets/pictos/picto_aufgabe.png" alt="" />
+             src="../assets/pictos/picto_meeting.png" alt="" />
 
-        <h1 class="card-title">Spielbrett-Aufgabe</h1>
+        <h1 class="card-title" id="card-title">Spielbrett-Aufgabe</h1>
         <p class="card-subtitle" id="card-subtitle"></p>
-        <p class="card-text" id="card-text">— Inhalt folgt —</p>
+        <p class="card-text" id="card-text"></p>
 
       </div>
     </div>
@@ -119,6 +119,7 @@
       const parts    = (item.Aufgabe_1 || '').split('\r');
       const subtitle = parts.length > 1 ? parts[0].trim() : '';
       const body     = parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim();
+      if (item.AufgabenArt_1) document.getElementById('card-title').textContent = item.AufgabenArt_1;
       if (subtitle) document.getElementById('card-subtitle').textContent = subtitle;
       document.getElementById('card-text').innerHTML = boldQuotes(body);
       if (item.Picto1)

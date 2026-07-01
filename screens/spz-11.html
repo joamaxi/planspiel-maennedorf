@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Variable Kosten – Planspiel Bülach</title>
+  <title>Spielbrett-Aufgabe – Planspiel Bülach</title>
 
   <link rel="stylesheet" href="../assets/css/app.css" />
   <link rel="stylesheet" href="../assets/css/tailwind.css" />
@@ -19,140 +19,57 @@
       width: 100%;
       max-width: 1024px;
       margin: 0 auto;
-      padding: 80px 120px 24px 120px;
+      padding: 160px 32px 24px 32px;
       display: flex;
-      gap: 80px;
       align-items: flex-start;
+      justify-content: center;
     }
 
-    /* ══ LINKE SPALTE ══════════════════════════════════════════════════════ */
-    .col-left {
-      width: 300px;
-      flex-shrink: 0;
-    }
-
-    .decision-card {
+    /* ── Aufgaben-Karte ──────────────────────────────────────────────────── */
+    .aufgabe-card {
       position: relative;
+      width: 100%;
+      max-width: 550px;
       border-top:  1px solid var(--color-border);
       border-left: 1px solid var(--color-border);
-      border-top-left-radius: 8px;
-      padding: 20px 20px 28px 20px;
+      border-top-left-radius: 12px;
+      padding: 36px 40px 40px 40px;
       background: #fff;
-      margin-top: 52px;
-    }
-    .decision-card + .decision-card {
-      margin-top: 28px;
     }
 
-    .card-illustration {
+    /* Picto oben rechts, überlappt Rahmen */
+    .card-picto {
       position: absolute;
-      top: -28px;
-      right: 12px;
-      height: 52px;
+      top: -38px;
+      right: 20px;
       width: auto;
+      height: 60px;
       display: block;
       background: #fff;
     }
 
     .card-title {
+      font-size: 2.0rem !important;
       font-weight: 800;
       color: var(--color-accent);
-      margin: 0 0 12px 0;
-      line-height: 1.1;
+      margin: 0 0 20px 0;
+      line-height: 1.05;
+      white-space: nowrap;
+    }
+
+    .card-subtitle {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0 0 6px 0;
     }
 
     .card-text {
-      font-size: 0.86rem;
+      font-size: 0.9rem;
       color: #333;
       line-height: 1.6;
       margin: 0;
     }
-
-    /* ══ RECHTE SPALTE ═════════════════════════════════════════════════════ */
-    .col-right {
-      flex: 1;
-      min-width: 0;
-    }
-
-    /* Wrapper mit L-Rahmen + Titel oben links + Picto oben rechts */
-    .vk-wrapper {
-      position: relative;
-      border-top:  1px solid var(--color-border);
-      border-left: 1px solid var(--color-border);
-      border-top-left-radius: 8px;
-      padding: 28px 24px 28px 24px;
-      margin-top: 52px;
-    }
-
-    .vk-wrapper-title {
-      position: absolute;
-      top: -40px;
-      left: 0;
-      font-size: 1.5rem;
-      font-weight: 300;
-      color: #aaa;
-      letter-spacing: 0.01em;
-      white-space: nowrap;
-      padding: 0 0 0 20px;
-    }
-
-    .vk-wrapper-picto {
-      position: absolute;
-      top: -80px;
-      right: 0;
-      height: 140px;
-      width: auto;
-      display: block;
-      background: transparent;
-      padding: 0 20px 0 0;
-    }
-
-    /* ── Eingabefeld ────────────────────────────────────────────────────── */
-    .vk-input-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .vk-input {
-      width: 120px;
-      flex-shrink: 0;
-      height: 52px;
-      border-radius: 8px;
-      border: 2px solid var(--color-accent);
-      padding: 0 16px;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--color-accent);
-      outline: none;
-      background: #fff;
-      text-align: right;
-    }
-    .vk-input::placeholder {
-      color: #c0d8e8;
-      font-weight: 400;
-    }
-    .vk-input::-webkit-inner-spin-button,
-    .vk-input::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    .vk-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
-
-    .vk-currency {
-      font-size: 1rem;
-      color: #aaa;
-      white-space: nowrap;
-    }
-
-    .vk-description {
-      font-size: 1rem;
-      color: #aaa;
-      line-height: 1.5;
-      margin: 0;
-    }
-
   </style>
 </head>
 
@@ -173,50 +90,15 @@
   <main class="w-full flex-1">
     <div class="page-main">
 
-      <!-- ══ LINKE SPALTE ══ -->
-      <div class="col-left">
+      <div class="aufgabe-card">
 
-        <!-- Karte 1 -->
-        <div class="decision-card">
-          <img id="card-picto-1" src="../assets/pictos/picto_meeting.png"
-               class="card-illustration" alt="" />
-          <h1 class="card-title" id="art-1">Entscheidung</h1>
-          <p class="card-text" id="text-1"></p>
-        </div>
+        <img id="card-picto" class="card-picto"
+             src="../assets/pictos/picto_aufgabe.png" alt="" />
 
-        <!-- Karte 2 -->
-        <div class="decision-card">
-          <img id="card-picto-2" src="../assets/pictos/picto_aufgabe.png"
-               class="card-illustration" alt="" />
-          <h1 class="card-title" id="art-2">Aufgabe</h1>
-          <p class="card-text" id="text-2"></p>
-        </div>
+        <h1 class="card-title" id="card-art">Spielbrett-Aufgabe</h1>
+        <p class="card-subtitle" id="card-subtitle"></p>
+        <p class="card-text"    id="card-text"></p>
 
-      </div>
-
-      <!-- ══ RECHTE SPALTE ══ -->
-      <div class="col-right">
-
-        <div class="vk-wrapper">
-
-          <!-- Titel oben links -->
-          <span class="vk-wrapper-title">Klinik-Apotheke</span>
-
-          <!-- Picto oben rechts -->
-          <img class="vk-wrapper-picto"
-               src="../assets/pictos/medikamente.png" alt="" />
-
-          <!-- Eingabefeld -->
-          <div class="vk-input-row">
-            <input class="vk-input" id="vk-input" type="number"
-                   min="0" step="1" placeholder="0" />
-            <span class="vk-currency">in Mio</span>
-          </div>
-
-          <!-- Beschreibung -->
-          <p class="vk-description">Kosten für Verbrauch <br> von Medikamenten und Material</p>
-
-        </div>
       </div>
 
     </div>
@@ -230,14 +112,10 @@
     function getLS(key) {
       try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
     }
-    function setLS(key, val) {
-      localStorage.setItem(key, JSON.stringify(val));
-    }
     function boldQuotes(text) {
       return text.replace(/"([^"]+)"/g, '<strong>"$1"</strong>');
     }
 
-    /* ══ Spielaufgaben → linke Karten ═════════════════════════════════════ */
     (function() {
       const data = getLS('spielaufgaben');
       if (!data) return;
@@ -245,89 +123,19 @@
       const item = arr.find(e => e.Spielzug === 'spz-11');
       if (!item) return;
 
-      function parseAufgabe(text) {
-        const parts = (text || '').split('\r');
-        return {
-          label: parts[0] || '',
-          body:  parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim()
-        };
-      }
+      if (item.AufgabenArt_1)
+        document.getElementById('card-art').textContent = item.AufgabenArt_1;
 
-      const a1 = parseAufgabe(item.Aufgabe_1);
-      const a2 = parseAufgabe(item.Aufgabe_2);
+      const parts    = (item.Aufgabe_1 || '').split('\r');
+      const subtitle = parts.length > 1 ? parts[0].trim() : '';
+      const body     = parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim();
 
-      if (item.AufgabenArt_1) document.getElementById('art-1').textContent = item.AufgabenArt_1;
-      if (item.AufgabenArt_2) document.getElementById('art-2').textContent = item.AufgabenArt_2;
-      document.getElementById('text-1').innerHTML = boldQuotes(a1.body);
-      document.getElementById('text-2').innerHTML = boldQuotes(a2.body);
+      if (subtitle) document.getElementById('card-subtitle').textContent = subtitle;
+      document.getElementById('card-text').innerHTML = boldQuotes(body);
 
       if (item.Picto1)
-        document.getElementById('card-picto-1').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
-      if (item.Picto2)
-        document.getElementById('card-picto-2').src = `../assets/pictos/${item.Picto2.toLowerCase()}`;
+        document.getElementById('card-picto').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
     })();
-
-    /* ══ Variable Kosten Eingabe ═══════════════════════════════════════════ */
-    (function() {
-      const input = document.getElementById('vk-input');
-
-      /* Gespeicherten Wert laden */
-      const saved = getLS('variablekosten');
-      if (saved !== null && saved !== undefined) {
-        input.value = saved;
-      }
-
-      input.addEventListener('input', function() {
-        const val = Math.round(parseFloat(input.value) || 0);
-        setLS('variablekosten', val);
-      });
-    })();
-
-    /* ══ Transfer beim Next-Klick ════════════════════════════════════════ */
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('#nav-next')) return;
-      if (localStorage.getItem('done_spz11_variablekosten') === 'true') return;
-
-      const betrag = Math.round(parseFloat(getLS('variablekosten')) || 0);
-
-      if (betrag === 0) {
-        localStorage.setItem('done_spz11_variablekosten', 'true');
-        return;
-      }
-
-      /* Bilanz: FluessigeMittel -= betrag, Vorraete += betrag */
-      const bilanzData = getLS('bilanzStart');
-      if (bilanzData) {
-        const arr    = bilanzData.Anfangsbilanz || bilanzData;
-        const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
-        const idx    = arr[teamNr] !== undefined ? teamNr : (arr[teamNr-1] !== undefined ? teamNr-1 : 0);
-        const entry  = arr[idx];
-        if (entry && entry.Bilanz) {
-          entry.Bilanz.FluessigeMittel = (Number(entry.Bilanz.FluessigeMittel) || 0) - betrag;
-          entry.Bilanz.Vorraete        = (Number(entry.Bilanz.Vorraete)        || 0) + betrag;
-          arr[idx] = entry;
-          setLS('bilanzStart', bilanzData.Anfangsbilanz
-            ? { ...bilanzData, Anfangsbilanz: arr } : arr);
-        }
-      }
-
-      /* Protokoll */
-      const teamNr    = Number(localStorage.getItem('teamNumber')) || 1;
-      const protokoll = getLS('protokoll') || [];
-      protokoll.push({
-        zeit:     new Date().toISOString(),
-        spielzug: 'spz-11',
-        aktion:   'Medikamente/Material Einkauf',
-        von:      'Flüssige Mittel',
-        nach:     'Vorräte',
-        betrag:   betrag,
-        team:     localStorage.getItem('klinikName') || `Team ${teamNr}`
-      });
-      setLS('protokoll', protokoll);
-
-      localStorage.setItem('done_spz11_variablekosten', 'true');
-
-    }, true);
   </script>
 </body>
 </html>

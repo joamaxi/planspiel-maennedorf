@@ -229,7 +229,7 @@
   data-step-total="20"
   data-wirkung="00-wirkungen.png"
   data-disable-handbuch="true"
-  data-disable-ereignis="true"
+  
 >
   <div id="app-header" class="w-full"></div>
 
@@ -292,7 +292,7 @@
 
               <!-- Untere Reihe: Label links + Gesamtes Spital unter Ambulant -->
               <div class="var-total-row">
-                <span class="var-total-label">Variable Kosten für Diagnostik/<br>Therapie, Pflege/Hotel</span>
+                <span class="var-total-label">Variable Kosten für Diagnostik/<br>Therapie, Pflege/Hotelerie</span>
                 <div class="var-box total-box" style="flex:1;">
                     <div class="var-body">
                     <div class="var-badge" id="val-total">–</div>
@@ -375,12 +375,15 @@
       }
 
       /* Fallback-Kostensätze für Ambulant (falls kein Lookup) */
-      const AMBULANT_KOSTEN = kostenLookup['Ambulant|Ambulant'] || kostenLookup['Ambulant|'] || 5;
-      const ambulantAnzahl  = Number(aufnahme.Ambulant) || 0;
+      const AMBULANT_KOSTEN = kostenLookup['Ambulant-C|Ambulant-C'] || kostenLookup['Ambulant-C|'] || kostenLookup['Ambulant|Ambulant'] || 5;
+      const ambulantAnzahl  = Number(aufnahme['Ambulant-C']) || 0;
 
-      const medizin      = kostenBereich('Medizin')      || 0;
-      const chirurgie    = kostenBereich('Chirurgie')     || 0;
-      const geburtshilfe = kostenBereich('Geburtshilfe') || 0;
+      /* spz-19 Aktive Rechnungsabgrenzung pro Bereich abziehen */
+      const spz19 = getLS('spz19_bereiche') || {};
+
+      const medizin      = (kostenBereich('Medizin')      || 0) - (Number(spz19.Medizin)      || 0);
+      const chirurgie    = (kostenBereich('Chirurgie')     || 0) - (Number(spz19.Chirurgie)    || 0);
+      const geburtshilfe = (kostenBereich('Geburtshilfe') || 0) - (Number(spz19.Geburtshilfe) || 0);
       const ambulant     = ambulantAnzahl * AMBULANT_KOSTEN;
       const total        = medizin + chirurgie + geburtshilfe + ambulant;
 
@@ -421,7 +424,7 @@
 
       /* Erfolgsrechnung: Variable_Kosten_Spital */
       const er = getLS('erfolgsrechnung') || {};
-      er.Variable_Kosten_Spital = total;
+      er.Variable_Kosten_Spital = (Number(er.Variable_Kosten_Spital) || 0) + total;
       setLS('erfolgsrechnung', er);
 
       /* Protokoll */

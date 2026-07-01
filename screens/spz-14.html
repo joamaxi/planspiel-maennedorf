@@ -299,14 +299,19 @@
     /* ══ Patientenaufnahme-Grid ════════════════════════════════════════════ */
     (function() {
       /* Fallback falls marktStart noch nicht importiert wurde */
-      const FALLBACK = [
-        { marktName: 'Medizin',      rgb: '230,51,41'   },
-        { marktName: 'Chirurgie',    rgb: '249,178,51'  },
-        { marktName: 'Geburtshilfe', rgb: '58,170,53'   },
+      const FALLBACK_STAT = [
+        { marktName: 'Medizin',      rgb: '230,51,41'  },
+        { marktName: 'Chirurgie',    rgb: '249,178,51' },
+        { marktName: 'Geburtshilfe', rgb: '58,170,53'  },
       ];
-      const marktData = getLS('marktStart');
-      const raw       = marktData ? (marktData.Marktbereiche || marktData) : [];
-      const bereiche  = (Array.isArray(raw) && raw.length > 0) ? raw : FALLBACK;
+      const FALLBACK_AMB = { marktName: 'Ambulant', rgb: '144,144,144' };
+
+      const marktData  = getLS('marktStart');
+      const raw        = marktData ? (marktData.markt || marktData.Marktbereiche || marktData) : [];
+      const alle       = (Array.isArray(raw) && raw.length > 0) ? raw : [...FALLBACK_STAT, FALLBACK_AMB];
+      const bereiche   = alle.filter(b => (b.marktNr || 0) < 4 && b.marktName !== (FALLBACK_AMB.marktName));
+      const ambulantMarkt = alle.find(b => (b.marktNr === 4) || b.marktName === 'Ambulant-C') || FALLBACK_AMB;
+      const stationaere = bereiche.length > 0 ? bereiche : FALLBACK_STAT;
 
       const saved      = getLS('patientenAufnahme') || {};
       const grid       = document.getElementById('patient-grid');
@@ -321,18 +326,18 @@
         totalBadge.textContent = sum > 0 ? sum : '–';
         /* Speichern */
         const saveObj = {};
-        bereiche.forEach(b => {
+        stationaere.forEach(b => {
           saveObj[b.marktName] = {
             PHP:      parseInt(document.getElementById(`inp-${b.marktName}-php`)?.value)  || 0,
             Allgemein:parseInt(document.getElementById(`inp-${b.marktName}-allg`)?.value) || 0
           };
         });
-        saveObj['Ambulant'] = parseInt(document.getElementById('inp-ambulant')?.value) || 0;
+        saveObj[ambulantMarkt.marktName] = parseInt(document.getElementById('inp-ambulant')?.value) || 0;
         setLS('patientenAufnahme', saveObj);
       }
 
-      /* ── 3 Marktbereiche ── */
-      bereiche.forEach(b => {
+      /* ── 3 stationäre Marktbereiche ── */
+      stationaere.forEach(b => {
         const rgb     = (b.rgb || '160,184,200');
         const savedB  = saved[b.marktName] || {};
 
@@ -345,14 +350,14 @@
             <div class="patient-input-row">
               <span class="patient-label">P/HP</span>
               <input class="patient-input" id="inp-${b.marktName}-php" type="number"
-                     min="0" step="1" placeholder="0"
+                     min="0" step="1" placeholder=""
                      value="${savedB.PHP || ''}"
                      style="border-color:rgb(${rgb}); color:rgb(${rgb});" />
             </div>
             <div class="patient-input-row">
               <span class="patient-label">Allgemein</span>
               <input class="patient-input" id="inp-${b.marktName}-allg" type="number"
-                     min="0" step="1" placeholder="0"
+                     min="0" step="1" placeholder=""
                      value="${savedB.Allgemein || ''}"
                      style="border-color:rgb(${rgb}); color:rgb(${rgb});" />
             </div>
@@ -365,22 +370,25 @@
         allInputs.push(inpPhp, inpAllg);
         inpPhp.addEventListener('input',  recalcTotal);
         inpAllg.addEventListener('input', recalcTotal);
+        inpPhp.addEventListener('focus',  () => inpPhp.select());
+        inpAllg.addEventListener('focus', () => inpAllg.select());
       });
 
-      /* ── Ambulant (fix, grau) ── */
-      const savedAmb = saved['Ambulant'] || '';
+      /* ── Ambulant-C (aus JSON) ── */
+      const ambRgb   = ambulantMarkt.rgb || '144,144,144';
+      const savedAmb = saved[ambulantMarkt.marktName] || '';
       const ambBox   = document.createElement('div');
       ambBox.className = 'patient-box';
-      ambBox.style.borderColor = '#bbb';
+      ambBox.style.borderColor = `rgb(${ambRgb})`;
       ambBox.innerHTML = `
-        <div class="patient-header" style="background:#bbb;">Ambulant</div>
+        <div class="patient-header" style="background:rgb(${ambRgb});">${ambulantMarkt.marktName}</div>
         <div class="patient-body single">
           <div class="patient-input-row">
             <span class="patient-label">Ambulante Patienten<br>in allen Bereichen</span>
             <input class="patient-input" id="inp-ambulant" type="number"
                    min="0" step="1" placeholder="0"
                    value="${savedAmb}"
-                   style="border-color:#bbb; color:#999;" />
+                   style="border-color:rgb(${ambRgb}); color:rgb(${ambRgb});" />
           </div>
         </div>
       `;
@@ -388,6 +396,7 @@
       const inpAmb = ambBox.querySelector('#inp-ambulant');
       allInputs.push(inpAmb);
       inpAmb.addEventListener('input', recalcTotal);
+      inpAmb.addEventListener('focus', () => inpAmb.select());
 
       /* Initial-Total */
       recalcTotal();

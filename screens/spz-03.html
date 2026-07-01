@@ -19,7 +19,7 @@
       width: 100%;
       max-width: 1024px;
       margin: 0 auto;
-      padding: 36px 32px 24px 32px;
+      padding: 100px 32px 24px 32px;
       display: flex;
       gap: 56px;
       align-items: flex-start;
@@ -274,6 +274,14 @@
       const b = entry.Bilanz;
       if (!b) return;
 
+      /* ── Summen on-the-fly berechnen ── */
+      const n = k => Number(b[k]) || 0;
+      const umlauf     = n('FluessigeMittel') + n('Forderungen') + n('Aktive_Rechnungsabgrenzung') + n('Vorraete');
+      const anlage     = n('Infrastruktur_Anlage') + n('Gebaude_Anlage') + n('Immaterielle_Werte_Anlage');
+      const totalAktiv = umlauf + anlage;
+      const fremd      = n('Verbindlichkeiten') + n('Passive_Rechnungsabgrenzung') + n('Ruckstellungen') + n('Darlehen_Bank');
+      const totalPassiv = fremd + n('Eigenkapital');
+
       /* ── Hilfs-Funktionen ── */
       function row(label, value, cls = '') {
         return `<div class="bl-row ${cls}">
@@ -292,30 +300,30 @@
       /* ── AKTIVA ── */
       document.getElementById('col-aktiva').innerHTML = `
         <div class="bilanz-col-header">AKTIVA</div>
-        ${row('Flüssigen Mittel',             b.FluessigeMittel)}
-        ${row('Forderungen (Debitoren)',       b.Forderungen)}
-        ${row('Aktive Rechnungsabgrenzung',    b.Aktive_Rechnungsabgrenzung)}
-        ${row('Vorräte',                       b.Vorraete)}
-        ${row('Umlaufvermögen',               b.TOTAL_Umlaufvermoegen, 'subtotal')}
+        ${row('Flüssigen Mittel',              n('FluessigeMittel'))}
+        ${row('Forderungen (Debitoren)',        n('Forderungen'))}
+        ${row('Aktive Rechnungsabgrenzung',     n('Aktive_Rechnungsabgrenzung'))}
+        ${row('Vorräte',                        n('Vorraete'))}
+        ${row('Umlaufvermögen',                umlauf, 'subtotal')}
         ${spacer()}
-        ${row('Infrastruktur Gerätepark, etc.',b.Infrastruktur_Anlage)}
-        ${row('Infrastruktur Gebäude',         b.Gebaude_Anlage)}
-        ${b.Immaterielle_Werte_Anlage ? row('Immaterielle Werte', b.Immaterielle_Werte_Anlage) : ''}
-        ${row('Anlagevermögen',               b['TOTAL_Anlagevermögen'] ?? b.TOTAL_Anlage, 'subtotal')}
-        ${total('TOTAL Aktiven', b.TOTAL_Aktiven)}
+        ${row('Infrastruktur Gerätepark, etc.', n('Infrastruktur_Anlage'))}
+        ${row('Infrastruktur Gebäude',          n('Gebaude_Anlage'))}
+        ${n('Immaterielle_Werte_Anlage') ? row('Immaterielle Werte', n('Immaterielle_Werte_Anlage')) : ''}
+        ${row('Anlagevermögen',                anlage, 'subtotal')}
+        ${total('TOTAL Aktiven', totalAktiv)}
       `;
 
       /* ── PASSIVA ── */
       document.getElementById('col-passiva').innerHTML = `
         <div class="bilanz-col-header">PASSIVA</div>
-        ${row('Verbindlichkeiten (Kreditoren)', b.Verbindlichkeiten)}
-        ${row('Passive Rechnungsabgrenzung',    b.Passive_Rechnungsabgrenzung)}
-        ${row('Rückstellungen',                 b.Ruckstellungen)}
-        ${row('Darlehen Bank',                  b.Darlehen_Bank)}
-        ${row('Fremdkapital',                   b.Fremdkapital, 'subtotal')}
+        ${row('Verbindlichkeiten (Kreditoren)', n('Verbindlichkeiten'))}
+        ${row('Passive Rechnungsabgrenzung',    n('Passive_Rechnungsabgrenzung'))}
+        ${row('Rückstellungen',                 n('Ruckstellungen'))}
+        ${row('Darlehen Bank',                  n('Darlehen_Bank'))}
+        ${row('Fremdkapital',                   fremd, 'subtotal')}
         ${spacer()}
-        ${row('Eigenkapital',                   b.Eigenkapital)}
-        ${total('TOTAL Passiven', b.TOTAL_Passiven)}
+        ${row('Eigenkapital',                   n('Eigenkapital'))}
+        ${total('TOTAL Passiven', totalPassiv)}
       `;
     })();
   </script>

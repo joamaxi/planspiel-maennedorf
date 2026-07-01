@@ -1,0 +1,29 @@
+{
+  "klinikName": "Sajetta Klinik",
+  "geschaeftsleitung": [
+    {
+      "name": "",
+      "funktion": "Ärztliche/r Direktor/in"
+    },
+    {
+      "name": "",
+      "funktion": "Leiter/in Bereich HRM"
+    },
+    {
+      "name": "",
+      "funktion": "Leiter/in Bereich Finanzen"
+    },
+    {
+      "name": "",
+      "funktion": "Leiter/in Bereich Pflege (operatives Tagesgeschäft)"
+    },
+    {
+      "name": "",
+      "funktion": "Leiter/in Bereich Unternehmensentwicklung"
+    },
+    {
+      "name": "",
+      "funktion": "Leiter/in Bereich Services"
+    }
+  ]
+}

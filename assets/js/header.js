@@ -1,8 +1,9 @@
 export function renderHeader() {
   const teamNumber = localStorage.getItem('teamNumber') || '';
+  const rundeNumber = localStorage.getItem('rundeNumber') || '';
   const teamLabel  = teamNumber ? `Team ${teamNumber}` : '';
+  const rundeLabel = rundeNumber ? `Runde ${rundeNumber}` : '';
 
-  // Gleiche Breite + Padding wie die Navigationsleiste (max-width 1024px, 16px seitlich)
   return `
     <header style="
       width: 100%;
@@ -30,16 +31,23 @@ export function renderHeader() {
           style="height: 25px; width: auto; display: block; flex-shrink: 0; cursor: pointer;"
         />
 
-        <!-- Mitte: Team-Nummer -->
+        <!-- Mitte: Team + Runde -->
         <span id="header-team-label" style="
           font-size: 1rem;
           font-weight: 700;
           color: var(--color-accent);
           letter-spacing: 0.03em;
-        ">${teamLabel}</span>
+          display: flex;
+          align-items: center;
+          gap: 18px;
+        ">
+          <span style="font-weight:400; color:#7aabcc;">${teamLabel}</span>
+          <span id="header-runde-label" style="font-weight:400; color:#7aabcc;">${rundeLabel}</span>
+        </span>
 
         <!-- Rechts: Spital Bülach Logo -->
         <img
+          id="spital-logo"
           src="../assets/logos/spital-buelach-logo.png"
           alt="Spital Bülach"
           style="height: 15px; width: auto; display: block; flex-shrink: 0;"

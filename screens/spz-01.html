@@ -375,6 +375,64 @@
     /* ── Init ── */
     buildGLRows();
 
+    /* ── Von Server laden (ab Runde 2) ── */
+    (async function() {
+      const runde  = Number(localStorage.getItem('rundeNumber') || '1');
+      const teamNr = localStorage.getItem('teamNumber') || '1';
+      if (runde < 2) return;
+
+      try {
+        const res = await fetch(`../data/json/team${teamNr}-leitung.json?v=${Date.now()}`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data.klinikName) {
+          klinikInput.value = data.klinikName;
+          localStorage.setItem('klinikName', data.klinikName);
+        }
+
+        if (Array.isArray(data.geschaeftsleitung)) {
+          document.querySelectorAll('.gl-row-item').forEach((row, i) => {
+            const entry = data.geschaeftsleitung[i];
+            if (!entry) return;
+            const nameInput  = row.querySelector('.gl-name-input');
+            const funkSelect = row.querySelector('.gl-funktion-select');
+            if (nameInput)  nameInput.value  = entry.name     || '';
+            if (funkSelect) funkSelect.value = entry.funktion || '';
+          });
+          localStorage.setItem('geschaeftsleitung', JSON.stringify(data.geschaeftsleitung));
+        }
+      } catch(e) {
+        console.warn('leitung.json nicht geladen:', e);
+      }
+    })();
+
+    /* ── Export beim Verlassen ── */
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#nav-next')) return;
+
+      const teamNr = localStorage.getItem('teamNumber') || '0';
+      const klinik = klinikInput.value.trim();
+      const rows   = [];
+      document.querySelectorAll('.gl-row-item').forEach(row => {
+        rows.push({
+          name:     row.querySelector('.gl-name-input').value,
+          funktion: row.querySelector('.gl-funktion-select').value,
+        });
+      });
+
+      const filename = `team${teamNr}-leitung.json`;
+      fetch('../data/json/save.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename,
+          data: JSON.stringify({ klinikName: klinik, geschaeftsleitung: rows }, null, 2)
+        }),
+        keepalive: true
+      }).catch(err => console.error('Leitung-Export fehlgeschlagen:', err));
+    }, true);
+
     /* ── Spielaufgaben → Karten befüllen ── */
     (function() {
       try {

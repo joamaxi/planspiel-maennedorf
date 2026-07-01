@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Protokoll – Moderatoren-Ansicht</title>
   <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
   <style>
-    html, body { margin:0; padding:0; min-height:100vh; background:#f4f8fc; font-family: inherit; }
+    html, body { margin:0; padding:0; min-height:100vh; background:#fff; font-size: 108%; }
     * { box-sizing: border-box; }
 
     /* ── Hauptinhalt ── */
@@ -34,16 +35,106 @@
       font-weight: 700; color: var(--color-accent);
     }
 
-    .btn-back {
-      height: 38px; padding: 0 18px;
-      border: 1.5px solid var(--color-border);
-      border-radius: 8px; background: #fff;
-      color: var(--color-accent); font-size: 0.84rem; font-weight: 600;
-      cursor: pointer; transition: background 0.15s;
-      display: flex; align-items: center; gap: 6px;
+    .btn-back-wrap {
+      margin-top: 48px;
+      display: flex;
+      justify-content: center;
+      padding-bottom: 48px;
     }
-    .btn-back:hover { background: #f0f6fc; }
 
+    .btn-back {
+      width: 100%;
+      max-width: 480px;
+      height: 52px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 14px;
+      background: #dbeef8;
+      color: var(--color-accent);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-back:hover { background: #c8e1f0; }
+
+
+    /* ── Projektentscheide-Tabelle ── */
+    .projekt-section { margin-top: 40px; }
+
+    .projekt-table-wrap {
+      border-top: 1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .projekt-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .projekt-table thead th {
+      padding: 10px 14px;
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--color-accent);
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+      background: #f8fbfd;
+      white-space: nowrap;
+    }
+    .projekt-table tbody tr {
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .projekt-table tbody tr:last-child { border-bottom: none; }
+    .projekt-table tbody tr:hover { background: #f4f8fc; }
+    .projekt-table tbody td {
+      padding: 7px 14px;
+      font-size: 0.67rem;
+      color: #444;
+      vertical-align: middle;
+    }
+    .projekt-table td.td-nr     { color: var(--color-accent); font-weight: 700; white-space: nowrap; }
+    .projekt-table td.td-kosten { color: var(--color-accent); font-weight: 700; text-align: right; white-space: nowrap; }
+    .projekt-table td.td-none   { color: #bbb; }
+    .projekt-table tfoot td {
+      padding: 8px 14px;
+      font-size: 0.67rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      background: #f0f5f9;
+      border-top: 1px solid var(--color-border);
+      text-align: right;
+    }
+    .projekt-table tfoot td:first-child { text-align: left; }
+
+    /* ── Zufriedenheits-Tabelle ── */
+    .zuf-check-section { margin-top: 40px; }
+    .zuf-check-table { width: 100%; border-collapse: collapse; }
+    .zuf-check-table thead th {
+      padding: 10px 14px; font-size: 0.75rem; font-weight: 700;
+      color: var(--color-accent); text-align: left;
+      border-bottom: 1px solid var(--color-border); background: #f8fbfd;
+    }
+    .zuf-check-table thead th:not(:first-child) { text-align: center; }
+    .zuf-check-table tbody tr { border-bottom: 1px solid var(--color-border-light); }
+    .zuf-check-table tbody tr:last-child { border-bottom: none; }
+    .zuf-check-table tbody tr:hover { background: #f4f8fc; }
+    .zuf-check-table tbody td {
+      padding: 7px 14px; font-size: 0.67rem; color: #444; text-align: center;
+    }
+    .zuf-check-table tbody td:first-child { text-align: left; font-weight: 600; color: var(--color-accent); }
+    .zuf-periode { font-weight: 700; color: #3a7a3a; }
+    .zuf-periode.neg { color: #a03030; }
+    .zuf-periode.zero { color: #888; }
+    .zuf-check-table tfoot td {
+      padding: 8px 14px; font-size: 0.67rem; font-weight: 700;
+      color: var(--color-accent); background: #f0f5f9;
+      border-top: 1px solid var(--color-border); text-align: center;
+    }
+    .zuf-check-table tfoot td:first-child { text-align: left; }
 
     /* ── Protokoll-Tabelle ── */
     .proto-box {
@@ -78,7 +169,7 @@
     tbody tr:hover { background: #f4f8fc; }
     tbody td {
       padding: 9px 14px;
-      font-size: 0.83rem;
+      font-size: 0.67rem;
       color: #444;
       vertical-align: middle;
     }
@@ -194,6 +285,12 @@
       padding-bottom: 6px;
       border-bottom: 1px solid var(--color-border-light);
     }
+    .bil-section-head {
+      font-size: 0.78rem; font-weight: 800;
+      color: var(--color-accent);
+      padding: 8px 0 3px; margin-top: 4px;
+      border-bottom: 1px solid var(--color-border);
+    }
     .bil-row {
       display: flex; justify-content: space-between;
       align-items: center; padding: 3px 0;
@@ -202,6 +299,17 @@
     }
     .bil-row:last-child { border-bottom: none; }
     .bil-val { font-weight: 600; color: var(--color-accent); }
+    .bil-row.bil-total {
+      font-weight: 700; color: var(--color-accent);
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      padding: 5px 0;
+    }
+    .bil-row.bil-total .bil-val { font-weight: 800; }
+    .bil-row.bil-grand { margin-top: 2px; }
+    .bil-row.bil-highlight { background: #fff3cc; border-radius: 4px; padding: 4px 4px; }
+    .bil-row.bil-highlight .bil-val { font-weight: 800; }
+    .bil-spacer { height: 10px; }
   </style>
 </head>
 <body>
@@ -212,34 +320,8 @@
 
       <div class="page-header">
         <h1 class="page-title">
-          Protokoll — <strong id="team-name">–</strong>
+          Protokoll — <strong id="team-name">–</strong> &nbsp;|&nbsp; Team <strong id="title-team-nr">–</strong> &nbsp;|&nbsp; Runde <strong id="title-runde-nr">–</strong>
         </h1>
-        <button class="btn-back" id="btn-back">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8"
-                  stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Zurück
-        </button>
-      </div>
-
-      <!-- Protokoll-Tabelle -->
-      <div class="proto-box" id="proto-box">
-        <div class="proto-empty" id="proto-empty">Noch keine Einträge</div>
-        <table id="proto-table" style="display:none;">
-          <thead>
-            <tr>
-              <th>Spielzug</th>
-              <th>Team</th>
-              <th>Aktion</th>
-              <th>Von</th>
-              <th>Nach</th>
-              <th style="text-align:right;">Betrag (TCHF)</th>
-              <th>Zeit</th>
-            </tr>
-          </thead>
-          <tbody id="proto-body"></tbody>
-        </table>
       </div>
 
       <!-- Erfolgsrechnung -->
@@ -273,6 +355,86 @@
         <div class="bilanz-grid" id="bilanz-grid"></div>
       </div>
 
+      <!-- Projektentscheide -->
+      <div class="projekt-section" id="projekt-section" style="display:none;">
+        <p class="section-title">Projektentscheide</p>
+        <div class="projekt-table-wrap">
+          <table class="projekt-table">
+            <thead>
+              <tr>
+                <th>Nr</th>
+                <th>Projekt</th>
+                <th>Investition</th>
+                <th style="text-align:right;">Kosten (TCHF)</th>
+              </tr>
+            </thead>
+            <tbody id="projekt-body"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3">TOTAL Projektkosten</td>
+                <td id="projekt-total">0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Zufriedenheits-Indices -->
+      <div class="zuf-check-section" id="zuf-check-section" style="display:none;">
+        <p class="section-title">Zufriedenheits-Indices</p>
+        <div class="projekt-table-wrap">
+          <table class="zuf-check-table">
+            <thead>
+              <tr>
+                <th>Zufriedenheit</th>
+                <th>Anfang</th>
+                <th>Periode</th>
+                <th>Ende</th>
+              </tr>
+            </thead>
+            <tbody id="zuf-check-body"></tbody>
+            <tfoot>
+              <tr>
+                <td>TOTAL</td>
+                <td id="zuf-total-anfang">–</td>
+                <td id="zuf-total-periode">–</td>
+                <td id="zuf-total-ende">–</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Protokoll-Tabelle -->
+      <div class="proto-box" id="proto-box" style="margin-top:48px;">
+        <div class="proto-empty" id="proto-empty">Noch keine Einträge</div>
+        <table id="proto-table" style="display:none;">
+          <thead>
+            <tr>
+              <th>Spielzug</th>
+              <th>Team</th>
+              <th>Aktion</th>
+              <th>Von</th>
+              <th>Nach</th>
+              <th style="text-align:right;">Betrag (TCHF)</th>
+              <th>Zeit</th>
+            </tr>
+          </thead>
+          <tbody id="proto-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Zurück-Button -->
+      <div class="btn-back-wrap">
+        <button class="btn-back" id="btn-back">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Schliessen
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -284,9 +446,125 @@
     /* ── Inhalt laden ── */
     (function loadContent() {
 
+      let jahresergebnis = 0; /* wird in ER-Block gesetzt, Bilanz-Block liest es */
+
       /* Team-Name */
       const klinikName = localStorage.getItem('klinikName') || '–';
       document.getElementById('team-name').textContent = klinikName;
+      document.getElementById('title-team-nr').textContent  = localStorage.getItem('teamNumber')  || '–';
+      document.getElementById('title-runde-nr').textContent = localStorage.getItem('rundeNumber') || '–';
+
+      /* ── Projektentscheide ── */
+      (function() {
+        const entscheide = getLS('projektEntscheide') || {};
+        const rawPrj     = getLS('projekte');
+        const alleRecs   = rawPrj ? (rawPrj.projekte || rawPrj) : [];
+
+        const projektMap = {};
+        alleRecs.forEach(r => {
+          if (!projektMap[r.projektNr]) projektMap[r.projektNr] = [];
+          projektMap[r.projektNr].push(r);
+        });
+
+        const nrs = Object.keys(projektMap).map(Number).sort((a, b) => a - b);
+        if (nrs.length === 0) return;
+
+        let totalKosten = 0;
+        const tbody = document.getElementById('projekt-body');
+
+        nrs.forEach(nr => {
+          const first = projektMap[nr][0];
+          const ent   = entscheide[nr];
+          const tr    = document.createElement('tr');
+
+          if (!ent) {
+            tr.innerHTML = `
+              <td class="td-nr">${nr}</td>
+              <td class="td-none">${first.projektName}</td>
+              <td class="td-none">–</td>
+              <td class="td-kosten td-none" style="color:#bbb;">–</td>`;
+          } else {
+            totalKosten += ent.levelKosten || 0;
+            tr.innerHTML = `
+              <td class="td-nr">${nr}</td>
+              <td>${ent.projektName}</td>
+              <td>${ent.levelBezeichnung}</td>
+              <td class="td-kosten">${ent.levelKosten}</td>`;
+          }
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById('projekt-total').textContent = totalKosten;
+        document.getElementById('projekt-section').style.display = 'block';
+      })();
+
+      /* ── Zufriedenheits-Indices ── */
+      (function() {
+        const ORDER = ['MIZI', 'PAZI', 'BEZI', 'ZUZI', 'EIZI'];
+
+        const zufData  = getLS('zufriedenheiten');
+        const zufArr   = zufData ? (zufData.Zufriedenheiten || zufData) : [];
+        if (zufArr.length === 0) return;
+
+        const anfangMap = {}, nameMap = {};
+        zufArr.forEach(z => {
+          anfangMap[z.Zufriedenheit_Kuerzel] = Number(z.Zufriedenheit_Wert) || 0;
+          nameMap[z.Zufriedenheit_Kuerzel]   = z.Zufriedenheit_Name || z.Zufriedenheit_Kuerzel;
+        });
+
+        /* NPR */
+        const npr = {
+          MIZI: Number(zufData?.MIZI_NPR) || 0,
+          PAZI: Number(zufData?.PAZI_NPR) || 0
+        };
+
+        /* Projekt-Wirkungen */
+        const projektWirk = { MIZI:0, PAZI:0, BEZI:0, ZUZI:0, EIZI:0 };
+        const entscheide  = getLS('projektEntscheide') || {};
+        const rawPrj      = getLS('projekte');
+        const alleRecs    = rawPrj ? (rawPrj.projekte || rawPrj) : [];
+        const pMap        = {};
+        alleRecs.forEach(r => { if (!pMap[r.projektNr]) pMap[r.projektNr] = []; pMap[r.projektNr].push(r); });
+
+        Object.entries(entscheide).forEach(([nr, ent]) => {
+          if (ent.levelKosten === undefined || ent.levelKosten === null) return;
+          const recs = pMap[Number(nr)] || [];
+          const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
+                    || recs.find(r => r.levelKosten === ent.levelKosten);
+          if (!rec) return;
+          for (let i = 1; i <= 3; i++) {
+            const name = rec[`wirkungName${i}`];
+            const val  = Number(rec[`wirkungWert${i}`]) || 0;
+            if (name && projektWirk[name] !== undefined) projektWirk[name] += val;
+          }
+        });
+
+        const tbody = document.getElementById('zuf-check-body');
+        let totAnfang = 0, totPeriode = 0, totEnde = 0;
+
+        ORDER.forEach(k => {
+          const anfang  = anfangMap[k] ?? 0;
+          const periode = projektWirk[k] + (npr[k] || 0);
+          const ende    = anfang + periode;
+          totAnfang += anfang; totPeriode += periode; totEnde += ende;
+
+          const sign = periode > 0 ? '+' : '';
+          const cls  = periode > 0 ? '' : (periode < 0 ? ' neg' : ' zero');
+          const tr   = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${nameMap[k] || k} <span style="font-weight:400;color:#aaa;">(${k})</span></td>
+            <td>${anfang}</td>
+            <td><span class="zuf-periode${cls}">${sign}${periode}</span></td>
+            <td>${ende}</td>`;
+          tbody.appendChild(tr);
+        });
+
+        const ps = totPeriode > 0 ? '+' : '';
+        document.getElementById('zuf-total-anfang').textContent  = totAnfang;
+        document.getElementById('zuf-total-periode').textContent = ps + totPeriode;
+        document.getElementById('zuf-total-ende').textContent    = totEnde;
+        document.getElementById('zuf-check-section').style.display = 'block';
+      })();
 
       /* Protokoll */
       const protokoll = getLS('protokoll') || [];
@@ -303,7 +581,7 @@
           }) : '–';
           tr.innerHTML = `
             <td class="td-spielzug">${p.spielzug || '–'}</td>
-            <td>${p.team || '–'}</td>
+            <td>${(p.team || '–').toString().replace(/team\s*/i, '')}</td>
             <td>${p.aktion || '–'}</td>
             <td>${p.von || '–'}</td>
             <td>${p.nach || '–'}</td>
@@ -333,16 +611,18 @@
         }
 
         /* Berechnete Felder */
-        const totalBetrieb   = (v('Ertraege_Spitalbetrieb',0)||0) + (v('Andere_Ertraege',0)||0);
+        const done29         = localStorage.getItem('done_spz29') === 'true';
+        const abschreibungen = done29 ? (v('Abschreibungen', 0) || 0) : 0;
+        const totalBetrieb   = (v('Ertraege_Spitalbetrieb',0)||0) + (v('Andere_Ertraege',0)||0) + (v('Ausserordentliche_Ertraege',0)||0);
         const totalVar       = Math.round((v('Variable_Kosten_Spital',0)||0) + (v('Variable_Kosten_Medikamente',0)||0) - (v('Variable_Kostenreduktion',0)||0));
         const db1            = totalBetrieb - totalVar;
         const totalFix       = (v('Personalaufwand',0)||0) + (v('Kosten_Projekte',0)||0) + (v('Lebensmittel',0)||0) + (v('Unterhalt',0)||0) + (v('Energie',0)||0) + (v('Buero',0)||0) + (v('Rekrutierung',0)||0) + (v('Ausserordentliche',0)||0);
         const ebitdar        = db1 - totalFix;
-        const ebit           = ebitdar - (v('Mietzins',0)||0) - (v('Abschreibungen',0)||0);
+        const ebit           = ebitdar - (v('Mietzins',0)||0) - abschreibungen;
         const zinsen         = v('Zinsen_Bank', 0);
         const ebt            = ebit - zinsen;
-        const steuern        = v('Steuern', 0)||0;
-        const jahresergebnis = ebt - steuern;
+        const steuern = v('Steuern', 0)||0;
+        jahresergebnis = ebt - steuern;
 
         function row(label, val, cls='') {
           return `<div class="er-row ${cls}">
@@ -358,6 +638,7 @@
           <p class="er-col-title">Erträge</p>
           ${row('Erträge aus Spitalbetrieb',       fmt(v('Ertraege_Spitalbetrieb', 0)))}
           ${row('Andere betriebliche Erträge',      fmt(v('Andere_Ertraege', 0)))}
+          ${row('Ausserordentliche Erträge',        fmt(v('Ausserordentliche_Ertraege', 0)))}
           ${row('TOTAL Betriebsertrag (gerundet)',  totalBetrieb, 'subtotal')}
           <p class="er-col-title" style="margin-top:18px;">Aufwände</p>
           ${row('Variable Kosten aus Spitalbetrieb',        fmt(v('Variable_Kosten_Spital', 0)))}
@@ -383,7 +664,7 @@
           ${row('TOTAL Fixkosten',                                totalFix,  'subtotal')}
           ${row('EBITDAR – Erfolg vor Zinsen, Steuern, Abschr., Mieten', ebitdar, 'subtotal')}
           ${row('Mietzinsaufwand',                                fmt(v('Mietzins', null)))}
-          ${row('Abschreibungen (Infrastruktur und Gebäude)',     fmt(v('Abschreibungen', null)))}
+          ${row('Abschreibungen (Infrastruktur und Gebäude)',     done29 ? fmt(abschreibungen) : '')}
           ${row('EBIT',                                           ebit,      'subtotal')}
           ${row('Zinsen für Bankdarlehen',                        zinsen)}
           ${row('EBT – Gewinn vor Steuern',                      ebt,       'subtotal')}
@@ -416,45 +697,108 @@
         const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
         const entry  = arr[teamNr] ?? arr[teamNr-1] ?? arr[0];
         if (entry && entry.Bilanz) {
-          const b = entry.Bilanz;
+          const b    = entry.Bilanz;
           const grid = document.getElementById('bilanz-grid');
+          const n    = k => Number(b[k]) || 0;
 
-          /* Berechnete Totals */
-          const n = k => Number(b[k]) || 0;
-          const anlage        = n('TOTAL_Anlagevermögen') || n('TOTAL_Anlage');
-          const umlauf        = n('FluessigeMittel') + n('Forderungen') + n('Aktive_Rechnungsabgrenzung') + n('Vorraete');
-          const totalAktiven  = umlauf + anlage;
-          const fremdkapital  = n('Verbindlichkeiten') + n('Passive_Rechnungsabgrenzung') + n('Ruckstellungen') + n('Darlehen_Bank');
-          const totalPassiven = fremdkapital + n('Eigenkapital');
+          /* Anlagevermögen — Investitionen + Abschreibungen direkt berechnen */
+          const infraStart = n('Infrastruktur_Anlage');
+          const gebStart   = n('Gebaude_Anlage');
 
-          const aktiva = [
-            ['Flüssige Mittel',            b.FluessigeMittel],
-            ['Forderungen',                b.Forderungen],
-            ['Aktive Rechnungsabgrenzung', b.Aktive_Rechnungsabgrenzung],
-            ['Vorräte',                    b.Vorraete],
-            ['Umlaufvermögen',            umlauf],
-            ['Anlagevermögen',            anlage],
-            ['TOTAL Aktiven',              totalAktiven],
-          ];
-          const passiva = [
-            ['Verbindlichkeiten',          b.Verbindlichkeiten],
-            ['Passive Rechnungsabgrenzung',b.Passive_Rechnungsabgrenzung],
-            ['Rückstellungen',             b.Ruckstellungen],
-            ['Darlehen Bank',              b.Darlehen_Bank],
-            ['Fremdkapital',               fremdkapital],
-            ['Eigenkapital',               b.Eigenkapital],
-            ['TOTAL Passiven',             totalPassiven],
-          ];
+          const rateInfra = Number(entry.AbschreibungAktuell) || 0;
+          const rateGeb   = Number(entry.AbschreibungGebaude) || 0;
 
-          [['AKTIVA', aktiva], ['PASSIVA', passiva]].forEach(([title, rows]) => {
-            const card = document.createElement('div');
-            card.className = 'bilanz-card';
-            card.innerHTML = `<div class="bilanz-card-title">${title}</div>` +
-              rows.map(([l, v]) =>
-                `<div class="bil-row"><span>${l}</span><span class="bil-val">${v ?? '–'}</span></div>`
-              ).join('');
-            grid.appendChild(card);
+          /* Investitionen aus projektEntscheide + projekte rekonstruieren */
+          const _entsch  = getLS('projektEntscheide') || {};
+          const _rawPrj  = getLS('projekte');
+          const _allRecs = _rawPrj ? (_rawPrj.projekte || _rawPrj) : [];
+          const _pMap    = {};
+          _allRecs.forEach(r => { if (!_pMap[r.projektNr]) _pMap[r.projektNr] = []; _pMap[r.projektNr].push(r); });
+          let investInfra = 0, investGeb = 0;
+          Object.entries(_entsch).forEach(([nr, ent]) => {
+            if (!ent.levelKosten) return;
+            const recs = _pMap[Number(nr)] || [];
+            const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
+                      || recs.find(r => r.levelKosten === ent.levelKosten);
+            if (!rec) return;
+            if (rec.option1 === 'Investitionen Infrastruktur') investInfra += Number(rec.optionWert1) || 0;
+            if (rec.option1 === 'Investitionen Gebäude')       investGeb   += Number(rec.optionWert1) || 0;
           });
+
+          const done29      = localStorage.getItem('done_spz29') === 'true';
+          const infraInv    = investInfra;
+          const infraAbschr = done29 ? Math.round((infraStart + infraInv) * rateInfra / 100) : 0;
+          const infraEnde   = infraStart + infraInv - infraAbschr;
+
+          const gebInv      = investGeb;
+          const gebAbschr   = done29 ? Math.round((gebStart + gebInv) * rateGeb / 100) : 0;
+          const gebEnde     = gebStart + gebInv - gebAbschr;
+
+          const anlage       = infraEnde + gebEnde;
+          const umlauf       = n('FluessigeMittel') + n('Forderungen') + n('Aktive_Rechnungsabgrenzung') + n('Vorraete');
+          const totalAktiven = umlauf + anlage;
+
+          /* Passiva */
+          const fremdkapital      = n('Verbindlichkeiten') + n('Passive_Rechnungsabgrenzung') + n('Ruckstellungen') + n('Darlehen_Bank');
+          /* Reingewinn/-verlust als Ausgleichsgrösse: Bilanz balanciert immer */
+          const reingewinn        = totalAktiven - fremdkapital - n('Eigenkapital');
+          const eigenkapitalTotal = n('Eigenkapital') + reingewinn;
+          const totalPassiven     = fremdkapital + eigenkapitalTotal;
+
+          function show(v) { return (v === 0 || v === null || v === undefined) ? '' : v; }
+          function sec(label) { return `<div class="bil-section-head">${label}</div>`; }
+          function spacer()   { return `<div class="bil-spacer"></div>`; }
+          function row(label, val, cls='') {
+            return `<div class="bil-row ${cls}"><span>${label}</span><span class="bil-val">${val !== '' ? val : ''}</span></div>`;
+          }
+
+          /* AKTIVA */
+          const aktivaCard = document.createElement('div');
+          aktivaCard.className = 'bilanz-card';
+          aktivaCard.innerHTML = `
+            <div class="bilanz-card-title">AKTIVA</div>
+            ${sec('Umlaufvermögen')}
+            ${row('Flüssige Mittel', show(n('FluessigeMittel')))}
+            ${row('Forderungen aus Lieferungen und Leistungen (Debitoren)', show(n('Forderungen')))}
+            ${row('Aktive Rechnungsabgrenzung', show(n('Aktive_Rechnungsabgrenzung')))}
+            ${row('Warenvorräte (Medikamente und Material)', show(n('Vorraete')))}
+            ${row('TOTAL Umlaufvermögen', umlauf, 'bil-total')}
+            ${spacer()}
+            ${sec('Anlagevermögen')}
+            ${row('Anlagevermögen Infrastruktur zu Beginn des Jahres', show(infraStart))}
+            ${row('Investitionen Infrastruktur in diesem Jahr', show(infraInv))}
+            ${row('Abschreibungen Infrastruktur in diesem Jahr', show(infraAbschr))}
+            ${row('Anlagevermögen Infrastruktur am Ende des Jahres', infraEnde)}
+            ${spacer()}
+            ${row('Anlagevermögen Gebäude zu Beginn des Jahres', show(gebStart))}
+            ${row('Investitionen Gebäude in diesem Jahr', show(gebInv))}
+            ${row('Abschreibungen Gebäude in diesem Jahr', show(gebAbschr))}
+            ${row('Anlagevermögen Gebäude am Ende des Jahres', gebEnde)}
+            ${row('TOTAL Anlagevermögen', anlage, 'bil-total')}
+            ${row('TOTAL Aktiven', totalAktiven, 'bil-total bil-grand')}
+          `;
+
+          /* PASSIVA */
+          const passivaCard = document.createElement('div');
+          passivaCard.className = 'bilanz-card';
+          passivaCard.innerHTML = `
+            <div class="bilanz-card-title">PASSIVA</div>
+            ${sec('Fremdkapital')}
+            ${row('Verbindlichkeiten (Kreditoren)', show(n('Verbindlichkeiten')))}
+            ${row('Passive Rechnungsabgrenzung', show(n('Passive_Rechnungsabgrenzung')))}
+            ${row('Rückstellungen', show(n('Ruckstellungen')))}
+            ${row('Bankdarlehen', show(n('Darlehen_Bank')))}
+            ${row('TOTAL Fremdkapital', fremdkapital, 'bil-total')}
+            ${spacer()}
+            ${sec('Eigenkapital')}
+            ${row('Eigenkapital', show(n('Eigenkapital')))}
+            ${row('Reingewinn/-verlust', reingewinn, 'bil-highlight')}
+            ${row('TOTAL Eigenkapital', eigenkapitalTotal, 'bil-total')}
+            ${row('TOTAL Passiven', totalPassiven, 'bil-total bil-grand')}
+          `;
+
+          grid.appendChild(aktivaCard);
+          grid.appendChild(passivaCard);
           document.getElementById('bilanz-section').style.display = 'block';
         }
       }

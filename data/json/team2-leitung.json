@@ -1,0 +1,29 @@
+{
+  "klinikName": "Sonnenspital",
+  "geschaeftsleitung": [
+    {
+      "name": "Harry",
+      "funktion": "Ärztliche/r Direktor/in"
+    },
+    {
+      "name": "Marry",
+      "funktion": "Leiter/in Bereich HRM"
+    },
+    {
+      "name": "Carry",
+      "funktion": "Leiter/in Bereich Finanzen"
+    },
+    {
+      "name": "Darry",
+      "funktion": "Leiter/in Bereich Pflege (operatives Tagesgeschäft)"
+    },
+    {
+      "name": "Garry",
+      "funktion": "Leiter/in Bereich Unternehmensentwicklung"
+    },
+    {
+      "name": "Sarry",
+      "funktion": "Leiter/in Bereich Services"
+    }
+  ]
+}

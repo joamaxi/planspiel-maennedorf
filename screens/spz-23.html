@@ -19,7 +19,7 @@
       width: 100%;
       max-width: 1024px;
       margin: 0 auto;
-      padding: 60px 32px 24px 32px;
+      padding: 10px 32px 24px 32px;
       display: flex;
       gap: 60px;
       align-items: flex-start;
@@ -291,8 +291,8 @@
         return php + allg;
       }
 
-      const ambulantErtrag = ertragLookup['Ambulant|Ambulant'] || ertragLookup['Ambulant|'] || 0;
-      const ambulantAnzahl = Number(aufnahme.Ambulant) || 0;
+      const ambulantErtrag = ertragLookup['Ambulant-C|Ambulant-C'] || ertragLookup['Ambulant-C|'] || ertragLookup['Ambulant|Ambulant'] || 0;
+      const ambulantAnzahl = Number(aufnahme['Ambulant-C']) || 0;
 
       const medizin      = ertraegeBereich('Medizin');
       const chirurgie    = ertraegeBereich('Chirurgie');
@@ -303,9 +303,9 @@
       const andereErtraege = Math.round(ertraege * 0.05);
       const gesamtertrag  = ertraege + andereErtraege;
 
-      /* Variable Kosten aus Erfolgsrechnung */
+      /* Variable Kosten aus Erfolgsrechnung (spz-19 + spz-20 akkumuliert) */
       const er          = getLS('erfolgsrechnung') || {};
-      const varSpital   = Number(er.Variable_Kosten_Spital)      || 0;
+      const varSpital   = Number(er.Variable_Kosten_Spital) || 0;
       const varMed      = Number(er.Variable_Kosten_Medikamente) || 0;
       const db1         = Math.round(gesamtertrag - varSpital - varMed);
 
@@ -324,54 +324,7 @@
       localStorage.setItem('spz23_db1',           db1);
     })();
 
-    /* ══ Transfer beim Next-Klick ════════════════════════════════════════ */
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('#nav-next')) return;
-      if (localStorage.getItem('done_spz23_ertraege') === 'true') return;
-
-      const ertraege      = Number(localStorage.getItem('spz23_ertraege'))      || 0;
-      const andereErtraege = Number(localStorage.getItem('spz23_andereErtraege')) || 0;
-      const gesamtertrag  = ertraege + andereErtraege;
-
-      if (gesamtertrag === 0) { localStorage.setItem('done_spz23_ertraege', 'true'); return; }
-
-      /* Bilanz: FluessigeMittel += gesamtertrag */
-      const bilanzData = getLS('bilanzStart');
-      if (bilanzData) {
-        const arr    = bilanzData.Anfangsbilanz || bilanzData;
-        const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
-        const idx    = arr[teamNr] !== undefined ? teamNr : (arr[teamNr-1] !== undefined ? teamNr-1 : 0);
-        const entry  = arr[idx];
-        if (entry && entry.Bilanz) {
-          entry.Bilanz.FluessigeMittel = (Number(entry.Bilanz.FluessigeMittel) || 0) + gesamtertrag;
-          arr[idx] = entry;
-          setLS('bilanzStart', bilanzData.Anfangsbilanz ? { ...bilanzData, Anfangsbilanz: arr } : arr);
-        }
-      }
-
-      /* Erfolgsrechnung */
-      const er = getLS('erfolgsrechnung') || {};
-      er.Ertraege_Spitalbetrieb = ertraege;
-      er.Andere_Ertraege        = andereErtraege;
-      setLS('erfolgsrechnung', er);
-
-      /* Protokoll */
-      const teamNr    = Number(localStorage.getItem('teamNumber')) || 1;
-      const teamLabel = localStorage.getItem('klinikName') || `Team ${teamNr}`;
-      const protokoll = getLS('protokoll') || [];
-      protokoll.push({
-        zeit:     new Date().toISOString(),
-        spielzug: 'spz-23',
-        aktion:   'Erträge Klinikbetrieb',
-        von:      'Forderungen',
-        nach:     'Flüssige Mittel',
-        betrag:   gesamtertrag,
-        team:     teamLabel
-      });
-      setLS('protokoll', protokoll);
-
-      localStorage.setItem('done_spz23_ertraege', 'true');
-    }, true);
+    /* spz-23 ist eine Anzeigeseite – Transfer erfolgt in spz-24 */
   </script>
 </body>
 </html>

@@ -197,7 +197,7 @@
   data-step-total="20"
   data-wirkung="00-wirkungen.png"
   data-disable-handbuch="true"
-  data-disable-ereignis="true"
+  
 >
   <div id="app-header" class="w-full"></div>
 
@@ -291,12 +291,11 @@
         document.getElementById('card-picto-1').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
     })();
 
-    /* ══ Patientenkosten aus patienten ════════════════════════════════════ */
+    /* ══ Aktive Rechnungsabgrenzung: anzahl × kostenTotal pro Bereich ════ */
     (function() {
-      /* Fallback-Werte (Allgemein) */
-      const kosten = { Medizin: 10, Chirurgie: 11, Geburtshilfe: 7 };
+      /* kostenTotal pro Bereich (Allgemein) aus patienten JSON */
+      const kostenRate = { Medizin: 10, Chirurgie: 11, Geburtshilfe: 7 };
 
-      /* Werte aus localStorage laden – nur Versicherung "Allgemein" */
       const raw = getLS('patienten');
       const eintraege = raw
         ? (Array.isArray(raw) ? raw : (Array.isArray(raw.patienten) ? raw.patienten : []))
@@ -304,18 +303,37 @@
 
       eintraege.forEach(e => {
         if (e.versicherung !== 'Allgemein') return;
-        if (e.marktName === 'Medizin')      kosten.Medizin      = Number(e.kostenTotal) || kosten.Medizin;
-        if (e.marktName === 'Chirurgie')     kosten.Chirurgie    = Number(e.kostenTotal) || kosten.Chirurgie;
-        if (e.marktName === 'Geburtshilfe')  kosten.Geburtshilfe = Number(e.kostenTotal) || kosten.Geburtshilfe;
+        if (e.marktName === 'Medizin')      kostenRate.Medizin      = Number(e.kostenTotal) || kostenRate.Medizin;
+        if (e.marktName === 'Chirurgie')    kostenRate.Chirurgie    = Number(e.kostenTotal) || kostenRate.Chirurgie;
+        if (e.marktName === 'Geburtshilfe') kostenRate.Geburtshilfe = Number(e.kostenTotal) || kostenRate.Geburtshilfe;
       });
 
-      /* Werte in Badges schreiben + Total speichern */
-      document.getElementById('val-medizin').textContent      = kosten.Medizin;
-      document.getElementById('val-chirurgie').textContent    = kosten.Chirurgie;
-      document.getElementById('val-geburtshilfe').textContent = kosten.Geburtshilfe;
+      /* Anzahl aus startPatienten (spz-2) */
+      const spData      = getLS('startPatienten');
+      const startAuftrag = spData ? (spData.startauftrag || spData) : [];
+      const anzahl = { Medizin: 0, Chirurgie: 0, Geburtshilfe: 0 };
+      (Array.isArray(startAuftrag) ? startAuftrag : []).forEach(e => {
+        if (e.versicherung !== 'Allgemein') return;
+        if (e.marktName === 'Medizin')      anzahl.Medizin      = Number(e.anzahl) || 0;
+        if (e.marktName === 'Chirurgie')    anzahl.Chirurgie    = Number(e.anzahl) || 0;
+        if (e.marktName === 'Geburtshilfe') anzahl.Geburtshilfe = Number(e.anzahl) || 0;
+      });
 
-      const total = kosten.Medizin + kosten.Chirurgie + kosten.Geburtshilfe;
+      /* Aktive Rechnungsabgrenzung = anzahl × kostenTotal */
+      const werte = {
+        Medizin:      anzahl.Medizin      * kostenRate.Medizin,
+        Chirurgie:    anzahl.Chirurgie    * kostenRate.Chirurgie,
+        Geburtshilfe: anzahl.Geburtshilfe * kostenRate.Geburtshilfe,
+      };
+
+      /* Werte in Badges schreiben + speichern */
+      document.getElementById('val-medizin').textContent      = werte.Medizin;
+      document.getElementById('val-chirurgie').textContent    = werte.Chirurgie;
+      document.getElementById('val-geburtshilfe').textContent = werte.Geburtshilfe;
+
+      const total = werte.Medizin + werte.Chirurgie + werte.Geburtshilfe;
       localStorage.setItem('spz19_aktiveRechnung', total);
+      setLS('spz19_bereiche', { Medizin: werte.Medizin, Chirurgie: werte.Chirurgie, Geburtshilfe: werte.Geburtshilfe });
     })();
 
     /* ══ Transfer beim Next-Klick ════════════════════════════════════════ */
@@ -341,6 +359,11 @@
           ));
         }
       }
+
+      /* Erfolgsrechnung: Variable Kosten Spital += total */
+      const er = getLS('erfolgsrechnung') || {};
+      er.Variable_Kosten_Spital = (Number(er.Variable_Kosten_Spital) || 0) + total;
+      setLS('erfolgsrechnung', er);
 
       /* Protokoll */
       const teamNr    = Number(localStorage.getItem('teamNumber')) || 1;

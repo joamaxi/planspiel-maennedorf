@@ -50,7 +50,9 @@ if (footerTarget) {
   }
   function goNext() {
     const n = document.body.dataset.next;
-    if (n) window.location.href = n;
+    if (!n) return;
+    document.dispatchEvent(new CustomEvent('nav:next'));
+    window.location.href = n;
   }
 
   const backBtn = document.getElementById('nav-back');
@@ -186,6 +188,12 @@ if (footerTarget) {
       rueckzahlung: (Number(totals.rueckzahlung) || 0) + rueckNeu
     });
     _setLS('bankValues', { aufnahme: 0, rueckzahlung: 0 });
+
+    /* Rückzahlungs-Flag für diese Runde setzen */
+    if (rueckNeu > 0) {
+      const runde = localStorage.getItem('rundeNumber') || '1';
+      localStorage.setItem(`bank_rueckzahlung_r${runde}`, 'true');
+    }
   }
 
   function closeBank() {
@@ -215,7 +223,7 @@ if (footerTarget) {
       closeBank();
     } else {
       const fr = document.getElementById('bank-frame');
-      if (fr) fr.src = 'bank.html';
+      if (fr) fr.src = `bank.html?t=${Date.now()}`;
       bankOverlay.classList.add('show');
       if (bankBtn) bankBtn.classList.add('active');
       showCloseBar(closeBank);
@@ -277,10 +285,11 @@ if (footerTarget) {
       }
     }
 
-    /* Erfolgsrechnung: Ausserordentliche akkumulieren */
-    if (negNeu !== 0) {
+    /* Erfolgsrechnung: Ausserordentliche Erträge / Aufwände akkumulieren */
+    if (posNeu !== 0 || negNeu !== 0) {
       const er = _getLS('erfolgsrechnung') || {};
-      er.Ausserordentliche = (Number(er.Ausserordentliche) || 0) + negNeu;
+      if (posNeu !== 0) er.Ausserordentliche_Ertraege = (Number(er.Ausserordentliche_Ertraege) || 0) + posNeu;
+      if (negNeu !== 0) er.Ausserordentliche           = (Number(er.Ausserordentliche)          || 0) + negNeu;
       _setLS('erfolgsrechnung', er);
     }
 
