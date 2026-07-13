@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Handbuch</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      background: transparent;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    #hb-wrapper {
+      display: flex;
+      justify-content: center;
+    }
+    #hb-frame {
+      border: none;
+      width: 595px;
+      height: 842px;
+      transform-origin: top center;
+      display: block;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="hb-wrapper">
+    <iframe id="hb-frame" src=""></iframe>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const file   = params.get('file');
+    if (file) {
+      document.getElementById('hb-frame').src = '../handbuch/html/' + file;
+    }
+
+    let contentHeight = 842;
+
+    function scaleFrame() {
+      const frame   = document.getElementById('hb-frame');
+      const wrapper = document.getElementById('hb-wrapper');
+      const vw      = window.innerWidth;
+      const scale   = vw / 595;
+      frame.style.transform = `scale(${scale})`;
+      wrapper.style.height  = Math.ceil(contentHeight * scale) + 'px';
+    }
+
+    const frame = document.getElementById('hb-frame');
+    frame.addEventListener('load', function() {
+      try {
+        const h = frame.contentDocument.body.scrollHeight;
+        if (h > 10) { contentHeight = h; }
+      } catch(e) {}
+      scaleFrame();
+    });
+
+    scaleFrame();
+    window.addEventListener('resize', scaleFrame);
+  </script>
+</body>
+</html>

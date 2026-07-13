@@ -366,6 +366,7 @@
     /* ══ Projekt auswählen + Tabelle rendern ═════════════════════════════ */
     function selectProject(nr) {
       aktivNr = nr;
+      localStorage.setItem('aktivProjektNr', nr);
 
       /* Balken-Highlight */
       projektNrs.forEach(n => {

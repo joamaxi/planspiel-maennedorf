@@ -38,7 +38,7 @@
   padding: 0 16px 40px 16px;
   box-sizing: border-box;
   position: relative;
-  z-index: 3000;   /* immer über Overlays */
+  z-index: 5000;   /* immer über Overlays */
 }
 
 .footer-inner {

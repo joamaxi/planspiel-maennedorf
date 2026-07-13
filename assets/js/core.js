@@ -64,17 +64,76 @@ if (footerTarget) {
   const handbuchBtn = document.getElementById('nav-handbuch');
   const wirkungBtn  = document.getElementById('nav-wirkungen');
 
+  /* Lookup-Map aus handbuch.json: spielzug → handbuch-Datei */
+  let _handbuchMap = {};
+  let _handbuchVerfuegbar = false;
+  const _currentScreen = window.location.pathname.split('/').pop();
+
+  function _applyHandbuchState() {
+    const btn = document.getElementById('nav-handbuch');
+    if (btn) btn.classList.toggle('disabled', !_handbuchVerfuegbar);
+  }
+
+  fetch('../data/handbuch.json')
+    .then(r => r.json())
+    .then(data => {
+      (data.Handbuch || []).forEach(e => { _handbuchMap[e.spielzug] = e.handbuch; });
+      _handbuchVerfuegbar = Object.keys(_handbuchMap).some(k => k === _currentScreen || k.startsWith(_currentScreen + ':'));
+      _applyHandbuchState();
+    })
+    .catch(() => {});
+
+  function _getHandbuchFile() {
+    /* Für spz-25: Compound-Key mit aktiver ProjektNr */
+    if (_currentScreen === 'spz-25.html') {
+      const nr = localStorage.getItem('aktivProjektNr');
+      if (nr) return _handbuchMap[`spz-25.html:${nr}`] || null;
+      return null;
+    }
+    return _handbuchMap[_currentScreen] || document.body.dataset.handbuch || null;
+  }
+
+  /* Overlay + iframe in DOM injizieren */
+  const handbuchOverlay = document.createElement('div');
+  handbuchOverlay.id = 'handbuch-overlay';
+  handbuchOverlay.style.cssText = [
+    'position:fixed','inset:0','background:rgba(0,0,0,0.55)',
+    'display:none','align-items:center','justify-content:center','z-index:4000'
+  ].join(';');
+  handbuchOverlay.innerHTML =
+    '<iframe id="handbuch-frame" src="" frameborder="0" ' +
+    'style="width:100%;height:100%;border:none;background:transparent;"></iframe>' +
+    '<button id="handbuch-close-btn" style="' +
+      'position:absolute;top:14px;right:18px;z-index:10;' +
+      'background:linear-gradient(to bottom,#f0f6fc 0%,#dcedf8 85%,#b8d6ee 100%);' +
+      'border:1px solid #2575b0;border-radius:10px;' +
+      'width:44px;height:44px;font-size:1.6rem;line-height:1;cursor:pointer;' +
+      'color:#2575b0;box-shadow:0 2px 8px rgba(0,0,0,0.18);display:flex;' +
+      'align-items:center;justify-content:center;' +
+    '">&times;</button>';
+  document.body.appendChild(handbuchOverlay);
+
+  const _hbStyle = document.createElement('style');
+  _hbStyle.textContent = '#handbuch-overlay.show{display:flex!important;}';
+  document.head.appendChild(_hbStyle);
+
+  /* X-Button verdrahten */
+  document.getElementById('handbuch-close-btn').addEventListener('click', function() {
+    closeHandbuch();
+  });
+
   function closeHandbuch() {
     const ov = document.getElementById('handbuch-overlay');
     const fr = document.getElementById('handbuch-frame');
     if (ov) ov.classList.remove('show');
     if (fr) fr.src = '';
     if (handbuchBtn) handbuchBtn.classList.remove('active');
-    restoreFooter();
+    const shell = document.querySelector('.footer-shell');
+    if (shell) shell.style.display = '';
   }
 
   function openHandbuch() {
-    const file = document.body.dataset.handbuch;
+    const file = _getHandbuchFile();
     if (!file) return;
     const ov = document.getElementById('handbuch-overlay');
     const fr = document.getElementById('handbuch-frame');
@@ -93,7 +152,8 @@ if (footerTarget) {
       fr.src = `handbuch.html?file=${encodeURIComponent(file)}`;
       ov.classList.add('show');
       if (handbuchBtn) handbuchBtn.classList.add('active');
-      showCloseBar(closeHandbuch);
+      const shell = document.querySelector('.footer-shell');
+      if (shell) shell.style.display = 'none';
     }
   }
 
@@ -133,7 +193,7 @@ if (footerTarget) {
   bankOverlay.id = 'bank-overlay';
   bankOverlay.style.cssText = [
     'position:fixed','inset:0','background:rgba(0,0,0,0.45)',
-    'display:none','align-items:center','justify-content:center','z-index:500'
+    'display:none','align-items:center','justify-content:center','z-index:4000'
   ].join(';');
   bankOverlay.innerHTML =
     '<iframe id="bank-frame" src="" frameborder="0" ' +
@@ -240,7 +300,7 @@ if (footerTarget) {
   ereignisOverlay.id = 'ereignis-overlay';
   ereignisOverlay.style.cssText = [
     'position:fixed','inset:0','background:rgba(0,0,0,0.45)',
-    'display:none','align-items:center','justify-content:center','z-index:500'
+    'display:none','align-items:center','justify-content:center','z-index:4000'
   ].join(';');
   ereignisOverlay.innerHTML =
     '<iframe id="ereignis-frame" src="" frameborder="0" ' +
@@ -375,6 +435,7 @@ if (footerTarget) {
       const el = document.getElementById(id);
       if (el && document.body.dataset[flag] === 'true') el.classList.add('disabled');
     });
+    _applyHandbuchState();
   }
 
   /* ── Disabled-Zustände initial setzen ───────────────────────────────────── */
