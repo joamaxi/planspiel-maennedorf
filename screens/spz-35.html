@@ -71,6 +71,58 @@
       line-height: 1.6;
       margin: 0;
     }
+
+    /* ── Bestätigungs-Modal (Runde abschliessen) ── */
+    .confirm-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-backdrop.visible { display: flex; }
+    .confirm-box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 32px 36px;
+      width: 360px;
+      max-width: calc(100vw - 40px);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-align: center;
+    }
+    .confirm-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--color-accent);
+    }
+    .confirm-text {
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.5;
+    }
+    .confirm-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .confirm-btn {
+      flex: 1;
+      height: 44px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+    }
+    .confirm-btn.cancel { background: #eef2f6; color: #666; }
+    .confirm-btn.cancel:hover { background: #e2e8ee; }
+    .confirm-btn.ok { background: var(--color-accent); color: #fff; }
+    .confirm-btn.ok:hover { background: var(--color-accent-dark); }
   </style>
 </head>
 
@@ -88,6 +140,15 @@
   data-disable-ereignis="true"
   data-disable-next="true"
 >
+  <!-- Bestätigungs-Modal (Runde abschliessen) -->
+  <div class="confirm-backdrop" id="confirm-backdrop">
+    <div class="confirm-box">
+      <div class="confirm-title" id="confirm-title"></div>
+      <div class="confirm-text" id="confirm-text"></div>
+      <div class="confirm-actions" id="confirm-actions"></div>
+    </div>
+  </div>
+
   <div id="app-header" class="w-full"></div>
 
   <main class="w-full flex-1">
@@ -140,9 +201,51 @@
         document.getElementById('card-picto').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
     })();
 
-    /* ── Rechtes Logo → spz-00 (nur hier aktiv) ───────────────────────── */
+    /* ── Rechtes Logo → Runde abschliessen (nur hier aktiv) ───────────── */
     document.addEventListener('click', function(e) {
-      if (e.target.id === 'spital-logo') window.location.href = 'spz-00.html';
+      if (e.target.id !== 'spital-logo') return;
+
+      const team  = localStorage.getItem('teamNumber') || '';
+      const runde = Number(localStorage.getItem('rundeNumber')) || 1;
+      const maxR  = Number(localStorage.getItem('maxRunden')) || 0;
+      const ip    = localStorage.getItem('serverIp') || '';
+
+      const backdrop = document.getElementById('confirm-backdrop');
+      const title    = document.getElementById('confirm-title');
+      const text     = document.getElementById('confirm-text');
+      const actions  = document.getElementById('confirm-actions');
+
+      function closeModal() { backdrop.classList.remove('visible'); }
+
+      /* Letzte Runde bereits erreicht → nur Warnhinweis, kein Reset */
+      if (maxR && runde >= maxR) {
+        title.textContent = 'Spiel beendet';
+        text.textContent  = `Die letzte Runde (${maxR} von ${maxR}) ist bereits erreicht.`;
+        actions.innerHTML = '<button class="confirm-btn ok" id="confirm-ok">OK</button>';
+        backdrop.classList.add('visible');
+        document.getElementById('confirm-ok').addEventListener('click', closeModal);
+        return;
+      }
+
+      /* Bestätigung für Rundenwechsel */
+      const nextRunde = runde + 1;
+      title.textContent = 'Nächste Runde starten?';
+      text.textContent  = `Alle aktuellen Rundendaten werden gelöscht. Runde ${nextRunde}${maxR ? ' von ' + maxR : ''} beginnt danach neu.`;
+      actions.innerHTML = `
+        <button class="confirm-btn cancel" id="confirm-cancel">Abbrechen</button>
+        <button class="confirm-btn ok" id="confirm-ok">Bestätigen</button>
+      `;
+      backdrop.classList.add('visible');
+
+      document.getElementById('confirm-cancel').addEventListener('click', closeModal);
+      document.getElementById('confirm-ok').addEventListener('click', () => {
+        localStorage.clear();
+        localStorage.setItem('teamNumber', team);
+        localStorage.setItem('rundeNumber', String(nextRunde));
+        localStorage.setItem('serverIp', ip);
+        if (maxR) localStorage.setItem('maxRunden', String(maxR));
+        window.location.href = 'spz-00.html';
+      });
     });
   </script>
 </body>

@@ -3,7 +3,7 @@
     {
       "Zufriedenheit_Kuerzel": "MIZI",
       "Zufriedenheit_Name": "Mitarbeitenden-Zufriedenheit",
-      "Zufriedenheit_Wert": 34
+      "Zufriedenheit_Wert": 35
     },
     {
       "Zufriedenheit_Kuerzel": "PAZI",
@@ -23,7 +23,7 @@
     {
       "Zufriedenheit_Kuerzel": "EIZI",
       "Zufriedenheit_Name": "Eigentümer-Zufriedenheit",
-      "Zufriedenheit_Wert": 48
+      "Zufriedenheit_Wert": 49
     }
   ]
 }

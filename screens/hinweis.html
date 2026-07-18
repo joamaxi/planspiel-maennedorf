@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="de" class="iframe-embed">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hinweis</title>
+
+    <link rel="stylesheet" href="../assets/css/app.css" />
+    <link rel="stylesheet" href="../assets/css/tailwind.css" />
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Planspiel" />
+    <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+    <style>
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .page-shell {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .hinweis-card {
+            position: relative;
+            width: 750px;
+            min-height: 240px;
+            background: #ffffff;
+            border-right: 2px solid var(--color-accent);
+            border-bottom: 2px solid var(--color-accent);
+            border-bottom-right-radius: 28px;
+            border-bottom-left-radius: 28px;
+            border-top-right-radius: 28px;
+            padding: 34px 30px 28px 30px;
+        }
+
+        .hinweis-icon-wrap {
+            position: absolute;
+            top: -100px;
+            right: -20px;
+            width: auto;
+            height: 150px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .hinweis-icon {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .hinweis-title {
+            margin: 0 82px 14px 0;
+            color: var(--color-accent);
+            padding-right: 110px;
+            font-size: 1.18rem;
+            line-height: 1.08;
+            font-weight: 700;
+        }
+
+        .hinweis-text {
+            color: var(--color-label);
+            font-size: 0.92rem;
+            line-height: 1.28;
+            font-weight: 400;
+            padding-right: 110px;
+            margin: 0;
+            white-space: pre-line;
+        }
+
+        @media (max-width: 980px) {
+
+            html,
+            body {
+                overflow: auto;
+            }
+
+            .page-shell {
+                height: auto;
+                min-height: 100vh;
+                align-items: flex-start;
+            }
+
+            .hinweis-card {
+                width: 100%;
+                min-height: auto;
+                padding: 28px 18px 18px 18px;
+                border-bottom-right-radius: 22px;
+                border-bottom-left-radius: 22px;
+                border-top-right-radius: 22px;
+            }
+
+            .hinweis-icon-wrap {
+                top: 14px;
+                right: 14px;
+                width: 60px;
+                height: 60px;
+            }
+
+            .hinweis-icon {
+                max-width: 42px;
+                max-height: 42px;
+            }
+
+            .hinweis-title {
+                margin: 0 62px 12px 0;
+                font-size: 1rem;
+            }
+
+            .hinweis-text {
+                font-size: 0.84rem;
+                line-height: 1.26;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-shell">
+        <section class="hinweis-card" id="hinweis-card">
+            <div class="hinweis-icon-wrap">
+                <img id="hinweis-icon" class="hinweis-icon" src="" alt="Hinweis" />
+            </div>
+
+            <h2 class="hinweis-title" id="hinweis-title"></h2>
+            <p class="hinweis-text" id="hinweis-text"></p>
+        </section>
+    </div>
+
+    <script>
+        function getLS(key) {
+            try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
+        }
+
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const spielzug = params.get('spielzug');
+            const runde = params.get('runde');
+            if (!spielzug) return;
+
+            const data = getLS('hinweis');
+            if (!data) return;
+
+            const arr = data.hinweise || data;
+            const entry = arr.find(e => e.spielzug === spielzug && String(e.runde) === String(runde));
+            if (!entry) return;
+
+            if (entry.bildpfad) {
+                document.getElementById('hinweis-icon').src = `../${entry.bildpfad}`;
+            }
+
+            const parts = String(entry.hinweistext || '').split('\r');
+            const title = parts.length > 1 ? parts[0].trim() : '';
+            const body = parts.length > 1 ? parts.slice(1).join('\r').trim() : parts[0].trim();
+
+            document.getElementById('hinweis-title').textContent = title;
+            document.getElementById('hinweis-text').textContent = body;
+        })();
+    </script>
+</body>
+
+</html>

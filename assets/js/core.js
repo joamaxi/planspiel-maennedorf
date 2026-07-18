@@ -74,8 +74,24 @@ if (footerTarget) {
     if (btn) btn.classList.toggle('disabled', !_handbuchVerfuegbar);
   }
 
-  fetch('../data/handbuch.json')
-    .then(r => r.json())
+  /* JSON laden (UTF-16LE mit BOM oder UTF-8) – gleiche Daten wie im Import (spz-00.html) */
+  async function _fetchUTF16Json(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const buf   = await res.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    const isUtf16le = bytes[0] === 0xFF && bytes[1] === 0xFE;
+    let text;
+    if (isUtf16le) {
+      text = new TextDecoder('utf-16le').decode(buf);
+      if (text.startsWith('﻿')) text = text.slice(1);
+    } else {
+      text = new TextDecoder('utf-8').decode(buf);
+    }
+    return JSON.parse(text);
+  }
+
+  _fetchUTF16Json('../data/json/handbuch.json')
     .then(data => {
       (data.Handbuch || []).forEach(e => { _handbuchMap[e.spielzug] = e.handbuch; });
       _handbuchVerfuegbar = Object.keys(_handbuchMap).some(k => k === _currentScreen || k.startsWith(_currentScreen + ':'));
@@ -96,6 +112,7 @@ if (footerTarget) {
   /* Overlay + iframe in DOM injizieren */
   const handbuchOverlay = document.createElement('div');
   handbuchOverlay.id = 'handbuch-overlay';
+  handbuchOverlay.className = 'app-overlay';
   handbuchOverlay.style.cssText = [
     'position:fixed','inset:0','background:rgba(0,0,0,0.55)',
     'display:none','align-items:center','justify-content:center','z-index:4000'
@@ -191,6 +208,7 @@ if (footerTarget) {
 
   const bankOverlay = document.createElement('div');
   bankOverlay.id = 'bank-overlay';
+  bankOverlay.className = 'app-overlay';
   bankOverlay.style.cssText = [
     'position:fixed','inset:0','background:rgba(0,0,0,0.45)',
     'display:none','align-items:center','justify-content:center','z-index:4000'
@@ -269,10 +287,10 @@ if (footerTarget) {
   function openBank() {
     const isOpen = bankOverlay.classList.contains('show');
 
-    ['handbuch-overlay','wirkung-overlay','ereignis-overlay'].forEach(id => {
+    ['handbuch-overlay','wirkung-overlay','ereignis-overlay','hinweis-overlay'].forEach(id => {
       const o = document.getElementById(id); if (o) o.classList.remove('show');
     });
-    ['handbuch-frame','wirkung-frame','ereignis-frame'].forEach(id => {
+    ['handbuch-frame','wirkung-frame','ereignis-frame','hinweis-frame'].forEach(id => {
       const f = document.getElementById(id); if (f) f.src = '';
     });
     if (handbuchBtn) handbuchBtn.classList.remove('active');
@@ -292,12 +310,64 @@ if (footerTarget) {
 
   if (bankBtn) bankBtn.addEventListener('click', openBank);
 
+  /* ── Hinweis (Auto-Popup) ─────────────────────────────────────────────────── */
+  const hinweisOverlay = document.createElement('div');
+  hinweisOverlay.id = 'hinweis-overlay';
+  hinweisOverlay.className = 'app-overlay';
+  hinweisOverlay.style.cssText = [
+    'position:fixed','inset:0','background:rgba(0,0,0,0.55)',
+    'display:none','align-items:center','justify-content:center','z-index:4000'
+  ].join(';');
+  hinweisOverlay.innerHTML =
+    '<iframe id="hinweis-frame" src="" frameborder="0" ' +
+    'style="width:100%;height:100%;border:none;background:transparent;"></iframe>';
+  document.body.appendChild(hinweisOverlay);
+
+  const _hwStyle = document.createElement('style');
+  _hwStyle.textContent = '#hinweis-overlay.show{display:flex!important;}';
+  document.head.appendChild(_hwStyle);
+
+  function closeHinweis(spielzug, runde) {
+    if (spielzug) localStorage.setItem(`hinweis_gesehen_${spielzug}_r${runde}`, 'true');
+    hinweisOverlay.classList.remove('show');
+    const fr = document.getElementById('hinweis-frame');
+    if (fr) fr.src = '';
+    restoreFooter();
+  }
+
+  function openHinweis(spielzug, runde) {
+    const fr = document.getElementById('hinweis-frame');
+    if (fr) fr.src = `hinweis.html?spielzug=${encodeURIComponent(spielzug)}&runde=${encodeURIComponent(runde)}`;
+    hinweisOverlay.classList.add('show');
+    showCloseBar(() => closeHinweis(spielzug, runde));
+  }
+
+  /* Prüfen, ob für den aktuellen Screen + Runde ein noch nicht gesehener Hinweis existiert */
+  (function checkHinweis() {
+    const spielzug = _currentScreen.replace(/\.html$/, '');
+    const runde    = localStorage.getItem('rundeNumber') || '1';
+    let data;
+    try { data = JSON.parse(localStorage.getItem('hinweis')); } catch(e) { data = null; }
+    if (!data) return;
+
+    const arr   = data.hinweise || data;
+    const entry = Array.isArray(arr)
+      ? arr.find(e => e.spielzug === spielzug && String(e.runde) === String(runde))
+      : null;
+    if (!entry) return;
+
+    if (localStorage.getItem(`hinweis_gesehen_${spielzug}_r${runde}`) === 'true') return;
+
+    openHinweis(spielzug, runde);
+  })();
+
   /* ── Ereignis ─────────────────────────────────────────────────────────────── */
   const ereignisBtn = document.getElementById('nav-ereignis');
 
   /* Overlay + iframe in DOM injizieren */
   const ereignisOverlay = document.createElement('div');
   ereignisOverlay.id = 'ereignis-overlay';
+  ereignisOverlay.className = 'app-overlay';
   ereignisOverlay.style.cssText = [
     'position:fixed','inset:0','background:rgba(0,0,0,0.45)',
     'display:none','align-items:center','justify-content:center','z-index:4000'
@@ -392,10 +462,10 @@ if (footerTarget) {
     const isOpen = ereignisOverlay.classList.contains('show');
 
     /* Andere Overlays schliessen */
-    ['handbuch-overlay','wirkung-overlay'].forEach(id => {
+    ['handbuch-overlay','wirkung-overlay','hinweis-overlay'].forEach(id => {
       const o = document.getElementById(id); if (o) o.classList.remove('show');
     });
-    ['handbuch-frame','wirkung-frame'].forEach(id => {
+    ['handbuch-frame','wirkung-frame','hinweis-frame'].forEach(id => {
       const f = document.getElementById(id); if (f) f.src = '';
     });
     if (handbuchBtn) handbuchBtn.classList.remove('active');
@@ -457,14 +527,14 @@ if (footerTarget) {
    Neosight-Logo → Passwort-Modal → check.html
    ═══════════════════════════════════════════════════════════════════════════ */
 (function() {
-  const CHECK_PASSWORD = '1234';   // ← Passwort hier ändern
+  const CHECK_PASSWORD = '8822';   // ← Passwort hier ändern
   const CHECK_PAGE     = 'check.html';
 
   /* Modal-HTML einfügen */
   const modal = document.createElement('div');
   modal.id = 'check-modal';
   modal.innerHTML = `
-    <div id="check-modal-backdrop" style="
+    <div id="check-modal-backdrop" class="app-overlay" style="
       position:fixed; inset:0; background:rgba(0,0,0,0.45);
       display:none; align-items:center; justify-content:center;
       z-index:9999; opacity:0; transition:opacity 0.2s;

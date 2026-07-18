@@ -14,6 +14,7 @@
   <style>
     html, body { margin:0; padding:0; min-height:100vh; background:#ffffff; }
     * { box-sizing:border-box; }
+    #spital-logo { cursor: pointer; }
 
     .page-main {
       width: 100%;
@@ -211,7 +212,7 @@
 
 <body
   class="bg-white min-h-screen flex flex-col items-center"
-  data-prev="spz-00.html"
+  data-prev=""
   data-next="spz-02.html"
   data-spielzug-label="Spielzug 1"
   data-step-current="1"
@@ -220,6 +221,7 @@
   data-handbuch="hb-spz01.html"
   data-disable-bank="true"
   data-disable-ereignis="true"
+  data-disable-back="true"
 >
   <div id="app-header" class="w-full bg-white"></div>
 
@@ -469,6 +471,11 @@
         }
       } catch(e) { console.warn('Spielaufgaben spz-01:', e); }
     })();
+
+    /* ── Rechtes Logo → spz-00 ─────────────────────────────────────────── */
+    document.addEventListener('click', function(e) {
+      if (e.target.id === 'spital-logo') window.location.href = 'spz-00.html';
+    });
   </script>
 </body>
 </html>

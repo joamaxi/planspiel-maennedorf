@@ -2,30 +2,28 @@
   "Zufriedenheiten": [
     {
       "Zufriedenheit_Kuerzel": "MIZI",
-      "Zufriedenheit_Name": "Mitarbeiter-Zufriedenheit",
-      "Zufriedenheit_Wert": 92
+      "Zufriedenheit_Name": "Mitarbeitenden-Zufriedenheit",
+      "Zufriedenheit_Wert": 20
     },
     {
       "Zufriedenheit_Kuerzel": "PAZI",
       "Zufriedenheit_Name": "Patienten-Zufriedenheit",
-      "Zufriedenheit_Wert": 107
+      "Zufriedenheit_Wert": 28
     },
     {
       "Zufriedenheit_Kuerzel": "BEZI",
-      "Zufriedenheit_Name": "Besucher-Zufriedenheit",
-      "Zufriedenheit_Wert": 78
+      "Zufriedenheit_Name": "Besuchenden-Zufriedenheit",
+      "Zufriedenheit_Wert": 42
     },
     {
       "Zufriedenheit_Kuerzel": "ZUZI",
-      "Zufriedenheit_Name": "Zuweiser-Zufriedenheit",
-      "Zufriedenheit_Wert": 85
+      "Zufriedenheit_Name": "Zuweisenden-Zufriedenheit",
+      "Zufriedenheit_Wert": 36
     },
     {
       "Zufriedenheit_Kuerzel": "EIZI",
       "Zufriedenheit_Name": "Eigentümer-Zufriedenheit",
-      "Zufriedenheit_Wert": 67
+      "Zufriedenheit_Wert": 48
     }
-  ],
-  "MIZI_NPR": -5,
-  "PAZI_NPR": -5
+  ]
 }

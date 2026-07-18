@@ -211,3 +211,44 @@ button.footer-btn.disabled img {
 .card-title {
   font-size: 18px !important;
 }
+
+/* ── Laptop-Format: Höhe der App auf grossen Bildschirmen begrenzen ──────────
+   Verhindert, dass sich die Screens auf hohen/externen Monitoren über die
+   gesamte Fensterhöhe strecken. App wird als zentriertes "Fenster" (max.
+   900px hoch) mit dezentem Rahmen angezeigt, aussenrum neutraler Hintergrund. */
+html:not(.iframe-embed) {
+  min-height: 100vh !important;
+  max-height: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #c3ccd4 !important;
+  overflow: auto;
+}
+
+html:not(.iframe-embed) > body {
+  position: relative !important;
+  height: 900px !important;
+  max-height: 900px !important;
+  min-height: 0 !important;
+  width: 100%;
+  max-width: 1366px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 900px), (max-height: 920px) {
+  html:not(.iframe-embed) { padding: 0; }
+  html:not(.iframe-embed) > body {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    box-shadow: none;
+  }
+}
+
+/* Overlays (Handbuch, Bank, Ereignis, Hinweis) müssen sich auf den
+   Spiel-Rahmen beschränken statt auf das ganze Browserfenster. */
+html:not(.iframe-embed) > body .app-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+}

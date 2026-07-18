@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Druckansicht – Protokoll</title>
+
+  <style>
+    :root {
+      --accent: #2575b0;
+      --accent-dark: #1a5a8a;
+      --border: #a0c8e8;
+      --border-light: #cce0f0;
+      --label: #7e9aac;
+      --sum-bg: #e8f4fb;
+      --total-bg: #d0e8f5;
+    }
+
+    @page {
+      size: landscape;
+      margin: 10mm 12mm;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color: #333;
+    }
+    * { box-sizing: border-box; }
+
+    /* ── Bildschirm-Vorschau: Seiten mit Abstand + Schatten, Druck-Button ── */
+    body { background: #ccc; }
+    .toolbar {
+      position: fixed;
+      top: 12px; right: 16px;
+      z-index: 10;
+      display: flex; gap: 10px;
+    }
+    .toolbar button {
+      height: 40px; padding: 0 18px;
+      border-radius: 8px; border: 1px solid var(--accent);
+      background: var(--accent); color: #fff;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
+    }
+    .toolbar button:hover { background: var(--accent-dark); }
+    .toolbar button.secondary {
+      background: #fff; color: var(--accent);
+    }
+    .toolbar button.secondary:hover { background: #eef6fb; }
+
+    .print-page {
+      background: #fff;
+      width: 277mm;
+      min-height: 190mm;
+      margin: 24px auto;
+      padding: 10mm 12mm;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+
+    @media print {
+      body { background: #fff; }
+      .toolbar { display: none !important; }
+      .print-page {
+        width: auto; min-height: 0;
+        margin: 0; padding: 0;
+        box-shadow: none;
+        break-after: page;
+        page-break-after: always;
+      }
+      .print-page:last-child {
+        break-after: auto;
+        page-break-after: auto;
+      }
+    }
+
+    /* ── Gemeinsame Elemente ── */
+    .print-title {
+      font-size: 1.3rem; font-weight: 300; color: var(--label);
+      margin: 0 0 14px 0;
+    }
+    .print-title strong { font-weight: 700; color: var(--accent); }
+
+    .section-title {
+      font-size: 0.82rem; font-weight: 800;
+      color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.04em;
+      margin: 0 0 8px 0;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cols-2 { display: flex; gap: 24px; }
+    .cols-2 > div { flex: 1; min-width: 0; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 5px 8px; font-size: 0.68rem; font-weight: 700;
+      color: var(--accent); text-align: left;
+      border-bottom: 1px solid var(--border);
+      background: #f8fbfd; white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid var(--border-light); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody td { padding: 4px 8px; font-size: 0.66rem; color: #444; vertical-align: middle; }
+    tfoot td {
+      padding: 5px 8px; font-size: 0.66rem; font-weight: 700;
+      color: var(--accent); background: #f0f5f9;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Seite 1: Erfolgsrechnung + Bankdarlehen + Bilanz ── */
+    .er-row {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 8px; padding: 2px 6px;
+      font-size: 0.68rem; color: var(--accent);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .er-row.subtotal { background: var(--sum-bg); font-weight: 700; border-bottom: 1px solid var(--border); }
+    .er-row.jahresergebnis { background: #fef9e7; font-weight: 700; border-bottom: 1px solid #f0d060; }
+    .er-val { min-width: 32px; text-align: right; font-weight: 600; flex-shrink: 0; }
+    .er-row.subtotal .er-val, .er-row.jahresergebnis .er-val { font-weight: 800; }
+    .er-col-title {
+      font-size: 0.66rem; font-weight: 700; color: var(--accent);
+      margin: 6px 0 3px; padding-bottom: 2px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase; letter-spacing: 0.03em;
+    }
+    .er-col-title:first-child { margin-top: 0; }
+
+    .bank-move-grid { display: flex; gap: 14px; margin-top: 8px; }
+    .bank-move-card {
+      flex: 1; border-top: 1px solid var(--border); border-left: 1px solid var(--border);
+      border-top-left-radius: 6px; padding: 6px 10px;
+    }
+    .bank-move-label { font-size: 0.6rem; font-weight: 700; color: var(--label); text-transform: uppercase; }
+    .bank-move-val { font-size: 1rem; font-weight: 800; color: var(--accent); }
+    .bank-move-unit { font-size: 0.62rem; font-weight: 400; color: var(--label); margin-left: 3px; }
+
+    .bilanz-card {
+      border-top: 1px solid var(--border); border-left: 1px solid var(--border);
+      border-top-left-radius: 6px; padding: 8px 12px;
+    }
+    .bilanz-card-title {
+      font-size: 0.68rem; font-weight: 700; color: var(--accent);
+      margin-bottom: 4px; padding-bottom: 3px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .bil-section-head {
+      font-size: 0.64rem; font-weight: 800; color: var(--accent);
+      padding: 4px 0 1px; border-bottom: 1px solid var(--border);
+    }
+    .bil-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1px 0; font-size: 0.64rem; color: #555;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .bil-row:last-child { border-bottom: none; }
+    .bil-val { font-weight: 600; color: var(--accent); }
+    .bil-row.bil-total { font-weight: 700; color: var(--accent); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 2px 0; }
+    .bil-row.bil-total .bil-val { font-weight: 800; }
+    .bil-row.bil-highlight { background: #fff3cc; }
+    .bil-spacer { height: 5px; }
+
+    /* Zeilen/Karten nicht mitten durchschneiden */
+    tr, .bilanz-card, .bank-move-card, .er-row {
+      break-inside: avoid; page-break-inside: avoid;
+    }
+
+    /* Überschrift + zugehöriger Inhalt bleiben als Einheit zusammen,
+       damit nicht nur der Titel auf der Seite stehen bleibt */
+    #bilanz-section, #bank-section, #projekt-section, #zuf-check-section {
+      break-inside: avoid; page-break-inside: avoid;
+    }
+    .section-title {
+      break-after: avoid; page-break-after: avoid;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <button id="btn-zurueck" class="secondary">Zurück</button>
+    <button id="btn-print">Drucken</button>
+  </div>
+
+  <!-- ══ SEITE 1: Erfolgsrechnung, Bankdarlehen, Bilanz ══ -->
+  <section class="print-page">
+    <h1 class="print-title">
+      Protokoll — <strong id="team-name">–</strong> &nbsp;|&nbsp; Team <strong id="title-team-nr">–</strong> &nbsp;|&nbsp; Runde <strong id="title-runde-nr">–</strong>
+    </h1>
+
+    <p class="section-title">Erfolgsrechnung</p>
+    <div class="cols-2" id="er-grid"></div>
+
+    <div id="bilanz-section" style="display:none; margin-top:12px;">
+      <p class="section-title">Aktueller Stand Bilanz</p>
+      <div class="cols-2" id="bilanz-grid"></div>
+    </div>
+  </section>
+
+  <!-- ══ SEITE 2: Projektentscheide + Zufriedenheits-Indices + Bankdarlehen ══ -->
+  <section class="print-page">
+    <h1 class="print-title">
+      Protokoll — <strong id="team-name-2">–</strong> &nbsp;|&nbsp; Team <strong id="title-team-nr-2">–</strong> &nbsp;|&nbsp; Runde <strong id="title-runde-nr-2">–</strong>
+    </h1>
+
+    <div class="cols-2">
+      <div id="projekt-section" style="display:none;">
+        <p class="section-title">Projektentscheide</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Nr</th><th>Projekt</th><th>Investition</th><th style="text-align:right;">Kosten (TCHF)</th>
+            </tr>
+          </thead>
+          <tbody id="projekt-body"></tbody>
+          <tfoot>
+            <tr><td colspan="3">TOTAL Projektkosten</td><td id="projekt-total">0</td></tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div id="zuf-check-section" style="display:none;">
+        <p class="section-title">Zufriedenheits-Indices</p>
+        <table>
+          <thead>
+            <tr><th>Zufriedenheit</th><th>Anfang</th><th>Periode</th><th>Ende</th></tr>
+          </thead>
+          <tbody id="zuf-check-body"></tbody>
+          <tfoot>
+            <tr>
+              <td>TOTAL</td>
+              <td id="zuf-total-anfang">–</td>
+              <td id="zuf-total-periode">–</td>
+              <td id="zuf-total-ende">–</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div id="bank-section" style="display:none; margin-top:16px;">
+      <p class="section-title">Bankdarlehen</p>
+      <div class="bank-move-grid">
+        <div class="bank-move-card">
+          <div class="bank-move-label">Darlehen aufgenommen</div>
+          <div class="bank-move-val" id="bank-aufnahme">0<span class="bank-move-unit">Mio</span></div>
+        </div>
+        <div class="bank-move-card">
+          <div class="bank-move-label">Darlehen zurückbezahlt</div>
+          <div class="bank-move-val" id="bank-rueckzahlung">0<span class="bank-move-unit">Mio</span></div>
+        </div>
+        <div class="bank-move-card">
+          <div class="bank-move-label">Netto Darlehen</div>
+          <div class="bank-move-val" id="bank-netto">0<span class="bank-move-unit">Mio</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SEITE 3: Protokoll ══ -->
+  <section class="print-page">
+    <h1 class="print-title">
+      Protokoll — <strong id="team-name-3">–</strong> &nbsp;|&nbsp; Team <strong id="title-team-nr-3">–</strong> &nbsp;|&nbsp; Runde <strong id="title-runde-nr-3">–</strong>
+    </h1>
+
+    <p class="section-title">Protokoll</p>
+    <div id="proto-empty" style="padding:20px; text-align:center; color:var(--label); font-size:0.8rem;">Noch keine Einträge</div>
+    <table id="proto-table" style="display:none;">
+      <thead>
+        <tr>
+          <th>Spielzug</th><th>Team</th><th>Aktion</th><th>Von</th><th>Nach</th>
+          <th style="text-align:right;">Betrag (TCHF)</th><th>Zeit</th>
+        </tr>
+      </thead>
+      <tbody id="proto-body"></tbody>
+    </table>
+  </section>
+
+  <script>
+    function getLS(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+    }
+
+    (function loadContent() {
+      let jahresergebnis = 0;
+
+      /* Team-Name / Runde (auf allen 3 Seiten) */
+      const klinikName = localStorage.getItem('klinikName') || '–';
+      const teamNr      = localStorage.getItem('teamNumber')  || '–';
+      const rundeNr     = localStorage.getItem('rundeNumber') || '–';
+      ['team-name','team-name-2','team-name-3'].forEach(id => document.getElementById(id).textContent = klinikName);
+      ['title-team-nr','title-team-nr-2','title-team-nr-3'].forEach(id => document.getElementById(id).textContent = teamNr);
+      ['title-runde-nr','title-runde-nr-2','title-runde-nr-3'].forEach(id => document.getElementById(id).textContent = rundeNr);
+
+      /* ── Projektentscheide ── */
+      (function() {
+        const entscheide = getLS('projektEntscheide') || {};
+        const rawPrj     = getLS('projekte');
+        const alleRecs   = rawPrj ? (rawPrj.projekte || rawPrj) : [];
+
+        const projektMap = {};
+        alleRecs.forEach(r => {
+          if (!projektMap[r.projektNr]) projektMap[r.projektNr] = [];
+          projektMap[r.projektNr].push(r);
+        });
+
+        const nrs = Object.keys(projektMap).map(Number).sort((a, b) => a - b);
+        if (nrs.length === 0) return;
+
+        let totalKosten = 0;
+        const tbody = document.getElementById('projekt-body');
+
+        nrs.forEach(nr => {
+          const first = projektMap[nr][0];
+          const ent   = entscheide[nr];
+          const tr    = document.createElement('tr');
+
+          if (!ent) {
+            tr.innerHTML = `
+              <td style="color:#bbb;font-weight:700;">${nr}</td>
+              <td style="color:#bbb;">${first.projektName}</td>
+              <td style="color:#bbb;">–</td>
+              <td style="color:#bbb;text-align:right;">–</td>`;
+          } else {
+            totalKosten += ent.levelKosten || 0;
+            tr.innerHTML = `
+              <td style="color:var(--accent);font-weight:700;">${nr}</td>
+              <td>${ent.projektName}</td>
+              <td>${ent.levelBezeichnung}</td>
+              <td style="color:var(--accent);font-weight:700;text-align:right;">${ent.levelKosten}</td>`;
+          }
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById('projekt-total').textContent = totalKosten;
+        document.getElementById('projekt-section').style.display = 'block';
+      })();
+
+      /* ── Zufriedenheits-Indices ── */
+      (function() {
+        const ORDER = ['MIZI', 'PAZI', 'BEZI', 'ZUZI', 'EIZI'];
+
+        const zufData  = getLS('zufriedenheiten');
+        const zufArr   = zufData ? (zufData.Zufriedenheiten || zufData) : [];
+        if (zufArr.length === 0) return;
+
+        const anfangMap = {}, nameMap = {};
+        zufArr.forEach(z => {
+          anfangMap[z.Zufriedenheit_Kuerzel] = Number(z.Zufriedenheit_Wert) || 0;
+          nameMap[z.Zufriedenheit_Kuerzel]   = z.Zufriedenheit_Name || z.Zufriedenheit_Kuerzel;
+        });
+
+        const npr = {
+          MIZI: Number(zufData?.MIZI_NPR) || 0,
+          PAZI: Number(zufData?.PAZI_NPR) || 0
+        };
+
+        const projektWirk = { MIZI:0, PAZI:0, BEZI:0, ZUZI:0, EIZI:0 };
+        const entscheide  = getLS('projektEntscheide') || {};
+        const rawPrj      = getLS('projekte');
+        const alleRecs    = rawPrj ? (rawPrj.projekte || rawPrj) : [];
+        const pMap        = {};
+        alleRecs.forEach(r => { if (!pMap[r.projektNr]) pMap[r.projektNr] = []; pMap[r.projektNr].push(r); });
+
+        Object.entries(entscheide).forEach(([nr, ent]) => {
+          if (ent.levelKosten === undefined || ent.levelKosten === null) return;
+          const recs = pMap[Number(nr)] || [];
+          const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
+                    || recs.find(r => r.levelKosten === ent.levelKosten);
+          if (!rec) return;
+          for (let i = 1; i <= 3; i++) {
+            const name = rec[`wirkungName${i}`];
+            const val  = Number(rec[`wirkungWert${i}`]) || 0;
+            if (name && projektWirk[name] !== undefined) projektWirk[name] += val;
+          }
+        });
+
+        const tbody = document.getElementById('zuf-check-body');
+        let totAnfang = 0, totPeriode = 0, totEnde = 0;
+
+        ORDER.forEach(k => {
+          const anfang  = anfangMap[k] ?? 0;
+          const periode = projektWirk[k] + (npr[k] || 0);
+          const ende    = anfang + periode;
+          totAnfang += anfang; totPeriode += periode; totEnde += ende;
+
+          const sign = periode > 0 ? '+' : '';
+          const cls  = periode > 0 ? 'color:#3a7a3a;' : (periode < 0 ? 'color:#a03030;' : 'color:#888;');
+          const tr   = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${nameMap[k] || k} <span style="font-weight:400;color:#aaa;">(${k})</span></td>
+            <td>${anfang}</td>
+            <td><span style="font-weight:700;${cls}">${sign}${periode}</span></td>
+            <td>${ende}</td>`;
+          tbody.appendChild(tr);
+        });
+
+        const ps = totPeriode > 0 ? '+' : '';
+        document.getElementById('zuf-total-anfang').textContent  = totAnfang;
+        document.getElementById('zuf-total-periode').textContent = ps + totPeriode;
+        document.getElementById('zuf-total-ende').textContent    = totEnde;
+        document.getElementById('zuf-check-section').style.display = 'block';
+      })();
+
+      /* ── Protokoll ── */
+      const protokoll = getLS('protokoll') || [];
+      const tbody = document.getElementById('proto-body');
+      const table = document.getElementById('proto-table');
+      const empty = document.getElementById('proto-empty');
+
+      if (protokoll.length > 0) {
+        protokoll.forEach(p => {
+          const tr = document.createElement('tr');
+          const zeit = p.zeit ? new Date(p.zeit).toLocaleString('de-CH', {
+            day:'2-digit', month:'2-digit', year:'2-digit',
+            hour:'2-digit', minute:'2-digit'
+          }) : '–';
+          tr.innerHTML = `
+            <td style="font-weight:700;color:var(--accent);">${p.spielzug || '–'}</td>
+            <td>${(p.team || '–').toString().replace(/team\s*/i, '')}</td>
+            <td>${p.aktion || '–'}</td>
+            <td>${p.von || '–'}</td>
+            <td>${p.nach || '–'}</td>
+            <td style="font-weight:700;color:var(--accent);text-align:right;">${p.betrag !== undefined ? p.betrag : '–'}</td>
+            <td style="color:var(--label);">${zeit}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        empty.style.display = 'none';
+        table.style.display = 'table';
+      }
+
+      /* ── Erfolgsrechnung ── */
+      (function() {
+        const er   = getLS('erfolgsrechnung') || {};
+        const grid = document.getElementById('er-grid');
+
+        function v(key, def) {
+          const x = er[key];
+          return (x !== undefined && x !== null) ? x : def;
+        }
+        function fmt(n) {
+          return (n === null || n === undefined || n === '') ? '' : n;
+        }
+
+        const done29         = localStorage.getItem('done_spz29') === 'true';
+        const abschreibungen = done29 ? (v('Abschreibungen', 0) || 0) : 0;
+        const totalBetrieb   = (v('Ertraege_Spitalbetrieb',0)||0) + (v('Andere_Ertraege',0)||0) + (v('Ausserordentliche_Ertraege',0)||0);
+        const totalVar       = Math.round((v('Variable_Kosten_Spital',0)||0) + (v('Variable_Kosten_Medikamente',0)||0) - (v('Variable_Kostenreduktion',0)||0));
+        const db1            = totalBetrieb - totalVar;
+        const totalFix       = (v('Personalaufwand',0)||0) + (v('Kosten_Projekte',0)||0) + (v('Lebensmittel',0)||0) + (v('Unterhalt',0)||0) + (v('Energie',0)||0) + (v('Buero',0)||0) + (v('Rekrutierung',0)||0) + (v('Ausserordentliche',0)||0);
+        const ebitdar        = db1 - totalFix;
+        const ebit           = ebitdar - (v('Mietzins',0)||0) - abschreibungen;
+        const zinsen         = v('Zinsen_Bank', 0);
+        const ebt            = ebit - zinsen;
+        const steuern        = v('Steuern', 0)||0;
+        jahresergebnis = ebt - steuern;
+
+        function row(label, val, cls='') {
+          return `<div class="er-row ${cls}">
+            <span>${label}</span>
+            <span class="er-val">${fmt(val)}</span>
+          </div>`;
+        }
+
+        const colLeft = document.createElement('div');
+        colLeft.innerHTML = `
+          <p class="er-col-title">Erträge</p>
+          ${row('Erträge aus Spitalbetrieb',       fmt(v('Ertraege_Spitalbetrieb', 0)))}
+          ${row('Andere betriebliche Erträge',      fmt(v('Andere_Ertraege', 0)))}
+          ${row('Ausserordentliche Erträge',        fmt(v('Ausserordentliche_Ertraege', 0)))}
+          ${row('TOTAL Betriebsertrag (gerundet)',  totalBetrieb, 'subtotal')}
+          <p class="er-col-title">Aufwände</p>
+          ${row('Variable Kosten aus Spitalbetrieb',        fmt(v('Variable_Kosten_Spital', 0)))}
+          ${row('Variable Kosten für Medikamente / Material',fmt(v('Variable_Kosten_Medikamente', 0)))}
+          ${row('Variable Kostenreduktion',                 fmt(v('Variable_Kostenreduktion', 0)))}
+          ${row('TOTAL Variable Kosten (gerundet)',         totalVar, 'subtotal')}
+          ${row('DECKUNGSBEITRAG 1',                        db1,      'subtotal')}
+        `;
+
+        const colRight = document.createElement('div');
+        colRight.innerHTML = `
+          <p class="er-col-title">Aufwände</p>
+          ${row('Personalaufwand für Mitarbeitende',              fmt(v('Personalaufwand', 0)))}
+          ${row('Kosten aller Projekte des laufenden Jahres',     fmt(v('Kosten_Projekte', null)))}
+          ${row('Lebensmittel und Haushaltaufwand',               fmt(v('Lebensmittel', null)))}
+          ${row('Unterhalt und Reparaturen',                      fmt(v('Unterhalt', null)))}
+          ${row('Energie, Gas, Wasser, Entsorgung',               fmt(v('Energie', null)))}
+          ${row('Büro- und Verwaltungsaufwand',                   fmt(v('Buero', null)))}
+          ${row('Rekrutierungskosten',                            fmt(v('Rekrutierung', null)))}
+          ${row('Ausserordentliche Aufwände',                     fmt(v('Ausserordentliche', null)))}
+          ${row('TOTAL Fixkosten',                                totalFix,  'subtotal')}
+          ${row('EBITDAR', ebitdar, 'subtotal')}
+          ${row('Mietzinsaufwand',                                fmt(v('Mietzins', null)))}
+          ${row('Abschreibungen (Infrastruktur und Gebäude)',     done29 ? fmt(abschreibungen) : '')}
+          ${row('EBIT',                                           ebit,      'subtotal')}
+          ${row('Zinsen für Bankdarlehen',                        zinsen)}
+          ${row('EBT – Gewinn vor Steuern',                      ebt,       'subtotal')}
+          ${row('Steuern',                                        steuern)}
+          ${row('Jahresergebnis',                                 jahresergebnis, 'jahresergebnis')}
+        `;
+
+        grid.appendChild(colLeft);
+        grid.appendChild(colRight);
+      })();
+
+      /* ── Bank-Bewegungen ── */
+      (function() {
+        const applied = getLS('bankApplied') || {};
+        const auf   = Number(applied.aufnahme)    || 0;
+        const rueck = Number(applied.rueckzahlung) || 0;
+        const netto = auf - rueck;
+        if (auf > 0 || rueck > 0) {
+          document.getElementById('bank-aufnahme').innerHTML    = `${auf}<span class="bank-move-unit">Mio</span>`;
+          document.getElementById('bank-rueckzahlung').innerHTML = `${rueck}<span class="bank-move-unit">Mio</span>`;
+          document.getElementById('bank-netto').innerHTML        = `${netto}<span class="bank-move-unit">Mio</span>`;
+          document.getElementById('bank-section').style.display = 'block';
+        }
+      })();
+
+      /* ── Bilanz-Snapshot ── */
+      const bilanzData = getLS('bilanzStart');
+      if (bilanzData) {
+        const arr    = bilanzData.Anfangsbilanz || bilanzData;
+        const teamNrN = Number(localStorage.getItem('teamNumber')) || 1;
+        const entry  = arr[teamNrN] ?? arr[teamNrN-1] ?? arr[0];
+        if (entry && entry.Bilanz) {
+          const b    = entry.Bilanz;
+          const grid = document.getElementById('bilanz-grid');
+          const n    = k => Number(b[k]) || 0;
+
+          const infraStart = n('Infrastruktur_Anlage');
+          const gebStart   = n('Gebaude_Anlage');
+
+          const rateInfra = Number(entry.AbschreibungAktuell) || 0;
+          const rateGeb   = Number(entry.AbschreibungGebaude) || 0;
+
+          const _entsch  = getLS('projektEntscheide') || {};
+          const _rawPrj  = getLS('projekte');
+          const _allRecs = _rawPrj ? (_rawPrj.projekte || _rawPrj) : [];
+          const _pMap    = {};
+          _allRecs.forEach(r => { if (!_pMap[r.projektNr]) _pMap[r.projektNr] = []; _pMap[r.projektNr].push(r); });
+          let investInfra = 0, investGeb = 0;
+          Object.entries(_entsch).forEach(([nr, ent]) => {
+            if (!ent.levelKosten) return;
+            const recs = _pMap[Number(nr)] || [];
+            const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
+                      || recs.find(r => r.levelKosten === ent.levelKosten);
+            if (!rec) return;
+            if (rec.option1 === 'Investitionen Infrastruktur') investInfra += Number(rec.optionWert1) || 0;
+            if (rec.option1 === 'Investitionen Gebäude')       investGeb   += Number(rec.optionWert1) || 0;
+          });
+
+          const done29      = localStorage.getItem('done_spz29') === 'true';
+          const infraInv    = investInfra;
+          const infraAbschr = done29 ? Math.round((infraStart + infraInv) * rateInfra / 100) : 0;
+          const infraEnde   = infraStart + infraInv - infraAbschr;
+
+          const gebInv      = investGeb;
+          const gebAbschr   = done29 ? Math.round((gebStart + gebInv) * rateGeb / 100) : 0;
+          const gebEnde     = gebStart + gebInv - gebAbschr;
+
+          const anlage       = infraEnde + gebEnde;
+          const umlauf       = n('FluessigeMittel') + n('Forderungen') + n('Aktive_Rechnungsabgrenzung') + n('Vorraete');
+          const totalAktiven = umlauf + anlage;
+
+          const fremdkapital      = n('Verbindlichkeiten') + n('Passive_Rechnungsabgrenzung') + n('Ruckstellungen') + n('Darlehen_Bank');
+          const reingewinn        = totalAktiven - fremdkapital - n('Eigenkapital');
+          const eigenkapitalTotal = n('Eigenkapital') + reingewinn;
+          const totalPassiven     = fremdkapital + eigenkapitalTotal;
+
+          function show(v) { return (v === 0 || v === null || v === undefined) ? '' : v; }
+          function sec(label) { return `<div class="bil-section-head">${label}</div>`; }
+          function spacer()   { return `<div class="bil-spacer"></div>`; }
+          function row(label, val, cls='') {
+            return `<div class="bil-row ${cls}"><span>${label}</span><span class="bil-val">${val !== '' ? val : ''}</span></div>`;
+          }
+
+          const aktivaCard = document.createElement('div');
+          aktivaCard.className = 'bilanz-card';
+          aktivaCard.innerHTML = `
+            <div class="bilanz-card-title">AKTIVA</div>
+            ${sec('Umlaufvermögen')}
+            ${row('Flüssige Mittel', show(n('FluessigeMittel')))}
+            ${row('Forderungen (Debitoren)', show(n('Forderungen')))}
+            ${row('Aktive Rechnungsabgrenzung', show(n('Aktive_Rechnungsabgrenzung')))}
+            ${row('Warenvorräte', show(n('Vorraete')))}
+            ${row('TOTAL Umlaufvermögen', umlauf, 'bil-total')}
+            ${spacer()}
+            ${sec('Anlagevermögen')}
+            ${row('Infrastruktur Beginn Jahr', show(infraStart))}
+            ${row('Investitionen Infrastruktur', show(infraInv))}
+            ${row('Abschreibungen Infrastruktur', show(infraAbschr))}
+            ${row('Infrastruktur Ende Jahr', infraEnde)}
+            ${spacer()}
+            ${row('Gebäude Beginn Jahr', show(gebStart))}
+            ${row('Investitionen Gebäude', show(gebInv))}
+            ${row('Abschreibungen Gebäude', show(gebAbschr))}
+            ${row('Gebäude Ende Jahr', gebEnde)}
+            ${row('TOTAL Anlagevermögen', anlage, 'bil-total')}
+            ${row('TOTAL Aktiven', totalAktiven, 'bil-total bil-highlight')}
+          `;
+
+          const passivaCard = document.createElement('div');
+          passivaCard.className = 'bilanz-card';
+          passivaCard.innerHTML = `
+            <div class="bilanz-card-title">PASSIVA</div>
+            ${sec('Fremdkapital')}
+            ${row('Verbindlichkeiten (Kreditoren)', show(n('Verbindlichkeiten')))}
+            ${row('Passive Rechnungsabgrenzung', show(n('Passive_Rechnungsabgrenzung')))}
+            ${row('Rückstellungen', show(n('Ruckstellungen')))}
+            ${row('Bankdarlehen', show(n('Darlehen_Bank')))}
+            ${row('TOTAL Fremdkapital', fremdkapital, 'bil-total')}
+            ${spacer()}
+            ${sec('Eigenkapital')}
+            ${row('Eigenkapital', show(n('Eigenkapital')))}
+            ${row('Reingewinn/-verlust', reingewinn, 'bil-highlight')}
+            ${row('TOTAL Eigenkapital', eigenkapitalTotal, 'bil-total')}
+            ${row('TOTAL Passiven', totalPassiven, 'bil-total bil-highlight')}
+          `;
+
+          grid.appendChild(aktivaCard);
+          grid.appendChild(passivaCard);
+          document.getElementById('bilanz-section').style.display = 'block';
+        }
+      }
+    })();
+
+    /* ── Druck-Button + Auto-Print (neuer Tab per Klick von check.html) ── */
+    document.getElementById('btn-print').addEventListener('click', () => window.print());
+    document.getElementById('btn-zurueck').addEventListener('click', () => {
+      if (window.opener) window.close();
+      else window.location.href = 'check.html';
+    });
+    if (window.opener) {
+      setTimeout(() => window.print(), 300);
+    }
+  </script>
+</body>
+</html>
