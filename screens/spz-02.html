@@ -435,7 +435,7 @@
     (function() {
       const data = getLS('zufriedenheiten');
       if (!data) return;
-      const arr  = data.Zufriedenheiten || data;
+      const arr  = data.Zufriedenheiten || data.zufriedenheiten || data;
       const container = document.getElementById('zuf-rows');
 
       arr.forEach(z => {

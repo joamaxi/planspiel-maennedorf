@@ -302,6 +302,9 @@
       nb.Fremdkapital           = totFremd;
       nb.TOTAL_Passiven         = totPassiv;
 
+      /* Zinssatz für nächste Runde um 1% erhöhen */
+      newEntry.BankZinsen = (Number(newEntry.BankZinsen) || 3) + 1;
+
       const newArr     = [...arr];
       newArr[idx]      = newEntry;
       const exportData = exp.bilanzData.Anfangsbilanz

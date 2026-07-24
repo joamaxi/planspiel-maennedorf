@@ -292,7 +292,7 @@
 
               <!-- Untere Reihe: Label links + Gesamtes Spital unter Ambulant -->
               <div class="var-total-row">
-                <span class="var-total-label">Variable Kosten für Diagnostik/<br>Therapie, Pflege/Hotelerie</span>
+                <span class="var-total-label">Variable Kosten für Diagnostik/<br>Therapie, Pflege/Hotellerie</span>
                 <div class="var-box total-box" style="flex:1;">
                     <div class="var-body">
                     <div class="var-badge" id="val-total">–</div>
@@ -374,9 +374,12 @@
         return php + allg;
       }
 
-      /* Fallback-Kostensätze für Ambulant (falls kein Lookup) */
-      const AMBULANT_KOSTEN = kostenLookup['Ambulant-C|Ambulant-C'] || kostenLookup['Ambulant-C|'] || kostenLookup['Ambulant|Ambulant'] || 5;
-      const ambulantAnzahl  = Number(aufnahme['Ambulant-C']) || 0;
+      /* Ambulant: Kosten pro Marktbereich summieren */
+      const ambulant = ['Medizin', 'Chirurgie', 'Geburtshilfe'].reduce((sum, name) => {
+        const b = aufnahme[name];
+        if (!b || typeof b !== 'object') return sum;
+        return sum + (Number(b.Ambulant) || 0) * (kostenLookup[`${name}|`] || 0);
+      }, 0);
 
       /* spz-19 Aktive Rechnungsabgrenzung pro Bereich abziehen */
       const spz19 = getLS('spz19_bereiche') || {};
@@ -384,14 +387,13 @@
       const medizin      = (kostenBereich('Medizin')      || 0) - (Number(spz19.Medizin)      || 0);
       const chirurgie    = (kostenBereich('Chirurgie')     || 0) - (Number(spz19.Chirurgie)    || 0);
       const geburtshilfe = (kostenBereich('Geburtshilfe') || 0) - (Number(spz19.Geburtshilfe) || 0);
-      const ambulant     = ambulantAnzahl * AMBULANT_KOSTEN;
       const total        = medizin + chirurgie + geburtshilfe + ambulant;
 
       /* Anzeige */
       document.getElementById('val-medizin').textContent      = medizin      || '–';
       document.getElementById('val-chirurgie').textContent    = chirurgie    || '–';
       document.getElementById('val-geburtshilfe').textContent = geburtshilfe || '–';
-      document.getElementById('val-ambulant').textContent     = ambulant     || '–';
+      document.getElementById('val-ambulant').textContent     = ambulant  || '–';
       document.getElementById('val-total').textContent        = total        || '–';
 
       /* Total speichern für Transfer */

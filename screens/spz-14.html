@@ -19,7 +19,7 @@
       width: 100%;
       max-width: 1024px;
       margin: 0 auto;
-      padding: 100px 32px 24px 32px;
+      padding: 50px 32px 24px 32px;
       display: flex;
       gap: 60px;
       align-items: flex-start;
@@ -162,32 +162,24 @@
     .patient-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     .patient-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
-    /* Ambulant: einzelner Input zentriert */
-    .patient-body.single {
-      align-items: center;
-      justify-content: center;
-    }
-
     /* ── Total-Zeile ────────────────────────────────────────────────────── */
     .total-row {
       display: flex;
       align-items: center;
-      gap: 10px;   /* gleicher gap wie patient-grid */
+      justify-content: flex-end;
+      gap: 16px;
       margin-top: 12px;
     }
 
     .total-label {
-      flex: 3;     /* entspricht den 3 linken Boxen */
       text-align: right;
       font-size: 1.05rem;
       font-weight: 800;
       color: var(--color-label);
-      padding-right: 4px;
     }
 
     .total-badge-wrap {
-      flex: 0.8;     /* entspricht der Ambulant-Box */
-      padding: 0 10px; /* gleicher Seitenabstand wie patient-body */
+      width: 100px;
     }
 
     .total-badge {
@@ -329,10 +321,10 @@
         stationaere.forEach(b => {
           saveObj[b.marktName] = {
             PHP:      parseInt(document.getElementById(`inp-${b.marktName}-php`)?.value)  || 0,
-            Allgemein:parseInt(document.getElementById(`inp-${b.marktName}-allg`)?.value) || 0
+            Allgemein:parseInt(document.getElementById(`inp-${b.marktName}-allg`)?.value) || 0,
+            Ambulant: parseInt(document.getElementById(`inp-${b.marktName}-amb`)?.value)  || 0,
           };
         });
-        saveObj[ambulantMarkt.marktName] = parseInt(document.getElementById('inp-ambulant')?.value) || 0;
         setLS('patientenAufnahme', saveObj);
       }
 
@@ -361,42 +353,28 @@
                      value="${savedB.Allgemein || ''}"
                      style="border-color:rgb(${rgb}); color:rgb(${rgb});" />
             </div>
+            <div class="patient-input-row">
+              <span class="patient-label">Ambulant</span>
+              <input class="patient-input" id="inp-${b.marktName}-amb" type="number"
+                     min="0" step="1" placeholder=""
+                     value="${savedB.Ambulant || ''}"
+                     style="border-color:rgb(${rgb}); color:rgb(${rgb});" />
+            </div>
           </div>
         `;
         grid.appendChild(box);
 
         const inpPhp  = box.querySelector(`#inp-${b.marktName}-php`);
         const inpAllg = box.querySelector(`#inp-${b.marktName}-allg`);
-        allInputs.push(inpPhp, inpAllg);
+        const inpAmb  = box.querySelector(`#inp-${b.marktName}-amb`);
+        allInputs.push(inpPhp, inpAllg, inpAmb);
         inpPhp.addEventListener('input',  recalcTotal);
         inpAllg.addEventListener('input', recalcTotal);
+        inpAmb.addEventListener('input',  recalcTotal);
         inpPhp.addEventListener('focus',  () => inpPhp.select());
         inpAllg.addEventListener('focus', () => inpAllg.select());
+        inpAmb.addEventListener('focus',  () => inpAmb.select());
       });
-
-      /* ── Ambulant-C (aus JSON) ── */
-      const ambRgb   = ambulantMarkt.rgb || '144,144,144';
-      const savedAmb = saved[ambulantMarkt.marktName] || '';
-      const ambBox   = document.createElement('div');
-      ambBox.className = 'patient-box';
-      ambBox.style.borderColor = `rgb(${ambRgb})`;
-      ambBox.innerHTML = `
-        <div class="patient-header" style="background:rgb(${ambRgb});">${ambulantMarkt.marktName}</div>
-        <div class="patient-body single">
-          <div class="patient-input-row">
-            <span class="patient-label">Ambulante Patienten<br>in allen Bereichen</span>
-            <input class="patient-input" id="inp-ambulant" type="number"
-                   min="0" step="1" placeholder="0"
-                   value="${savedAmb}"
-                   style="border-color:rgb(${ambRgb}); color:rgb(${ambRgb});" />
-          </div>
-        </div>
-      `;
-      grid.appendChild(ambBox);
-      const inpAmb = ambBox.querySelector('#inp-ambulant');
-      allInputs.push(inpAmb);
-      inpAmb.addEventListener('input', recalcTotal);
-      inpAmb.addEventListener('focus', () => inpAmb.select());
 
       /* Initial-Total */
       recalcTotal();

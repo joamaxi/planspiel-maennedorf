@@ -396,10 +396,10 @@
           `<td>${r[`wirkungWert${w.key}`] ?? ''}</td>`
         ).join('');
         const starHtml = isSel
-          ? `<button class="star-btn selected" data-idx="${idx}">★</button>`
-          : `<button class="star-btn"          data-idx="${idx}">☆</button>`;
+          ? `<button class="star-btn selected" data-idx="${idx}">●</button>`
+          : `<button class="star-btn"          data-idx="${idx}">○</button>`;
 
-        return `<tr class="${isSel ? 'selected' : ''}" data-idx="${idx}">
+        return `<tr class="${isSel ? 'selected' : ''}" data-idx="${idx}" style="cursor:pointer;">
           <td>${r.levelBezeichnung}<br><small style="font-weight:400;color:#888;font-size:0.72rem;"></td>
           <td>${r.levelKosten}</td>
           ${tdWirkungen}
@@ -419,7 +419,7 @@
               <th>Investition</th>
               <th>Kosten</th>
               ${thWirkungen}
-              <th>bestätigt</th>
+              <th>Auswahl</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -429,10 +429,10 @@
       /* Close-Button neu binden (innerHTML hat ihn ersetzt) */
       detail.querySelector('#detail-close')?.addEventListener('click', closeOverlayDetail);
 
-      /* Stern-Klick Handler */
-      detail.querySelectorAll('.star-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const idx = Number(btn.dataset.idx);
+      /* Zeilen-Klick Handler */
+      detail.querySelectorAll('tbody tr').forEach(tr => {
+        tr.addEventListener('click', () => {
+          const idx = Number(tr.dataset.idx);
           onStarClick(nr, idx, records[idx]);
         });
       });

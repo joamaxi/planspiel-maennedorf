@@ -340,7 +340,7 @@
       let   patienten = 0;
       Object.entries(aufnahme).forEach(([key, val]) => {
         if (typeof val === 'object' && val !== null) {
-          patienten += (Number(val.PHP) || 0) + (Number(val.Allgemein) || 0);
+          patienten += (Number(val.PHP) || 0) + (Number(val.Allgemein) || 0) + (Number(val.Ambulant) || 0);
         } else {
           patienten += Number(val) || 0;
         }

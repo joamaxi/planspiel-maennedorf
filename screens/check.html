@@ -578,7 +578,7 @@
         const ORDER = ['MIZI', 'PAZI', 'BEZI', 'ZUZI', 'EIZI'];
 
         const zufData  = getLS('zufriedenheiten');
-        const zufArr   = zufData ? (zufData.Zufriedenheiten || zufData) : [];
+        const zufArr   = zufData ? (zufData.Zufriedenheiten || zufData.zufriedenheiten || zufData) : [];
         if (zufArr.length === 0) return;
 
         const anfangMap = {}, nameMap = {};

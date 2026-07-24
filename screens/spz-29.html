@@ -214,8 +214,8 @@
     const bilanz       = bilanzEntry?.Bilanz || {};
 
     /* Sätze aus bilanzStart */
-    const rateInfra = Number(bilanzEntry?.AbschreibungAktuell) || 0;
-    const rateGeb   = Number(bilanzEntry?.AbschreibungGebaude) || 0;
+    let rateInfra = Number(bilanzEntry?.AbschreibungAktuell) || 0;
+    const rateGeb = Number(bilanzEntry?.AbschreibungGebaude) || 0;
 
     /* Projekt-Investitionen aus projektEntscheide + projekte */
     const entscheide = getLS('projektEntscheide') || {};
@@ -241,6 +241,7 @@
       const wert = Number(rec.optionWert1) || 0;
       if (opt === 'Investitionen Infrastruktur') investInfra += wert;
       if (opt === 'Investitionen Gebäude')       investGeb   += wert;
+      if (opt === 'Abschreibung Infrastruktur')  rateInfra    = wert;
     });
 
     /* Basis + Investitionen × Satz, auf ganze Zahl runden */

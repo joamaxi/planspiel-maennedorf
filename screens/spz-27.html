@@ -243,7 +243,7 @@
 
       /* Anfangswerte aus zufriedenheiten-Import */
       const zufData  = getLS('zufriedenheiten');
-      const zufArr   = zufData ? (zufData.Zufriedenheiten || zufData) : [];
+      const zufArr   = zufData ? (zufData.Zufriedenheiten || zufData.zufriedenheiten || zufData) : [];
       const anfangMap = {};
       const nameMap   = {};
       zufArr.forEach(z => {
@@ -323,23 +323,29 @@
       const zufData = getLS('zufriedenheiten');
       if (!zufData) return;
 
-      const zufArr  = zufData.Zufriedenheiten || zufData;
+      const zufArr  = zufData.Zufriedenheiten || zufData.zufriedenheiten || zufData;
       const endeMap = window._zufEndeMap || {};
 
-      /* Ende-Wert als neuer Anfangswert für nächste Runde */
-      const updated = zufArr.map(z => {
+      /* Ende-Wert als neuer Anfangswert für nächste Runde + als Objekt exportieren */
+      const zufObj = {};
+      zufArr.forEach(z => {
         const k    = z.Zufriedenheit_Kuerzel;
         const ende = endeMap[k];
-        return ende !== undefined ? { ...z, Zufriedenheit_Wert: ende } : z;
+        zufObj[k]  = ende !== undefined ? ende : z.Zufriedenheit_Wert;
       });
-      const exportData = zufData.Zufriedenheiten
-        ? { ...zufData, Zufriedenheiten: updated }
-        : updated;
+      const exportData = { Zufriedenheiten: zufObj };
 
       /* Dateiname: team{nr}-runde{runde}-zufriedenheiten.json */
-      const team     = localStorage.getItem('teamNumber')  || '0';
-      const runde    = localStorage.getItem('rundeNumber') || '1';
-      const filename = `team${team}-runde${Number(runde) + 1}-zufriedenheiten.json`;
+      const team      = localStorage.getItem('teamNumber') || '0';
+      const teamName  = localStorage.getItem('klinikName') || '';
+      const runde     = localStorage.getItem('rundeNumber') || '1';
+      const filename  = `team${team}-runde${Number(runde) + 1}-zufriedenheiten.json`;
+
+      exportData.teamNr   = Number(team);
+      exportData.teamName = teamName;
+      exportData.rundeNr  = Number(runde);
+      delete exportData.MIZI_NPR;
+      delete exportData.PAZI_NPR;
 
       /* Direkt in data/json speichern (keepalive: überlebt die Seitennavigation) */
       fetch('../data/json/save.php', {

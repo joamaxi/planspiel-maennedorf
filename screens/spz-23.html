@@ -291,13 +291,16 @@
         return php + allg;
       }
 
-      const ambulantErtrag = ertragLookup['Ambulant-C|Ambulant-C'] || ertragLookup['Ambulant-C|'] || ertragLookup['Ambulant|Ambulant'] || 0;
-      const ambulantAnzahl = Number(aufnahme['Ambulant-C']) || 0;
+      /* Ambulant: Erträge pro Marktbereich summieren */
+      const ambulant = ['Medizin', 'Chirurgie', 'Geburtshilfe'].reduce((sum, name) => {
+        const b = aufnahme[name];
+        if (!b || typeof b !== 'object') return sum;
+        return sum + (Number(b.Ambulant) || 0) * (ertragLookup[`${name}|`] || 0);
+      }, 0);
 
       const medizin      = ertraegeBereich('Medizin');
       const chirurgie    = ertraegeBereich('Chirurgie');
       const geburtshilfe = ertraegeBereich('Geburtshilfe');
-      const ambulant     = ambulantAnzahl * ambulantErtrag;
 
       const ertraege      = Math.round(medizin + chirurgie + geburtshilfe + ambulant);
       const andereErtraege = Math.round(ertraege * 0.05);

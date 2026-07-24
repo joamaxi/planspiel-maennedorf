@@ -1,4 +1,4 @@
-const CACHE_NAME = 'planspiel-buelach-v1';
+const CACHE_NAME = 'planspiel-buelach-v2';
 
 const ASSETS_TO_CACHE = [
   './',

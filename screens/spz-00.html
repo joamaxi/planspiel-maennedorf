@@ -72,12 +72,12 @@
 
     /* ── Einzelner Import-Slot ── */
     .import-slot {
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     .slot-label {
       font-size: 0.78rem;
       color: var(--color-label);
-      margin-bottom: 5px;
+      margin-bottom: 3px;
       padding-left: 2px;
     }
     .slot-row {
@@ -91,7 +91,7 @@
     .slot-input {
       flex: 1;
       min-width: 0;
-      height: 48px;
+      height: 36px;
       border: none;
       outline: none;
       padding: 0 14px;
@@ -104,8 +104,8 @@
 
     .btn-import {
       flex-shrink: 0;
-      height: 48px;
-      padding: 0 22px;
+      height: 36px;
+      padding: 0 16px;
       background: var(--color-accent);
       color: #fff;
       border: none;
@@ -173,6 +173,22 @@
     }
     .btn-reset:hover  { background: #c0392b; }
     .btn-reset:active { transform: scale(0.97); }
+
+    .btn-all {
+      padding: 16px 40px;
+      background: transparent;
+      color: var(--color-accent);
+      border: 2px solid var(--color-accent);
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+    .btn-all:hover    { background: var(--color-accent); color: #fff; }
+    .btn-all:active   { transform: scale(0.97); }
+    .btn-all:disabled { border-color: #aac4d8; color: #aac4d8; cursor: not-allowed; background: transparent; }
 
     .btn-weiter {
       padding: 16px 40px;
@@ -355,6 +371,7 @@
 
       <!-- Aktionszeile -->
       <div class="action-row">
+        <button class="btn-all"    id="btn-all"   disabled>Alle importieren</button>
         <button class="btn-start"  id="btn-start">Spiel starten &gt;&gt;</button>
         <button class="btn-weiter" id="btn-weiter" style="display:none;">zurück &gt;</button>
         <button class="btn-reset"  id="btn-reset">Alles löschen &amp; neu starten</button>
@@ -463,6 +480,17 @@
         window.location.href = document.body.dataset.next;
       });
 
+      /* Alle importieren */
+      document.getElementById('btn-all').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-all');
+        btn.disabled = true;
+        btn.textContent = 'Lädt…';
+        for (const slot of SLOTS) {
+          await importSlot(slot.key);
+        }
+        btn.textContent = 'Alle importiert ✓';
+      });
+
       /* Alles löschen & neu starten */
       document.getElementById('btn-reset').addEventListener('click', () => {
         if (confirm('Wirklich alle Daten löschen und das Spiel zurücksetzen?')) {
@@ -565,6 +593,8 @@
         const btn = document.getElementById(`btn-${slot.key}`);
         if (btn) btn.disabled = !ok;
       });
+      const btnAll = document.getElementById('btn-all');
+      if (btnAll) btnAll.disabled = !ok;
     }
 
     /* ── Dateiname Anfangsbilanz je nach Runde anpassen ─────────────────── */
