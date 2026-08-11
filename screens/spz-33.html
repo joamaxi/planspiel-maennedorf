@@ -198,7 +198,38 @@
 
       grid.appendChild(colLeft);
       grid.appendChild(colRight);
+
+      /* Werte global merken für Export */
+      window._erExport = {
+        Ertraege_Spitalbetrieb:    v('Ertraege_Spitalbetrieb', 0),
+        Andere_Ertraege:           v('Andere_Ertraege', 0),
+        Ausserordentliche_Ertraege:v('Ausserordentliche_Ertraege', 0),
+        TOTAL_Betriebsertrag:      totalBetrieb,
+        Variable_Kosten_Spital:    v('Variable_Kosten_Spital', 0),
+        Variable_Kosten_Medikamente: v('Variable_Kosten_Medikamente', 0),
+        Variable_Kostenreduktion:  v('Variable_Kostenreduktion', 0),
+        TOTAL_Variable_Kosten:     totalVar,
+        Deckungsbeitrag_1:         db1,
+        Personalaufwand:           v('Personalaufwand', 0),
+        Kosten_Projekte:           v('Kosten_Projekte', 0),
+        Lebensmittel:              v('Lebensmittel', 0),
+        Unterhalt:                 v('Unterhalt', 0),
+        Energie:                   v('Energie', 0),
+        Buero:                     v('Buero', 0),
+        Rekrutierung:              v('Rekrutierung', 0),
+        Ausserordentliche_Aufwaende: v('Ausserordentliche', 0),
+        TOTAL_Fixkosten:           totalFix,
+        EBITDAR:                   ebitdar,
+        Mietzins:                  v('Mietzins', 0),
+        Abschreibungen:            abschreibungen,
+        EBIT:                      ebit,
+        Zinsen_Bank:               zinsen,
+        EBT:                       ebt,
+        Steuern:                   steuern,
+        Jahresergebnis:            jahresergebnis
+      };
     })();
+
   </script>
 </body>
 </html>

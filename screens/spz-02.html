@@ -435,7 +435,21 @@
     (function() {
       const data = getLS('zufriedenheiten');
       if (!data) return;
-      const arr  = data.Zufriedenheiten || data.zufriedenheiten || data;
+      const cachedNames = getLS('zufNamen') || {};
+      const raw  = data.Zufriedenheiten || data.zufriedenheiten || data;
+      const arr  = Array.isArray(raw) ? raw
+        : Object.entries(raw)
+            .filter(([k]) => !k.endsWith('_NPR'))
+            .map(([k, val]) => ({
+              Zufriedenheit_Kuerzel: k,
+              Zufriedenheit_Name: cachedNames[k] || k,
+              Zufriedenheit_Wert: Number(val) || 0
+            }));
+      /* Namen cachen, solange Array-Format mit echten Namen vorliegt */
+      if (Array.isArray(raw) && arr.some(z => z.Zufriedenheit_Name !== z.Zufriedenheit_Kuerzel)) {
+        const nm = {}; arr.forEach(z => { nm[z.Zufriedenheit_Kuerzel] = z.Zufriedenheit_Name; });
+        localStorage.setItem('zufNamen', JSON.stringify(nm));
+      }
       const container = document.getElementById('zuf-rows');
 
       arr.forEach(z => {

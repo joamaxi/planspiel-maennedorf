@@ -263,12 +263,10 @@
     document.getElementById('val-zinsen').textContent = zinsen;
 
     /* ══ Transfer beim Weiter-Klick ══════════════════════════════════════ */
-    let done = false;
     document.addEventListener('nav:next', () => {
-      if (done) return;
-      done = true;
+      if (localStorage.getItem('done_spz30') === 'true') return;
 
-      const schulden = startSchuld;
+      const schulden  = startSchuld;
       const er        = getLS('erfolgsrechnung') || {};
       const protokoll = getLS('protokoll')       || [];
       const teamLabel = localStorage.getItem('klinikName') || `Team ${teamNr}`;
@@ -301,6 +299,7 @@
         betrag: zinsen, team: teamLabel
       });
       setLS('protokoll', protokoll);
+      localStorage.setItem('done_spz30', 'true');
     });
   </script>
 </body>

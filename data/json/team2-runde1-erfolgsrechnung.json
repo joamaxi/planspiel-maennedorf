@@ -1,0 +1,33 @@
+{
+  "teamNr": 2,
+  "teamName": "Joachim Klinik",
+  "rundeNr": 1,
+  "Erfolgsrechnung": {
+    "Ertraege_Spitalbetrieb": 486,
+    "Andere_Ertraege": 24,
+    "Ausserordentliche_Ertraege": 5,
+    "TOTAL_Betriebsertrag": 515,
+    "Variable_Kosten_Spital": 328,
+    "Variable_Kosten_Medikamente": 10,
+    "Variable_Kostenreduktion": 7,
+    "TOTAL_Variable_Kosten": 331,
+    "Deckungsbeitrag_1": 184,
+    "Personalaufwand": 18,
+    "Kosten_Projekte": 57,
+    "Lebensmittel": 3,
+    "Unterhalt": 2,
+    "Energie": 1,
+    "Buero": 3,
+    "Rekrutierung": 5,
+    "Ausserordentliche_Aufwaende": 0,
+    "TOTAL_Fixkosten": 89,
+    "EBITDAR": 95,
+    "Mietzins": 1,
+    "Abschreibungen": 10,
+    "EBIT": 84,
+    "Zinsen_Bank": 8,
+    "EBT": 76,
+    "Steuern": 6,
+    "Jahresergebnis": 70
+  }
+}

@@ -161,6 +161,7 @@
     .bil-row.bil-total { font-weight: 700; color: #000; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 2px 0; }
     .bil-row.bil-total .bil-val { font-weight: 800; }
     .bil-row.bil-highlight { background: #fff3cc; }
+    .bil-row.bil-total.bil-highlight { background: var(--sum-bg); }
     .bil-spacer { height: 5px; }
 
     /* Zeilen/Karten nicht mitten durchschneiden */
@@ -347,8 +348,25 @@
         const ORDER = ['MIZI', 'PAZI', 'BEZI', 'ZUZI', 'EIZI'];
 
         const zufData  = getLS('zufriedenheiten');
-        const zufArr   = zufData ? (zufData.Zufriedenheiten || zufData.zufriedenheiten || zufData) : [];
+        const cachedNames = getLS('zufNamen') || {};
+        const zufRaw   = zufData ? (zufData.Zufriedenheiten || zufData.zufriedenheiten || zufData) : [];
+        const zufArr   = Array.isArray(zufRaw) ? zufRaw
+          : (zufRaw && typeof zufRaw === 'object')
+            ? Object.entries(zufRaw)
+                .filter(([k]) => !k.endsWith('_NPR'))
+                .map(([k, val]) => ({
+                  Zufriedenheit_Kuerzel: k,
+                  Zufriedenheit_Name: cachedNames[k] || k,
+                  Zufriedenheit_Wert: Number(val) || 0
+                }))
+            : [];
         if (zufArr.length === 0) return;
+
+        /* Namen cachen falls Array-Format mit echten Namen vorliegt */
+        if (Array.isArray(zufRaw) && zufArr.some(z => z.Zufriedenheit_Name !== z.Zufriedenheit_Kuerzel)) {
+          const nm = {}; zufArr.forEach(z => { nm[z.Zufriedenheit_Kuerzel] = z.Zufriedenheit_Name; });
+          localStorage.setItem('zufNamen', JSON.stringify(nm));
+        }
 
         const anfangMap = {}, nameMap = {};
         zufArr.forEach(z => {
@@ -394,7 +412,7 @@
           const cls  = periode > 0 ? 'color:#3a7a3a;' : (periode < 0 ? 'color:#a03030;' : 'color:#888;');
           const tr   = document.createElement('tr');
           tr.innerHTML = `
-            <td>${nameMap[k] || k} <span style="font-weight:400;color:#aaa;">(${k})</span></td>
+            <td><span style="display:block;">${nameMap[k] || k}</span><span style="display:block;font-weight:400;color:#aaa;font-size:0.8em;">${k}</span></td>
             <td>${anfang}</td>
             <td><span style="font-weight:700;${cls}">${sign}${periode}</span></td>
             <td>${ende}</td>`;
@@ -549,19 +567,21 @@
           const _pMap    = {};
           _allRecs.forEach(r => { if (!_pMap[r.projektNr]) _pMap[r.projektNr] = []; _pMap[r.projektNr].push(r); });
           let investInfra = 0, investGeb = 0;
+          let rateInfraEff = rateInfra;
           Object.entries(_entsch).forEach(([nr, ent]) => {
-            if (!ent.levelKosten) return;
+            if (ent.levelKosten === undefined || ent.levelKosten === null) return;
             const recs = _pMap[Number(nr)] || [];
             const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
                       || recs.find(r => r.levelKosten === ent.levelKosten);
             if (!rec) return;
             if (rec.option1 === 'Investitionen Infrastruktur') investInfra += Number(rec.optionWert1) || 0;
             if (rec.option1 === 'Investitionen Gebäude')       investGeb   += Number(rec.optionWert1) || 0;
+            if (rec.option1 === 'Abschreibung Infrastruktur')  rateInfraEff = Number(rec.optionWert1) || rateInfra;
           });
 
           const done29      = localStorage.getItem('done_spz29') === 'true';
           const infraInv    = investInfra;
-          const infraAbschr = done29 ? Math.round((infraStart + infraInv) * rateInfra / 100) : 0;
+          const infraAbschr = done29 ? Math.round((infraStart + infraInv) * rateInfraEff / 100) : 0;
           const infraEnde   = infraStart + infraInv - infraAbschr;
 
           const gebInv      = investGeb;

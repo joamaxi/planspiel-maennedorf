@@ -217,13 +217,15 @@
 
       function closeModal() { backdrop.classList.remove('visible'); }
 
-      /* Letzte Runde bereits erreicht → nur Warnhinweis, kein Reset */
+      /* Letzte Runde bereits erreicht → Hinweis + Weiterleitung zu spz-00 */
       if (maxR && runde >= maxR) {
         title.textContent = 'Spiel beendet';
-        text.textContent  = `Die letzte Runde (${maxR} von ${maxR}) ist bereits erreicht.`;
+        text.textContent  = `Die letzte Runde (${maxR} von ${maxR}) ist bereits erreicht. Das Spiel wird beendet.`;
         actions.innerHTML = '<button class="confirm-btn ok" id="confirm-ok">OK</button>';
         backdrop.classList.add('visible');
-        document.getElementById('confirm-ok').addEventListener('click', closeModal);
+        document.getElementById('confirm-ok').addEventListener('click', () => {
+          window.location.href = 'spz-00.html';
+        });
         return;
       }
 

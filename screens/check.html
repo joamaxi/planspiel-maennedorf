@@ -578,7 +578,24 @@
         const ORDER = ['MIZI', 'PAZI', 'BEZI', 'ZUZI', 'EIZI'];
 
         const zufData  = getLS('zufriedenheiten');
-        const zufArr   = zufData ? (zufData.Zufriedenheiten || zufData.zufriedenheiten || zufData) : [];
+        let zufRaw = zufData ? (zufData.Zufriedenheiten || zufData.zufriedenheiten || zufData) : [];
+
+        const cachedNames = getLS('zufNamen') || {};
+        /* Beide Formate unterstützen: Array oder Objekt {MIZI: 85, ...} */
+        let zufArr;
+        if (Array.isArray(zufRaw)) {
+          zufArr = zufRaw;
+        } else if (zufRaw && typeof zufRaw === 'object') {
+          zufArr = Object.entries(zufRaw)
+            .filter(([k]) => !k.endsWith('_NPR'))
+            .map(([k, val]) => ({
+              Zufriedenheit_Kuerzel: k,
+              Zufriedenheit_Name: cachedNames[k] || k,
+              Zufriedenheit_Wert: Number(val) || 0
+            }));
+        } else {
+          zufArr = [];
+        }
         if (zufArr.length === 0) return;
 
         const anfangMap = {}, nameMap = {};
@@ -792,19 +809,21 @@
           const _pMap    = {};
           _allRecs.forEach(r => { if (!_pMap[r.projektNr]) _pMap[r.projektNr] = []; _pMap[r.projektNr].push(r); });
           let investInfra = 0, investGeb = 0;
+          let rateInfraEff = rateInfra;
           Object.entries(_entsch).forEach(([nr, ent]) => {
             if (!ent.levelKosten) return;
             const recs = _pMap[Number(nr)] || [];
             const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
                       || recs.find(r => r.levelKosten === ent.levelKosten);
             if (!rec) return;
-            if (rec.option1 === 'Investitionen Infrastruktur') investInfra += Number(rec.optionWert1) || 0;
-            if (rec.option1 === 'Investitionen Gebäude')       investGeb   += Number(rec.optionWert1) || 0;
+            if (rec.option1 === 'Investitionen Infrastruktur') investInfra  += Number(rec.optionWert1) || 0;
+            if (rec.option1 === 'Investitionen Gebäude')       investGeb    += Number(rec.optionWert1) || 0;
+            if (rec.option1 === 'Abschreibung Infrastruktur')  rateInfraEff  = Number(rec.optionWert1) || rateInfra;
           });
 
           const done29      = localStorage.getItem('done_spz29') === 'true';
           const infraInv    = investInfra;
-          const infraAbschr = done29 ? Math.round((infraStart + infraInv) * rateInfra / 100) : 0;
+          const infraAbschr = done29 ? Math.round((infraStart + infraInv) * rateInfraEff / 100) : 0;
           const infraEnde   = infraStart + infraInv - infraAbschr;
 
           const gebInv      = investGeb;

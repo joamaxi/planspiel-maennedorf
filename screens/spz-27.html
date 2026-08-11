@@ -243,7 +243,16 @@
 
       /* Anfangswerte aus zufriedenheiten-Import */
       const zufData  = getLS('zufriedenheiten');
-      const zufArr   = zufData ? (zufData.Zufriedenheiten || zufData.zufriedenheiten || zufData) : [];
+      const cachedNames = getLS('zufNamen') || {};
+      const zufRaw   = zufData ? (zufData.Zufriedenheiten || zufData.zufriedenheiten || zufData) : [];
+      const zufArr   = Array.isArray(zufRaw) ? zufRaw
+        : Object.entries(zufRaw)
+            .filter(([k]) => !k.endsWith('_NPR'))
+            .map(([k, val]) => ({
+              Zufriedenheit_Kuerzel: k,
+              Zufriedenheit_Name: cachedNames[k] || k,
+              Zufriedenheit_Wert: Number(val) || 0
+            }));
       const anfangMap = {};
       const nameMap   = {};
       zufArr.forEach(z => {
@@ -251,6 +260,10 @@
         anfangMap[k] = Number(z.Zufriedenheit_Wert) || 0;
         nameMap[k]   = z.Zufriedenheit_Name || k;
       });
+      /* Namen für künftige Fallbacks cachen (nur wenn Array-Format mit echten Namen) */
+      if (Array.isArray(zufRaw) && zufArr.some(z => z.Zufriedenheit_Name !== z.Zufriedenheit_Kuerzel)) {
+        localStorage.setItem('zufNamen', JSON.stringify(nameMap));
+      }
 
       /* NPR-Punkte aus spz-17 */
       const zufExtra = getLS('zufriedenheiten') || {};
@@ -323,29 +336,47 @@
       const zufData = getLS('zufriedenheiten');
       if (!zufData) return;
 
-      const zufArr  = zufData.Zufriedenheiten || zufData.zufriedenheiten || zufData;
-      const endeMap = window._zufEndeMap || {};
+      const endeMap  = window._zufEndeMap || {};
+      const cachedN  = getLS('zufNamen') || {};
+      const zufRaw   = zufData.Zufriedenheiten || zufData.zufriedenheiten || zufData;
+      const zufArr   = Array.isArray(zufRaw) ? zufRaw
+        : Object.entries(zufRaw)
+            .filter(([k]) => !k.endsWith('_NPR'))
+            .map(([k, val]) => ({
+              Zufriedenheit_Kuerzel: k,
+              Zufriedenheit_Name: cachedN[k] || k,
+              Zufriedenheit_Wert: Number(val) || 0
+            }));
 
-      /* Ende-Wert als neuer Anfangswert für nächste Runde + als Objekt exportieren */
-      const zufObj = {};
-      zufArr.forEach(z => {
-        const k    = z.Zufriedenheit_Kuerzel;
-        const ende = endeMap[k];
-        zufObj[k]  = ende !== undefined ? ende : z.Zufriedenheit_Wert;
-      });
-      const exportData = { Zufriedenheiten: zufObj };
+      /* Ende-Wert als neuer Anfangswert für nächste Runde — Array-Format beibehalten */
+      const exportArr = zufArr.map(z => ({
+        ...z,
+        Zufriedenheit_Wert: endeMap[z.Zufriedenheit_Kuerzel] ?? z.Zufriedenheit_Wert
+      }));
 
-      /* Dateiname: team{nr}-runde{runde}-zufriedenheiten.json */
+      /* Projekt 105 (Marktpositionierung): optionWert2 = Zugang zum Arbeitsmarkt */
+      const _entscheide  = getLS('projektEntscheide') || {};
+      const _rawProjekte = getLS('projekte');
+      const _alleRecs    = _rawProjekte ? (_rawProjekte.projekte || _rawProjekte) : [];
+      const _proj105     = _alleRecs.filter(r => r.projektNr === 105);
+      let zugangArbeitsmarkt = 0;
+      const _ent105 = _entscheide[105];
+      if (_ent105 && _ent105.levelKosten !== undefined && _ent105.levelKosten !== null) {
+        const _rec = _proj105.find(r => r.levelKosten === _ent105.levelKosten && r.levelBezeichnung === _ent105.levelBezeichnung)
+                  || _proj105.find(r => r.levelKosten === _ent105.levelKosten);
+        if (_rec) zugangArbeitsmarkt = Number(_rec.optionWert2) || 0;
+      }
+
+      /* Dateiname: team{nr}-runde{runde+1}-zufriedenheiten.json */
       const team      = localStorage.getItem('teamNumber') || '0';
       const teamName  = localStorage.getItem('klinikName') || '';
       const runde     = localStorage.getItem('rundeNumber') || '1';
       const filename  = `team${team}-runde${Number(runde) + 1}-zufriedenheiten.json`;
 
-      exportData.teamNr   = Number(team);
-      exportData.teamName = teamName;
-      exportData.rundeNr  = Number(runde);
-      delete exportData.MIZI_NPR;
-      delete exportData.PAZI_NPR;
+      const exportData = {
+        Zufriedenheiten: exportArr,
+        Zugang_Arbeitsmarkt: zugangArbeitsmarkt
+      };
 
       /* Direkt in data/json speichern (keepalive: überlebt die Seitennavigation) */
       fetch('../data/json/save.php', {

@@ -1,0 +1,33 @@
+{
+  "teamNr": 1,
+  "teamName": "Harry Klinik",
+  "rundeNr": 1,
+  "Erfolgsrechnung": {
+    "Ertraege_Spitalbetrieb": 497,
+    "Andere_Ertraege": 25,
+    "Ausserordentliche_Ertraege": 5,
+    "TOTAL_Betriebsertrag": 527,
+    "Variable_Kosten_Spital": 339,
+    "Variable_Kosten_Medikamente": 15,
+    "Variable_Kostenreduktion": 0,
+    "TOTAL_Variable_Kosten": 354,
+    "Deckungsbeitrag_1": 173,
+    "Personalaufwand": 23,
+    "Kosten_Projekte": 10,
+    "Lebensmittel": 3,
+    "Unterhalt": 2,
+    "Energie": 1,
+    "Buero": 3,
+    "Rekrutierung": 5,
+    "Ausserordentliche_Aufwaende": 3,
+    "TOTAL_Fixkosten": 50,
+    "EBITDAR": 123,
+    "Mietzins": 1,
+    "Abschreibungen": 10,
+    "EBIT": 112,
+    "Zinsen_Bank": 8,
+    "EBT": 104,
+    "Steuern": 6,
+    "Jahresergebnis": 98
+  }
+}

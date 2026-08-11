@@ -1,0 +1,33 @@
+{
+  "teamNr": 4,
+  "teamName": "Christian Klinik",
+  "rundeNr": 1,
+  "Erfolgsrechnung": {
+    "Ertraege_Spitalbetrieb": 614,
+    "Andere_Ertraege": 31,
+    "Ausserordentliche_Ertraege": 5,
+    "TOTAL_Betriebsertrag": 650,
+    "Variable_Kosten_Spital": 401,
+    "Variable_Kosten_Medikamente": 21,
+    "Variable_Kostenreduktion": 8,
+    "TOTAL_Variable_Kosten": 414,
+    "Deckungsbeitrag_1": 236,
+    "Personalaufwand": 21,
+    "Kosten_Projekte": 46,
+    "Lebensmittel": 3,
+    "Unterhalt": 2,
+    "Energie": 1,
+    "Buero": 3,
+    "Rekrutierung": 5,
+    "Ausserordentliche_Aufwaende": 2,
+    "TOTAL_Fixkosten": 83,
+    "EBITDAR": 153,
+    "Mietzins": 1,
+    "Abschreibungen": 10,
+    "EBIT": 142,
+    "Zinsen_Bank": 11,
+    "EBT": 131,
+    "Steuern": 7,
+    "Jahresergebnis": 124
+  }
+}

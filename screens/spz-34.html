@@ -149,19 +149,21 @@
       _allRecs.forEach(r => { if (!_pMap[r.projektNr]) _pMap[r.projektNr] = []; _pMap[r.projektNr].push(r); });
 
       let investInfra = 0, investGeb = 0;
+      let rateInfraEff = rateInfra;
       Object.entries(_entsch).forEach(([nr, ent]) => {
         if (!ent.levelKosten) return;
         const recs = _pMap[Number(nr)] || [];
         const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
                   || recs.find(r => r.levelKosten === ent.levelKosten);
         if (!rec) return;
-        if (rec.option1 === 'Investitionen Infrastruktur') investInfra += Number(rec.optionWert1) || 0;
-        if (rec.option1 === 'Investitionen Gebäude')       investGeb   += Number(rec.optionWert1) || 0;
+        if (rec.option1 === 'Investitionen Infrastruktur') investInfra  += Number(rec.optionWert1) || 0;
+        if (rec.option1 === 'Investitionen Gebäude')       investGeb    += Number(rec.optionWert1) || 0;
+        if (rec.option1 === 'Abschreibung Infrastruktur')  rateInfraEff  = Number(rec.optionWert1) || rateInfra;
       });
 
       const done29      = localStorage.getItem('done_spz29') === 'true';
       const infraInv    = investInfra;
-      const infraAbschr = done29 ? Math.round((infraStart + infraInv) * rateInfra / 100) : 0;
+      const infraAbschr = done29 ? Math.round((infraStart + infraInv) * rateInfraEff / 100) : 0;
       const infraEnde   = infraStart + infraInv - infraAbschr;
 
       const gebInv      = investGeb;
@@ -311,14 +313,92 @@
         ? { ...exp.bilanzData, Anfangsbilanz: newArr }
         : newArr;
 
-      const filename = `team${team}-runde${Number(runde) + 1}-aBilanz.json`;
+      const teamName = localStorage.getItem('klinikName') || '';
+
+      /* Erfolgsrechnung aus localStorage für eBilanz */
+      const er = getLS('erfolgsrechnung') || {};
+      function erV(k) { const x = er[k]; return (x !== undefined && x !== null) ? Number(x) || 0 : 0; }
+      const done29         = localStorage.getItem('done_spz29') === 'true';
+      const er_abschr      = done29 ? (erV('Abschreibungen') || 0) : 0;
+      const er_totalBetrieb = erV('Ertraege_Spitalbetrieb') + erV('Andere_Ertraege') + erV('Ausserordentliche_Ertraege');
+      const er_totalVar     = Math.round(erV('Variable_Kosten_Spital') + erV('Variable_Kosten_Medikamente') - erV('Variable_Kostenreduktion'));
+      const er_db1          = er_totalBetrieb - er_totalVar;
+      const er_totalFix     = erV('Personalaufwand') + erV('Kosten_Projekte') + erV('Lebensmittel') + erV('Unterhalt') + erV('Energie') + erV('Buero') + erV('Rekrutierung') + erV('Ausserordentliche');
+      const er_ebitdar      = er_db1 - er_totalFix;
+      const er_ebit         = er_ebitdar - erV('Mietzins') - er_abschr;
+      const er_ebt          = er_ebit - erV('Zinsen_Bank');
+      const er_jahresergebnis = er_ebt - erV('Steuern');
+
+      /* eBilanz: Endwerte der aktuellen Runde für FileMaker */
+      const eBilanzData = {
+        teamNr:   Number(team),
+        teamName: teamName,
+        rundeNr:  Number(runde),
+        Bilanz: {
+          Infrastruktur_Anlage:         exp.infraEnde,
+          Gebaude_Anlage:               exp.gebEnde,
+          FluessigeMittel:              exp.fluessig,
+          Vorraete:                     exp.vorraete,
+          Forderungen:                  exp.forderungen,
+          Aktive_Rechnungsabgrenzung:   exp.aktRa,
+          Immaterielle_Werte_Anlage:    exp.immateriell,
+          TOTAL_Umlaufvermoegen:        totUmlauf,
+          TOTAL_Anlagevermögen:         totAnlage,
+          TOTAL_Aktiven:                totAktiven,
+          Verbindlichkeiten:            exp.verbindlich,
+          Passive_Rechnungsabgrenzung:  exp.passRa,
+          Ruckstellungen:               exp.rueckst,
+          Darlehen_Bank:                exp.darlehen,
+          Fremdkapital:                 totFremd,
+          Eigenkapital:                 exp.eigenkapitalTotal,
+          TOTAL_Passiven:               totPassiv
+        },
+        Erfolgsrechnung: {
+          Ertraege_Spitalbetrieb:       erV('Ertraege_Spitalbetrieb'),
+          Andere_Ertraege:              erV('Andere_Ertraege'),
+          Ausserordentliche_Ertraege:   erV('Ausserordentliche_Ertraege'),
+          TOTAL_Betriebsertrag:         er_totalBetrieb,
+          Variable_Kosten_Spital:       erV('Variable_Kosten_Spital'),
+          Variable_Kosten_Medikamente:  erV('Variable_Kosten_Medikamente'),
+          Variable_Kostenreduktion:     erV('Variable_Kostenreduktion'),
+          TOTAL_Variable_Kosten:        er_totalVar,
+          Deckungsbeitrag_1:            er_db1,
+          Personalaufwand:              erV('Personalaufwand'),
+          Kosten_Projekte:              erV('Kosten_Projekte'),
+          Lebensmittel:                 erV('Lebensmittel'),
+          Unterhalt:                    erV('Unterhalt'),
+          Energie:                      erV('Energie'),
+          Buero:                        erV('Buero'),
+          Rekrutierung:                 erV('Rekrutierung'),
+          Ausserordentliche_Aufwaende:  erV('Ausserordentliche'),
+          TOTAL_Fixkosten:              er_totalFix,
+          EBITDAR:                      er_ebitdar,
+          Mietzins:                     erV('Mietzins'),
+          Abschreibungen:               er_abschr,
+          EBIT:                         er_ebit,
+          Zinsen_Bank:                  erV('Zinsen_Bank'),
+          EBT:                          er_ebt,
+          Steuern:                      erV('Steuern'),
+          Jahresergebnis:               er_jahresergebnis
+        }
+      };
+
+      const filenameA = `team${team}-runde${Number(runde) + 1}-aBilanz.json`;
+      const filenameE = `team${team}-runde${runde}-eBilanz.json`;
 
       fetch('../data/json/save.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename, data: JSON.stringify(exportData, null, 2) }),
+        body: JSON.stringify({ filename: filenameA, data: JSON.stringify(exportData, null, 2) }),
         keepalive: true
-      }).catch(err => console.error('Bilanz-Export fehlgeschlagen:', err));
+      }).catch(err => console.error('Bilanz-Export (aBilanz) fehlgeschlagen:', err));
+
+      fetch('../data/json/save.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: filenameE, data: JSON.stringify(eBilanzData, null, 2) }),
+        keepalive: true
+      }).catch(err => console.error('Bilanz-Export (eBilanz) fehlgeschlagen:', err));
     }, true);
   </script>
 </body>
