@@ -226,7 +226,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-27');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
       function parseBody(t) {
         const p = (t||'').split('\r');
@@ -292,11 +292,10 @@
           r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung
         ) || records.find(r => r.levelKosten === ent.levelKosten);
         if (!rec) return;
-        for (let i = 1; i <= 3; i++) {
-          const name = rec[`wirkungName${i}`];
-          const val  = Number(rec[`wirkungWert${i}`]) || 0;
-          if (name && projektWirk[name] !== undefined) projektWirk[name] += val;
-        }
+        (rec.wirkungen || []).forEach(w => {
+          const val = Number(w.wert) || 0;
+          if (w.name && projektWirk[w.name] !== undefined) projektWirk[w.name] += val;
+        });
       });
 
       /* Periode = Projektwirkung + NPR (nur MIZI/PAZI) */
@@ -364,7 +363,8 @@
       if (_ent105 && _ent105.levelKosten !== undefined && _ent105.levelKosten !== null) {
         const _rec = _proj105.find(r => r.levelKosten === _ent105.levelKosten && r.levelBezeichnung === _ent105.levelBezeichnung)
                   || _proj105.find(r => r.levelKosten === _ent105.levelKosten);
-        if (_rec) zugangArbeitsmarkt = Number(_rec.optionWert2) || 0;
+        const _opt = _rec && (_rec.optionen || []).find(o => o.name === 'Zugang zum Arbeitsmarkt');
+        if (_opt) zugangArbeitsmarkt = Number(_opt.wert) || 0;
       }
 
       /* Dateiname: team{nr}-runde{runde+1}-zufriedenheiten.json */

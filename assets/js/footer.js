@@ -1,15 +1,34 @@
 export function renderFooter() {
-  const spielzugLabel = document.body?.dataset?.spielzugLabel || 'Spielzug';
-  const currentStep   = Number(document.body?.dataset?.stepCurrent || 1);
-
-  /* Read Spielzug_Betrieb from einstellungen localStorage */
-  let totalSteps = Number(document.body?.dataset?.stepTotal || 20);
+  /* Try dynamic lookup via Spielaufgaben.json (screenFile match) */
+  let spielaufgaben = null;
   try {
-    const einst = JSON.parse(localStorage.getItem('einstellungen'));
-    const arr = einst ? (einst.Einstellungen || einst) : [];
-    const sb = Number(Array.isArray(arr) ? arr[0]?.Spielzug_Betrieb : arr.Spielzug_Betrieb);
-    if (sb > 0) totalSteps = sb;
-  } catch(e) { /* fallback to data-step-total */ }
+    const raw = JSON.parse(localStorage.getItem('spielaufgaben'));
+    spielaufgaben = raw ? (raw.spielaufgaben || raw) : null;
+  } catch(e) { /* no data yet */ }
+
+  const currentFile = window.location.pathname.split('/').pop();
+  const ownEntry = Array.isArray(spielaufgaben)
+    ? spielaufgaben.find(e => e.screenFile === currentFile)
+    : null;
+
+  let currentStep, totalSteps, spielzugLabel;
+
+  if (ownEntry) {
+    currentStep   = parseInt(String(ownEntry.Spielzug || '').replace(/\D/g, ''), 10) || 1;
+    totalSteps    = spielaufgaben.length;
+    spielzugLabel = `Spielzug ${currentStep}`;
+  } else {
+    /* Fallback for screens without a Spielaufgaben entry (e.g. spz-00.html) */
+    spielzugLabel = document.body?.dataset?.spielzugLabel || 'Spielzug';
+    currentStep   = Number(document.body?.dataset?.stepCurrent || 1);
+    totalSteps    = Number(document.body?.dataset?.stepTotal || 20);
+    try {
+      const einst = JSON.parse(localStorage.getItem('einstellungen'));
+      const arr = einst ? (einst.Einstellungen || einst) : [];
+      const sb = Number(Array.isArray(arr) ? arr[0]?.Spielzug_Betrieb : arr.Spielzug_Betrieb);
+      if (sb > 0) totalSteps = sb;
+    } catch(e) { /* fallback to data-step-total */ }
+  }
 
   let progressHtml = '';
   for (let i = 1; i <= totalSteps; i++) {

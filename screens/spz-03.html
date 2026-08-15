@@ -246,7 +246,7 @@
       if (!data) return;
       const arr  = data.spielaufgaben || data;
       // Ersten spz-03 Eintrag mit AufgabenArt_1 = 'Erklärung'
-      const item = arr.find(e => e.Spielzug === 'spz-03' && e.AufgabenArt_1 === 'Erklärung');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop() && e.AufgabenArt_1 === 'Erklärung');
       if (!item) return;
 
       if (item.AufgabenArt_1)

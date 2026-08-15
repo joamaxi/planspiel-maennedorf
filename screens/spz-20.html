@@ -258,30 +258,11 @@
             <div class="var-col">
 
               <!-- Obere Reihe: 4 Boxen -->
-              <div class="var-grid">
+              <div class="var-grid" id="var-grid">
 
-                <div class="var-box" style="border-color:rgb(230,51,41);">
-                  <div class="var-box-name" style="background:rgb(230,51,41);">Medizin</div>
-                  <div class="var-body">
-                    <div class="var-badge" id="val-medizin">–</div>
-                  </div>
-                </div>
+                <!-- 3 stationäre Marktbereiche: dynamisch per JS vor Ambulant eingefügt -->
 
-                <div class="var-box" style="border-color:rgb(249,178,51);">
-                  <div class="var-box-name" style="background:rgb(249,178,51);">Chirurgie</div>
-                  <div class="var-body">
-                    <div class="var-badge" id="val-chirurgie">–</div>
-                  </div>
-                </div>
-
-                <div class="var-box" style="border-color:rgb(58,170,53);">
-                  <div class="var-box-name" style="background:rgb(58,170,53);">Geburtshilfe</div>
-                  <div class="var-body">
-                    <div class="var-badge" id="val-geburtshilfe">–</div>
-                  </div>
-                </div>
-
-                <div class="var-box" style="border-color:rgb(37,117,176);">
+                <div class="var-box" id="ambulant-box" style="border-color:rgb(37,117,176);">
                   <div class="var-box-name" style="background:rgb(37,117,176);">Ambulant</div>
                   <div class="var-body">
                     <div class="var-badge" id="val-ambulant">–</div>
@@ -328,7 +309,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-20');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
 
       if (item.AufgabenArt_1) document.getElementById('art-1').textContent = item.AufgabenArt_1;
@@ -343,7 +324,19 @@
     /* ══ Variable Kosten berechnen ════════════════════════════════════════ */
     (function() {
 
-      /* kostenTotal-Lookup aus patienten JSON: { marktName+versicherung → kostenTotal } */
+      /* Fallback falls marktStart noch nicht importiert wurde */
+      const FALLBACK_STAT = [
+        { marktName: 'Medizin',      marktNr: 1, rgb: '230,51,41'  },
+        { marktName: 'Chirurgie',    marktNr: 2, rgb: '249,178,51' },
+        { marktName: 'Geburtshilfe', marktNr: 3, rgb: '58,170,53'  },
+      ];
+      const marktData     = getLS('marktStart');
+      const rawMarkt      = marktData ? (marktData.markt || marktData.Marktbereiche || marktData) : [];
+      const alleMarkt     = (Array.isArray(rawMarkt) && rawMarkt.length > 0) ? rawMarkt : FALLBACK_STAT;
+      const bereicheMarkt = alleMarkt.filter(b => (b.marktNr || 0) < 4 && b.marktName !== 'Ambulant');
+      const stationaere   = bereicheMarkt.length > 0 ? bereicheMarkt : FALLBACK_STAT;
+
+      /* kostenTotal-Lookup aus patienten JSON: { marktNr+versicherung → kostenTotal } */
       const raw       = getLS('patienten');
       const eintraege = raw
         ? (Array.isArray(raw) ? raw : (Array.isArray(raw.patienten) ? raw.patienten : []))
@@ -352,49 +345,67 @@
       /* Kosten-Tabelle aufbauen */
       const kostenLookup = {};
       eintraege.forEach(e => {
-        const key = `${e.marktName}|${e.versicherung}`;
+        const key = `${e.marktNr}|${e.versicherung}`;
         kostenLookup[key] = Number(e.kostenTotal) || 0;
       });
 
-      /* Patientenzahlen aus spz-14 (patientenAufnahme) */
+      /* Pauschaler Ambulant-Kostensatz (eigener Marktbereich "Ambulant", z.B. marktNr 4) –
+         Fallback falls kein pro-Bereich-Ambulant-Eintrag existiert (siehe unten) */
+      const ambulantMarkt   = alleMarkt.find(m => m.marktName === 'Ambulant' || m.marktNr === 4);
+      const ambulantMarktNr = ambulantMarkt ? ambulantMarkt.marktNr : 4;
+      const ambulantEntry   = eintraege.find(e => e.marktNr === ambulantMarktNr);
+      const ambulantFlatRate = ambulantEntry ? (Number(ambulantEntry.kostenTotal) || 0) : 0;
+
+      /* Patientenzahlen aus spz-14 (patientenAufnahme), Schlüssel = marktNr */
       const aufnahme = getLS('patientenAufnahme') || {};
 
-      function anzahlBereich(name) {
-        const b = aufnahme[name];
-        if (!b) return 0;
-        if (typeof b === 'object') return (Number(b.PHP) || 0) + (Number(b.Allgemein) || 0);
-        return Number(b) || 0;
-      }
-
-      function kostenBereich(name) {
-        const b = aufnahme[name];
+      function kostenBereich(marktNr) {
+        const b = aufnahme[marktNr];
         if (!b || typeof b !== 'object') return 0;
-        const php  = (Number(b.PHP)       || 0) * (kostenLookup[`${name}|Halbprivat/Privat`] || 0);
-        const allg = (Number(b.Allgemein) || 0) * (kostenLookup[`${name}|Allgemein`]          || 0);
+        const php  = (Number(b.PHP)       || 0) * (kostenLookup[`${marktNr}|Halbprivat/Privat`] || 0);
+        const allg = (Number(b.Allgemein) || 0) * (kostenLookup[`${marktNr}|Allgemein`]          || 0);
         return php + allg;
       }
 
-      /* Ambulant: Kosten pro Marktbereich summieren */
-      const ambulant = ['Medizin', 'Chirurgie', 'Geburtshilfe'].reduce((sum, name) => {
-        const b = aufnahme[name];
-        if (!b || typeof b !== 'object') return sum;
-        return sum + (Number(b.Ambulant) || 0) * (kostenLookup[`${name}|`] || 0);
-      }, 0);
-
-      /* spz-19 Aktive Rechnungsabgrenzung pro Bereich abziehen */
+      /* spz-19 Aktive Rechnungsabgrenzung pro Bereich abziehen (Schlüssel = marktNr) */
       const spz19 = getLS('spz19_bereiche') || {};
 
-      const medizin      = (kostenBereich('Medizin')      || 0) - (Number(spz19.Medizin)      || 0);
-      const chirurgie    = (kostenBereich('Chirurgie')     || 0) - (Number(spz19.Chirurgie)    || 0);
-      const geburtshilfe = (kostenBereich('Geburtshilfe') || 0) - (Number(spz19.Geburtshilfe) || 0);
-      const total        = medizin + chirurgie + geburtshilfe + ambulant;
+      /* Boxen dynamisch einfügen + Werte pro Bereich berechnen */
+      const grid        = document.getElementById('var-grid');
+      const ambulantBox = document.getElementById('ambulant-box');
+      let stationaerSum = 0;
+      let ambulantSum   = 0;
+
+      stationaere.forEach(b => {
+        const rgb  = b.rgb || '160,184,200';
+        const wert = kostenBereich(b.marktNr) - (Number(spz19[b.marktNr]) || 0);
+        stationaerSum += wert;
+
+        const bAufnahme = aufnahme[b.marktNr];
+        if (bAufnahme && typeof bAufnahme === 'object') {
+          /* Pro-Bereich-Ambulant-Satz nutzen falls vorhanden (Bülach-Stil),
+             sonst auf den pauschalen Ambulant-Marktsatz zurückfallen (Männedorf-Stil) */
+          const rate = kostenLookup[`${b.marktNr}|`] || ambulantFlatRate;
+          ambulantSum += (Number(bAufnahme.Ambulant) || 0) * rate;
+        }
+
+        const box = document.createElement('div');
+        box.className = 'var-box';
+        box.style.borderColor = `rgb(${rgb})`;
+        box.innerHTML = `
+          <div class="var-box-name" style="background:rgb(${rgb});">${b.marktName}</div>
+          <div class="var-body">
+            <div class="var-badge">${wert || '–'}</div>
+          </div>
+        `;
+        grid.insertBefore(box, ambulantBox);
+      });
+
+      const total = stationaerSum + ambulantSum;
 
       /* Anzeige */
-      document.getElementById('val-medizin').textContent      = medizin      || '–';
-      document.getElementById('val-chirurgie').textContent    = chirurgie    || '–';
-      document.getElementById('val-geburtshilfe').textContent = geburtshilfe || '–';
-      document.getElementById('val-ambulant').textContent     = ambulant  || '–';
-      document.getElementById('val-total').textContent        = total        || '–';
+      document.getElementById('val-ambulant').textContent = ambulantSum || '–';
+      document.getElementById('val-total').textContent    = total       || '–';
 
       /* Total speichern für Transfer */
       if (total > 0) localStorage.setItem('spz20_varKosten', total);

@@ -513,6 +513,7 @@
       { key: 'ratioWerte',      label: 'Pflegeintensität',                       default: 'ratioWerte.json' },
       { key: 'patienten',       label: 'Patienten Kosten und Ertrag',            default: 'aPatienten.json' },
       { key: 'projekte',        label: 'Projekte',                               default: 'projekte.json' },
+      { key: 'projektPeriode',  label: 'Projekt-Perioden-Sperre',                default: 'projektPeriode.json' },
       { key: 'betriebskosten',  label: 'Betriebskosten',                         default: 'betriebskosten.json' },
       { key: 'handbuch',        label: 'Handbuch-Zuordnung',                     default: 'handbuch.json' },
       { key: 'hinweis',         label: 'Hinweise',                               default: 'hinweis.json' },
@@ -617,6 +618,15 @@
           inpZuf.value = 'zufriedenheiten.json';
         } else if (t && r) {
           inpZuf.value = `team${t}-runde${r}-zufriedenheiten.json`;
+        }
+      }
+
+      const inpPeriode = document.getElementById('input-projektPeriode');
+      if (inpPeriode) {
+        if (!r || r === '1') {
+          inpPeriode.value = 'projektPeriode.json';
+        } else if (t && r) {
+          inpPeriode.value = `team${t}-runde${r}-projektPeriode.json`;
         }
       }
     }

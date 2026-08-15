@@ -186,7 +186,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-29');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
       function parseBody(t) {
         const p = (t||'').split('\r');
@@ -214,8 +214,9 @@
     const bilanz       = bilanzEntry?.Bilanz || {};
 
     /* Sätze aus bilanzStart */
-    let rateInfra = Number(bilanzEntry?.AbschreibungAktuell) || 0;
+    let rateInfra = Number(bilanzEntry?.AbschreibungMaschinen) || 0;
     const rateGeb = Number(bilanzEntry?.AbschreibungGebaude) || 0;
+    const reduktionsSatz = Number(bilanzEntry?.Abschreibungsreduktion) || 0;
 
     /* Projekt-Investitionen aus projektEntscheide + projekte */
     const entscheide = getLS('projektEntscheide') || {};
@@ -237,11 +238,11 @@
         r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung
       ) || records.find(r => r.levelKosten === ent.levelKosten);
       if (!rec) return;
-      const opt  = rec.option1 || '';
-      const wert = Number(rec.optionWert1) || 0;
-      if (opt === 'Investitionen Infrastruktur') investInfra += wert;
-      if (opt === 'Investitionen Gebäude')       investGeb   += wert;
-      if (opt === 'Abschreibung Infrastruktur')  rateInfra    = wert;
+      (rec.optionen || []).forEach(o => {
+        if (o.name === 'Abschreibung Maschinen')       investInfra += ent.levelKosten;
+        if (o.name === 'Abschreibung Gebäude')         investGeb   += ent.levelKosten;
+        if (o.name === 'Abschreibreduktion Maschinen') rateInfra    = reduktionsSatz;
+      });
     });
 
     /* Basis + Investitionen × Satz, auf ganze Zahl runden */

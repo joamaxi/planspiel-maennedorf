@@ -254,7 +254,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-23');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
 
       if (item.AufgabenArt_1) document.getElementById('art-1').textContent = item.AufgabenArt_1;
@@ -268,7 +268,17 @@
     /* ══ Erträge berechnen ════════════════════════════════════════════════ */
     (function() {
 
-      /* Ertrag-Lookup aus patienten JSON: { marktName|versicherung → ertrag } */
+      /* Fallback falls marktStart noch nicht importiert wurde */
+      const FALLBACK_STAT = [
+        { marktName: 'Medizin', marktNr: 1 }, { marktName: 'Chirurgie', marktNr: 2 }, { marktName: 'Geburtshilfe', marktNr: 3 },
+      ];
+      const marktData     = getLS('marktStart');
+      const rawMarkt      = marktData ? (marktData.markt || marktData.Marktbereiche || marktData) : [];
+      const alleMarkt     = (Array.isArray(rawMarkt) && rawMarkt.length > 0) ? rawMarkt : FALLBACK_STAT;
+      const bereicheMarkt = alleMarkt.filter(b => (b.marktNr || 0) < 4 && b.marktName !== 'Ambulant');
+      const stationaere   = bereicheMarkt.length > 0 ? bereicheMarkt : FALLBACK_STAT;
+
+      /* Ertrag-Lookup aus patienten JSON: { marktNr|versicherung → ertrag } */
       const raw       = getLS('patienten');
       const eintraege = raw
         ? (Array.isArray(raw) ? raw : (Array.isArray(raw.patienten) ? raw.patienten : []))
@@ -276,33 +286,44 @@
 
       const ertragLookup = {};
       eintraege.forEach(e => {
-        const key = `${e.marktName}|${e.versicherung}`;
+        const key = `${e.marktNr}|${e.versicherung}`;
         ertragLookup[key] = Number(e.ertrag) || 0;
       });
 
-      /* Patientenzahlen aus spz-14 (patientenAufnahme) */
+      /* Pauschaler Ambulant-Ertragssatz (eigener Marktbereich "Ambulant", z.B. marktNr 4) –
+         Fallback falls kein pro-Bereich-Ambulant-Eintrag existiert (siehe unten) */
+      const ambulantMarkt   = alleMarkt.find(m => m.marktName === 'Ambulant' || m.marktNr === 4);
+      const ambulantMarktNr = ambulantMarkt ? ambulantMarkt.marktNr : 4;
+      const ambulantEntry   = eintraege.find(e => e.marktNr === ambulantMarktNr);
+      const ambulantFlatRate = ambulantEntry ? (Number(ambulantEntry.ertrag) || 0) : 0;
+
+      /* Patientenzahlen aus spz-14 (patientenAufnahme), Schlüssel = marktNr */
       const aufnahme = getLS('patientenAufnahme') || {};
 
-      function ertraegeBereich(name) {
-        const b = aufnahme[name];
+      function ertraegeBereich(marktNr) {
+        const b = aufnahme[marktNr];
         if (!b || typeof b !== 'object') return 0;
-        const php  = (Number(b.PHP)       || 0) * (ertragLookup[`${name}|Halbprivat/Privat`] || 0);
-        const allg = (Number(b.Allgemein) || 0) * (ertragLookup[`${name}|Allgemein`]          || 0);
+        const php  = (Number(b.PHP)       || 0) * (ertragLookup[`${marktNr}|Halbprivat/Privat`] || 0);
+        const allg = (Number(b.Allgemein) || 0) * (ertragLookup[`${marktNr}|Allgemein`]          || 0);
         return php + allg;
       }
 
-      /* Ambulant: Erträge pro Marktbereich summieren */
-      const ambulant = ['Medizin', 'Chirurgie', 'Geburtshilfe'].reduce((sum, name) => {
-        const b = aufnahme[name];
-        if (!b || typeof b !== 'object') return sum;
-        return sum + (Number(b.Ambulant) || 0) * (ertragLookup[`${name}|`] || 0);
-      }, 0);
+      /* Ambulant + stationäre Erträge pro Marktbereich summieren */
+      let ambulant   = 0;
+      let stationaer = 0;
+      stationaere.forEach(m => {
+        const marktNr = m.marktNr;
+        stationaer += ertraegeBereich(marktNr);
+        const b = aufnahme[marktNr];
+        if (b && typeof b === 'object') {
+          /* Pro-Bereich-Ambulant-Satz nutzen falls vorhanden (Bülach-Stil),
+             sonst auf den pauschalen Ambulant-Marktsatz zurückfallen (Männedorf-Stil) */
+          const rate = ertragLookup[`${marktNr}|`] || ambulantFlatRate;
+          ambulant += (Number(b.Ambulant) || 0) * rate;
+        }
+      });
 
-      const medizin      = ertraegeBereich('Medizin');
-      const chirurgie    = ertraegeBereich('Chirurgie');
-      const geburtshilfe = ertraegeBereich('Geburtshilfe');
-
-      const ertraege      = Math.round(medizin + chirurgie + geburtshilfe + ambulant);
+      const ertraege      = Math.round(stationaer + ambulant);
       const andereErtraege = Math.round(ertraege * 0.05);
       const gesamtertrag  = ertraege + andereErtraege;
 

@@ -274,7 +274,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-14');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
 
       if (item.AufgabenArt_1)
@@ -292,11 +292,11 @@
     (function() {
       /* Fallback falls marktStart noch nicht importiert wurde */
       const FALLBACK_STAT = [
-        { marktName: 'Medizin',      rgb: '230,51,41'  },
-        { marktName: 'Chirurgie',    rgb: '249,178,51' },
-        { marktName: 'Geburtshilfe', rgb: '58,170,53'  },
+        { marktName: 'Medizin',      marktNr: 1, rgb: '230,51,41'  },
+        { marktName: 'Chirurgie',    marktNr: 2, rgb: '249,178,51' },
+        { marktName: 'Geburtshilfe', marktNr: 3, rgb: '58,170,53'  },
       ];
-      const FALLBACK_AMB = { marktName: 'Ambulant', rgb: '144,144,144' };
+      const FALLBACK_AMB = { marktName: 'Ambulant', marktNr: 4, rgb: '144,144,144' };
 
       const marktData  = getLS('marktStart');
       const raw        = marktData ? (marktData.markt || marktData.Marktbereiche || marktData) : [];
@@ -316,13 +316,13 @@
         let sum = 0;
         allInputs.forEach(inp => { sum += parseInt(inp.value) || 0; });
         totalBadge.textContent = sum > 0 ? sum : '–';
-        /* Speichern */
+        /* Speichern (Schlüssel = marktNr, stabil auch bei Namensänderungen) */
         const saveObj = {};
         stationaere.forEach(b => {
-          saveObj[b.marktName] = {
-            PHP:      parseInt(document.getElementById(`inp-${b.marktName}-php`)?.value)  || 0,
-            Allgemein:parseInt(document.getElementById(`inp-${b.marktName}-allg`)?.value) || 0,
-            Ambulant: parseInt(document.getElementById(`inp-${b.marktName}-amb`)?.value)  || 0,
+          saveObj[b.marktNr] = {
+            PHP:      parseInt(document.getElementById(`inp-${b.marktNr}-php`)?.value)  || 0,
+            Allgemein:parseInt(document.getElementById(`inp-${b.marktNr}-allg`)?.value) || 0,
+            Ambulant: parseInt(document.getElementById(`inp-${b.marktNr}-amb`)?.value)  || 0,
           };
         });
         setLS('patientenAufnahme', saveObj);
@@ -331,7 +331,7 @@
       /* ── 3 stationäre Marktbereiche ── */
       stationaere.forEach(b => {
         const rgb     = (b.rgb || '160,184,200');
-        const savedB  = saved[b.marktName] || {};
+        const savedB  = saved[b.marktNr] || {};
 
         const box = document.createElement('div');
         box.className = 'patient-box';
@@ -341,21 +341,21 @@
           <div class="patient-body">
             <div class="patient-input-row">
               <span class="patient-label">P/HP</span>
-              <input class="patient-input" id="inp-${b.marktName}-php" type="number"
+              <input class="patient-input" id="inp-${b.marktNr}-php" type="number"
                      min="0" step="1" placeholder=""
                      value="${savedB.PHP || ''}"
                      style="border-color:rgb(${rgb}); color:rgb(${rgb});" />
             </div>
             <div class="patient-input-row">
               <span class="patient-label">Allgemein</span>
-              <input class="patient-input" id="inp-${b.marktName}-allg" type="number"
+              <input class="patient-input" id="inp-${b.marktNr}-allg" type="number"
                      min="0" step="1" placeholder=""
                      value="${savedB.Allgemein || ''}"
                      style="border-color:rgb(${rgb}); color:rgb(${rgb});" />
             </div>
             <div class="patient-input-row">
               <span class="patient-label">Ambulant</span>
-              <input class="patient-input" id="inp-${b.marktName}-amb" type="number"
+              <input class="patient-input" id="inp-${b.marktNr}-amb" type="number"
                      min="0" step="1" placeholder=""
                      value="${savedB.Ambulant || ''}"
                      style="border-color:rgb(${rgb}); color:rgb(${rgb});" />
@@ -364,9 +364,7 @@
         `;
         grid.appendChild(box);
 
-        const inpPhp  = box.querySelector(`#inp-${b.marktName}-php`);
-        const inpAllg = box.querySelector(`#inp-${b.marktName}-allg`);
-        const inpAmb  = box.querySelector(`#inp-${b.marktName}-amb`);
+        const [inpPhp, inpAllg, inpAmb] = box.querySelectorAll('.patient-input');
         allInputs.push(inpPhp, inpAllg, inpAmb);
         inpPhp.addEventListener('input',  recalcTotal);
         inpAllg.addEventListener('input', recalcTotal);

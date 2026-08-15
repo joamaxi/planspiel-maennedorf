@@ -331,7 +331,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-02');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
 
       function parseAufgabe(text) {
@@ -378,11 +378,13 @@
         : alle;
       if (patienten.length === 0) patienten = alle;
 
-      // Markt-Farben aus markt_starteinstellung
+      // Markt-Farben + -Namen aus markt_starteinstellung (Schlüssel = marktNr)
       const marktColor = {};
+      const marktName  = {};
       if (mktData) {
         (mktData.markt || mktData).forEach(m => {
-          marktColor[m.marktName] = m.rgb;
+          marktColor[m.marktNr] = m.rgb;
+          marktName[m.marktNr]  = m.marktName;
         });
       }
 
@@ -393,17 +395,18 @@
       document.getElementById('total-patienten').textContent = totalAnzahl;
       document.getElementById('total-kosten').textContent    = totalKosten;
 
-      // Gruppieren nach marktName
+      // Gruppieren nach marktNr (stabil, unabhängig vom Namen)
       const gruppen = {};
       patienten.forEach(p => {
-        if (!gruppen[p.marktName]) gruppen[p.marktName] = [];
-        gruppen[p.marktName].push(p);
+        if (!gruppen[p.marktNr]) gruppen[p.marktNr] = [];
+        gruppen[p.marktNr].push(p);
       });
 
       // Markt-Boxen rendern
       const grid = document.getElementById('markt-grid');
-      Object.entries(gruppen).forEach(([markt, items]) => {
-        const rgb   = marktColor[markt] || '37,117,176';
+      Object.entries(gruppen).forEach(([marktNr, items]) => {
+        const rgb   = marktColor[marktNr] || '37,117,176';
+        const label = marktName[marktNr] || items[0]?.marktName || '';
         const anzahl = items.reduce((s, p) => s + Number(p.anzahl || 0), 0);
         const versicherungen = [...new Set(items.map(p => p.versicherung))];
 
@@ -424,7 +427,7 @@
         }).join('');
 
         box.innerHTML = `
-          <div class="markt-header" style="background:rgb(${rgb})">${markt}</div>
+          <div class="markt-header" style="background:rgb(${rgb})">${label}</div>
           ${zeilen}
         `;
         grid.appendChild(box);

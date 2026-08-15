@@ -215,7 +215,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-32');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
       function parseBody(t) {
         const p = (t||'').split('\r');
@@ -281,8 +281,9 @@
         r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung
       ) || records.find(r => r.levelKosten === ent.levelKosten);
       if (!rec) return;
-      if (rec.option1 === 'Variable Kostenreduktion') {
-        kostenReduktion += Math.round(varKosten * (Number(rec.optionWert1) || 0) / 100);
+      const redOpt = (rec.optionen || []).find(o => o.name === 'Variable Kostenreduktion');
+      if (redOpt) {
+        kostenReduktion += Math.round(varKosten * (Number(redOpt.wert) || 0) / 100);
       }
     });
 

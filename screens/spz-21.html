@@ -232,7 +232,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-21');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
 
       function parseAufgabe(text) {

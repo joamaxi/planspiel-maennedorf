@@ -442,7 +442,7 @@
         if (!raw) return;
         const data = JSON.parse(raw);
         const arr  = data.spielaufgaben || data;
-        const item = arr.find(e => e.Spielzug === 'spz-01');
+        const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
         if (!item) return;
 
         function parseText(text) {

@@ -601,14 +601,21 @@ if (footerTarget) {
     setTimeout(() => { backdrop.style.display = 'none'; }, 200);
   }
 
+  let modalMode = 'check';
+
   function tryEnter() {
-    if (input.value === CHECK_PASSWORD) {
-      closeModal();
-      window.location.href = CHECK_PAGE;
-    } else {
+    if (input.value !== CHECK_PASSWORD) {
       errMsg.style.display = 'block';
       input.value = '';
       input.focus();
+      return;
+    }
+    closeModal();
+    if (modalMode === 'unlock') {
+      localStorage.removeItem('done_spz26_projekte');
+      window.location.reload();
+    } else {
+      window.location.href = CHECK_PAGE;
     }
   }
 
@@ -619,6 +626,13 @@ if (footerTarget) {
 
   /* Logo-Klick nach Header-Rendering abfangen (Event-Delegation) */
   document.addEventListener('click', function(e) {
-    if (e.target && e.target.id === 'neosight-logo') openModal();
+    if (e.target && e.target.id === 'neosight-logo') { modalMode = 'check'; openModal(); }
   });
+
+  /* Für einzelne Screens (z.B. spz-25.html) nutzbar, um dasselbe Moderatoren-
+     Passwort-Modal für einen anderen Zweck als "check.html öffnen" zu triggern. */
+  window.openModeratorModal = function(mode) {
+    modalMode = mode;
+    openModal();
+  };
 })();

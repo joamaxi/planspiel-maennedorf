@@ -318,7 +318,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-17');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
       if (item.AufgabenArt_1) document.getElementById('art-1').textContent = item.AufgabenArt_1;
       const parts = (item.Aufgabe_1 || '').split('\r');
@@ -331,9 +331,12 @@
     /* ══ Pflegeintensität berechnen ════════════════════════════════════════ */
     (function() {
 
-      /* ── 1. Total Personaleinheiten (aus personalplanung, spz-10) ── */
-      const planung  = getLS('personalplanung') || {};
-      const personal = Object.values(planung).reduce((s, v) => s + (Number(v) || 0), 0);
+      /* ── 1. Total Personaleinheiten (intern + extern) ── */
+      const planungIntern = getLS('personalplanung') || {};
+      const planungExtern = getLS('personalplanungExtern') || {};
+      const personalIntern = Object.values(planungIntern).reduce((s, v) => s + (Number(v) || 0), 0);
+      const personalExtern = Object.values(planungExtern).reduce((s, v) => s + (Number(v) || 0), 0);
+      const personal = personalIntern + personalExtern;
 
       /* ── 2. Total Patienteneinheiten (aus patientenAufnahme, spz-14) ── */
       const aufnahme  = getLS('patientenAufnahme') || {};

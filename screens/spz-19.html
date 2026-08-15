@@ -226,31 +226,8 @@
 
           <div class="kosten-inner">
 
-            <!-- Bereichs-Boxen -->
-            <div class="kosten-grid">
-
-              <div class="kosten-box" style="border-color:rgb(230,51,41);">
-                <div class="kosten-box-name" style="background:rgb(230,51,41);">Medizin</div>
-                <div class="kosten-body">
-<div class="kosten-badge" id="val-medizin">–</div>
-                </div>
-              </div>
-
-              <div class="kosten-box" style="border-color:rgb(249,178,51);">
-                <div class="kosten-box-name" style="background:rgb(249,178,51);">Chirurgie</div>
-                <div class="kosten-body">
-<div class="kosten-badge" id="val-chirurgie">–</div>
-                </div>
-              </div>
-
-              <div class="kosten-box" style="border-color:rgb(58,170,53);">
-                <div class="kosten-box-name" style="background:rgb(58,170,53);">Geburtshilfe</div>
-                <div class="kosten-body">
-<div class="kosten-badge" id="val-geburtshilfe">–</div>
-                </div>
-              </div>
-
-            </div>
+            <!-- Bereichs-Boxen: dynamisch aus marktStart befüllt -->
+            <div class="kosten-grid" id="kosten-grid"></div>
 
           </div>
         </div>
@@ -279,7 +256,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-19');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
 
       if (item.AufgabenArt_1) document.getElementById('art-1').textContent = item.AufgabenArt_1;
@@ -293,47 +270,68 @@
 
     /* ══ Aktive Rechnungsabgrenzung: anzahl × kostenTotal pro Bereich ════ */
     (function() {
-      /* kostenTotal pro Bereich (Allgemein) aus patienten JSON */
-      const kostenRate = { Medizin: 10, Chirurgie: 11, Geburtshilfe: 7 };
+      /* Fallback falls marktStart noch nicht importiert wurde */
+      const FALLBACK_STAT = [
+        { marktName: 'Medizin',      marktNr: 1, rgb: '230,51,41'  },
+        { marktName: 'Chirurgie',    marktNr: 2, rgb: '249,178,51' },
+        { marktName: 'Geburtshilfe', marktNr: 3, rgb: '58,170,53'  },
+      ];
 
-      const raw = getLS('patienten');
-      const eintraege = raw
-        ? (Array.isArray(raw) ? raw : (Array.isArray(raw.patienten) ? raw.patienten : []))
+      const marktData = getLS('marktStart');
+      const raw       = marktData ? (marktData.markt || marktData.Marktbereiche || marktData) : [];
+      const alle      = (Array.isArray(raw) && raw.length > 0) ? raw : FALLBACK_STAT;
+      const bereiche  = alle.filter(b => (b.marktNr || 0) < 4 && b.marktName !== 'Ambulant');
+      const stationaere = bereiche.length > 0 ? bereiche : FALLBACK_STAT;
+
+      /* kostenTotal pro Bereich (Allgemein) aus patienten JSON – Schlüssel = marktNr */
+      const kostenRate = {};
+      stationaere.forEach(b => { kostenRate[b.marktNr] = 0; });
+
+      const rawPat = getLS('patienten');
+      const eintraege = rawPat
+        ? (Array.isArray(rawPat) ? rawPat : (Array.isArray(rawPat.patienten) ? rawPat.patienten : []))
         : [];
-
       eintraege.forEach(e => {
         if (e.versicherung !== 'Allgemein') return;
-        if (e.marktName === 'Medizin')      kostenRate.Medizin      = Number(e.kostenTotal) || kostenRate.Medizin;
-        if (e.marktName === 'Chirurgie')    kostenRate.Chirurgie    = Number(e.kostenTotal) || kostenRate.Chirurgie;
-        if (e.marktName === 'Geburtshilfe') kostenRate.Geburtshilfe = Number(e.kostenTotal) || kostenRate.Geburtshilfe;
+        if (e.marktNr in kostenRate) kostenRate[e.marktNr] = Number(e.kostenTotal) || kostenRate[e.marktNr];
       });
 
-      /* Anzahl aus startPatienten (spz-2) */
+      /* Anzahl aus startPatienten (spz-2) – Schlüssel = marktNr */
       const spData      = getLS('startPatienten');
       const startAuftrag = spData ? (spData.startauftrag || spData) : [];
-      const anzahl = { Medizin: 0, Chirurgie: 0, Geburtshilfe: 0 };
+      const anzahl = {};
+      stationaere.forEach(b => { anzahl[b.marktNr] = 0; });
       (Array.isArray(startAuftrag) ? startAuftrag : []).forEach(e => {
         if (e.versicherung !== 'Allgemein') return;
-        if (e.marktName === 'Medizin')      anzahl.Medizin      = Number(e.anzahl) || 0;
-        if (e.marktName === 'Chirurgie')    anzahl.Chirurgie    = Number(e.anzahl) || 0;
-        if (e.marktName === 'Geburtshilfe') anzahl.Geburtshilfe = Number(e.anzahl) || 0;
+        if (e.marktNr in anzahl) anzahl[e.marktNr] = Number(e.anzahl) || 0;
       });
 
-      /* Aktive Rechnungsabgrenzung = anzahl × kostenTotal */
-      const werte = {
-        Medizin:      anzahl.Medizin      * kostenRate.Medizin,
-        Chirurgie:    anzahl.Chirurgie    * kostenRate.Chirurgie,
-        Geburtshilfe: anzahl.Geburtshilfe * kostenRate.Geburtshilfe,
-      };
+      /* Aktive Rechnungsabgrenzung = anzahl × kostenTotal, Boxen dynamisch bauen */
+      const grid  = document.getElementById('kosten-grid');
+      const werte = {};
+      let total   = 0;
 
-      /* Werte in Badges schreiben + speichern */
-      document.getElementById('val-medizin').textContent      = werte.Medizin;
-      document.getElementById('val-chirurgie').textContent    = werte.Chirurgie;
-      document.getElementById('val-geburtshilfe').textContent = werte.Geburtshilfe;
+      stationaere.forEach(b => {
+        const rgb  = b.rgb || '160,184,200';
+        const wert = (anzahl[b.marktNr] || 0) * (kostenRate[b.marktNr] || 0);
+        werte[b.marktNr] = wert;
+        total += wert;
 
-      const total = werte.Medizin + werte.Chirurgie + werte.Geburtshilfe;
+        const box = document.createElement('div');
+        box.className = 'kosten-box';
+        box.style.borderColor = `rgb(${rgb})`;
+        box.innerHTML = `
+          <div class="kosten-box-name" style="background:rgb(${rgb});">${b.marktName}</div>
+          <div class="kosten-body">
+            <div class="kosten-badge">${wert}</div>
+          </div>
+        `;
+        grid.appendChild(box);
+      });
+
+      /* Werte speichern (Schlüssel = marktNr) */
       localStorage.setItem('spz19_aktiveRechnung', total);
-      setLS('spz19_bereiche', { Medizin: werte.Medizin, Chirurgie: werte.Chirurgie, Geburtshilfe: werte.Geburtshilfe });
+      setLS('spz19_bereiche', werte);
     })();
 
     /* ══ Transfer beim Next-Klick ════════════════════════════════════════ */

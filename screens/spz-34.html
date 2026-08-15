@@ -139,8 +139,9 @@
       /* ── Anlagevermögen: Investitionen + Abschreibungen direkt berechnen ── */
       const infraStart = n('Infrastruktur_Anlage');
       const gebStart   = n('Gebaude_Anlage');
-      const rateInfra  = Number(entry.AbschreibungAktuell) || 0;
+      const rateInfra  = Number(entry.AbschreibungMaschinen) || 0;
       const rateGeb    = Number(entry.AbschreibungGebaude) || 0;
+      const reduktionsSatz = Number(entry.Abschreibungsreduktion) || 0;
 
       const _entsch  = getLS('projektEntscheide') || {};
       const _rawPrj  = getLS('projekte');
@@ -156,9 +157,11 @@
         const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
                   || recs.find(r => r.levelKosten === ent.levelKosten);
         if (!rec) return;
-        if (rec.option1 === 'Investitionen Infrastruktur') investInfra  += Number(rec.optionWert1) || 0;
-        if (rec.option1 === 'Investitionen Gebäude')       investGeb    += Number(rec.optionWert1) || 0;
-        if (rec.option1 === 'Abschreibung Infrastruktur')  rateInfraEff  = Number(rec.optionWert1) || rateInfra;
+        (rec.optionen || []).forEach(o => {
+          if (o.name === 'Abschreibung Maschinen')       investInfra  += ent.levelKosten;
+          if (o.name === 'Abschreibung Gebäude')         investGeb    += ent.levelKosten;
+          if (o.name === 'Abschreibreduktion Maschinen') rateInfraEff  = reduktionsSatz || rateInfra;
+        });
       });
 
       const done29      = localStorage.getItem('done_spz29') === 'true';
@@ -185,7 +188,7 @@
       const eigenkapitalTotal = n('Eigenkapital') + reingewinn;
       const totalPassiven    = fremdkapital + eigenkapitalTotal;
 
-      function show(v) { return (v === 0 || v === null || v === undefined) ? '' : v; }
+      function show(v) { return (v === null || v === undefined) ? 0 : v; }
       function sec(label)   { return `<div class="bil-section-head">${label}</div>`; }
       function spacer()     { return `<div class="bil-spacer"></div>`; }
       function row(label, val, cls='') {
@@ -323,7 +326,7 @@
       const er_totalBetrieb = erV('Ertraege_Spitalbetrieb') + erV('Andere_Ertraege') + erV('Ausserordentliche_Ertraege');
       const er_totalVar     = Math.round(erV('Variable_Kosten_Spital') + erV('Variable_Kosten_Medikamente') - erV('Variable_Kostenreduktion'));
       const er_db1          = er_totalBetrieb - er_totalVar;
-      const er_totalFix     = erV('Personalaufwand') + erV('Kosten_Projekte') + erV('Lebensmittel') + erV('Unterhalt') + erV('Energie') + erV('Buero') + erV('Rekrutierung') + erV('Ausserordentliche');
+      const er_totalFix     = erV('Personalaufwand') + erV('Personalaufwand_Extern') + erV('Kosten_Projekte') + erV('Lebensmittel') + erV('Unterhalt') + erV('Energie') + erV('Buero') + erV('Rekrutierung') + erV('Ausserordentliche');
       const er_ebitdar      = er_db1 - er_totalFix;
       const er_ebit         = er_ebitdar - erV('Mietzins') - er_abschr;
       const er_ebt          = er_ebit - erV('Zinsen_Bank');
@@ -364,6 +367,7 @@
           TOTAL_Variable_Kosten:        er_totalVar,
           Deckungsbeitrag_1:            er_db1,
           Personalaufwand:              erV('Personalaufwand'),
+          Personalaufwand_Extern:       erV('Personalaufwand_Extern'),
           Kosten_Projekte:              erV('Kosten_Projekte'),
           Lebensmittel:                 erV('Lebensmittel'),
           Unterhalt:                    erV('Unterhalt'),

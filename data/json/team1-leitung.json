@@ -1,28 +1,28 @@
 {
-  "klinikName": "Harry Klinik",
+  "klinikName": "Joachim Klinik",
   "geschaeftsleitung": [
     {
-      "name": "Harry",
+      "name": "Joachim",
       "funktion": "Ärztliche/r Direktor/in"
     },
     {
-      "name": "Harry",
+      "name": "Joachim",
       "funktion": "Leiter/in Bereich HRM"
     },
     {
-      "name": "Harry",
+      "name": "Joachim",
       "funktion": "Leiter/in Bereich Finanzen"
     },
     {
-      "name": "Harry",
+      "name": "Joachim",
       "funktion": "Leiter/in Bereich Pflege (operatives Tagesgeschäft)"
     },
     {
-      "name": "Harry",
+      "name": "Joachim",
       "funktion": "Leiter/in Bereich Unternehmensentwicklung"
     },
     {
-      "name": "Harry",
+      "name": "Joachim",
       "funktion": "Leiter/in Bereich Services"
     }
   ]

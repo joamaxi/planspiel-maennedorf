@@ -114,7 +114,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-08');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
       const parts    = (item.Aufgabe_1 || '').split('\r');
       const subtitle = parts.length > 1 ? parts[0].trim() : '';

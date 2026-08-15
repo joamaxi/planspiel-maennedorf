@@ -208,7 +208,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-26');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
       function parseBody(t) {
         const p = (t||'').split('\r');
@@ -248,11 +248,7 @@
         ) || records.find(r => r.levelKosten === levelKosten);
         if (!rec) return {};
         const out = {};
-        for (let i = 1; i <= 3; i++) {
-          const name = rec[`wirkungName${i}`];
-          const val  = rec[`wirkungWert${i}`];
-          if (name) out[name] = val;
-        }
+        (rec.wirkungen || []).forEach(w => { if (w.name) out[w.name] = w.wert; });
         return out;
       }
 
@@ -289,7 +285,9 @@
           const v = wirk[col];
           if (v !== undefined && v !== '' && v !== null) {
             totalWirk[col] += Number(v) || 0;
-            return `<td class="wirkung-val">${v}</td>`;
+            return Number(v) !== 0
+              ? `<td class="wirkung-val">${v}</td>`
+              : `<td class="wirkung-empty"></td>`;
           }
           return `<td class="wirkung-empty"></td>`;
         }).join('');
@@ -334,6 +332,11 @@
         </table>
       `;
     })();
+
+    /* ══ Projektauswahl endgültig sperren, sobald weitergeklickt wird ══════ */
+    document.addEventListener('nav:next', () => {
+      localStorage.setItem('done_spz26_projekte', 'true');
+    });
   </script>
 </body>
 </html>

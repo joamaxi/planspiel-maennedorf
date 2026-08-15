@@ -67,6 +67,15 @@
     .proj-btn:hover  { border-color: var(--color-accent); }
     .proj-btn.active { border-color: var(--color-accent); background: #daeaf6; }
     .proj-btn.done   { border-color: #27ae60; }
+    .proj-btn.locked { border-color: #b0c8dc; background: #eef3f7; cursor: not-allowed; }
+    .proj-btn.locked .proj-btn-nr { background: #b0c8dc; }
+
+    .proj-btn-lock {
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: #7a90a3;
+      margin-top: 3px;
+    }
 
     .proj-btn-nr {
       display: inline-block;
@@ -181,6 +190,20 @@
     }
     .star-btn:hover    { background: #eef4e8; border-color: #27ae60; }
     .star-btn.selected { background: transparent; border: none; }
+    .star-btn.disabled { cursor: not-allowed; opacity: 0.5; pointer-events: none; }
+
+    .detail-lock-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #7a6000;
+      background: #fff3cd;
+      border: 1px solid #f0c040;
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
 
     /* ══ Spielaufgaben-Karten ═════════════════════════════════════════════ */
     .task-row {
@@ -288,7 +311,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-25');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
 
       function parseBody(text) {
@@ -307,6 +330,8 @@
     /* ══ Projektdaten aufbereiten ════════════════════════════════════════ */
     const raw = getLS('projekte');
     const alleRecords = raw ? (raw.projekte || raw) : [];
+    const currentRunde = Number(localStorage.getItem('rundeNumber')) || 1;
+    const teamNrGlobal  = Number(localStorage.getItem('teamNumber')) || 1;
 
     /* Gruppieren nach projektNr, sortiert nach levelKosten */
     const projektMap = {};
@@ -321,18 +346,138 @@
 
     const projektNrs = Object.keys(projektMap).map(Number).sort((a, b) => a - b);
 
+    /* ══ Mehrperioden-Projekte: Merge (geräteübergreifend) + Ablauf-Bereinigung ══ */
+    function mergeAndPruneProjektEntscheide() {
+      const local    = getLS('projektEntscheide') || {};
+      const imported = getLS('projektPeriode') || {};
+      let changed = false;
+
+      /* Vom Server importierte Wahl übernehmen, falls lokal nicht vorhanden
+         oder die importierte Wahl neuer ist (anderes Gerät hat zwischenzeitlich gewählt) */
+      Object.entries(imported).forEach(([nr, ent]) => {
+        const loc = local[nr];
+        if (!loc || (ent.gewaehltInRunde || 0) > (loc.gewaehltInRunde || 0)) {
+          local[nr] = { ...ent };
+          changed = true;
+        }
+      });
+
+      /* Abgelaufene Mehrperioden-Wahlen entfernen */
+      Object.entries(local).forEach(([nr, ent]) => {
+        if (!ent.projektPeriode || ent.projektPeriode <= 1) return;
+        const seit = currentRunde - (ent.gewaehltInRunde || currentRunde);
+        if (seit >= ent.projektPeriode) {
+          delete local[nr];
+          changed = true;
+        }
+      });
+
+      if (changed) setLS('projektEntscheide', local);
+      return local;
+    }
+
+    let entscheide = mergeAndPruneProjektEntscheide();
+
+    /* Sperr-Status eines Projekts ermitteln */
+    function getLockInfo(nr) {
+      if (localStorage.getItem('done_spz26_projekte') === 'true') {
+        return { locked: true, hard: true };
+      }
+      const ent = entscheide[nr];
+      if (!ent || !ent.projektPeriode || ent.projektPeriode <= 1) return { locked: false };
+      const seit = currentRunde - (ent.gewaehltInRunde || currentRunde);
+      if (seit > 0 && seit < ent.projektPeriode) {
+        return { locked: true, until: ent.gewaehltInRunde + ent.projektPeriode };
+      }
+      return { locked: false };
+    }
+
+    /* Anzeigetext für ein gesperrtes Projekt */
+    function lockLabel(lock) {
+      return lock.hard ? '🔒 bestätigt' : `🔒 bis Runde ${lock.until}`;
+    }
+
+    /* Zurück-Button deaktivieren, sobald die Projektauswahl bestätigt ist */
+    if (localStorage.getItem('done_spz26_projekte') === 'true') {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('nav-back')?.classList.add('disabled');
+      });
+    }
+
+    /* Rechtes Logo (nur auf dieser Seite): Spielleiter-Passwort → Sperre aufheben */
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'spital-logo') window.openModeratorModal?.('unlock');
+    });
+
+    /* ══ Mehrperioden-Wahlen an den Server sichern (für nächste Runde/Gerät) ══ */
+    function exportProjektPeriode() {
+      const payload = {};
+      Object.entries(entscheide).forEach(([nr, ent]) => {
+        if (!ent.projektPeriode || ent.projektPeriode <= 1) return;
+        const seitNaechsteRunde = (currentRunde + 1) - (ent.gewaehltInRunde || currentRunde);
+        if (seitNaechsteRunde < ent.projektPeriode) {
+          payload[nr] = {
+            levelIdx:         ent.levelIdx,
+            levelKosten:      ent.levelKosten,
+            levelBezeichnung: ent.levelBezeichnung,
+            projektName:      ent.projektName,
+            gewaehltInRunde:  ent.gewaehltInRunde,
+            projektPeriode:   ent.projektPeriode
+          };
+        }
+      });
+
+      const filename = `team${teamNrGlobal}-runde${currentRunde + 1}-projektPeriode.json`;
+      fetch('../data/json/save.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename, data: JSON.stringify(payload, null, 2) }),
+        keepalive: true
+      }).catch(err => console.error('Projekt-Perioden-Export fehlgeschlagen:', err));
+    }
+
+    /* ══ Zusätzliche Patienten aus gewählten Projekten für FileMaker exportieren ══ */
+    function exportZusatzPatienten() {
+      const patienten = [];
+      Object.entries(entscheide).forEach(([nr, ent]) => {
+        const recs = projektMap[Number(nr)] || [];
+        const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
+                  || recs.find(r => r.levelKosten === ent.levelKosten);
+        if (!rec) return;
+        const opt = (rec.optionen || []).find(o => o.name === 'Zusätzliche Patienten');
+        if (!opt) return;
+        patienten.push({
+          projektNr:        Number(nr),
+          projektName:      ent.projektName,
+          levelBezeichnung: ent.levelBezeichnung,
+          levelKosten:      ent.levelKosten,
+          zusatzPatienten:  Number(opt.wert) || 0
+        });
+      });
+
+      const filename = `team${teamNrGlobal}-runde${currentRunde}-zusatzPatienten.json`;
+      fetch('../data/json/save.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename, data: JSON.stringify({ patienten }, null, 2) }),
+        keepalive: true
+      }).catch(err => console.error('Zusatz-Patienten-Export fehlgeschlagen:', err));
+    }
+
     /* ══ Projektbalken aufbauen ══════════════════════════════════════════ */
     let aktivNr = null;
     const track = document.getElementById('proj-bar-track');
 
     projektNrs.forEach(nr => {
       const first = projektMap[nr][0];
+      const lock  = getLockInfo(nr);
       const btn   = document.createElement('button');
-      btn.className = 'proj-btn';
+      btn.className = 'proj-btn' + (lock.locked ? ' locked' : '');
       btn.id = `proj-btn-${nr}`;
       btn.innerHTML = `
         <div class="proj-btn-nr">${nr}</div>
         <div class="proj-btn-name">${first.projektName}</div>
+        ${lock.locked ? `<div class="proj-btn-lock">${lockLabel(lock)}</div>` : ''}
       `;
       btn.addEventListener('click', () => selectProject(nr));
       track.appendChild(btn);
@@ -354,11 +499,23 @@
 
     /* Bereits gewählte Projekte markieren */
     function refreshBarDone() {
-      const entscheide = getLS('projektEntscheide') || {};
       projektNrs.forEach(nr => {
         const btn = document.getElementById(`proj-btn-${nr}`);
         if (!btn) return;
+        const lock = getLockInfo(nr);
         btn.classList.toggle('done', !!entscheide[nr]);
+        btn.classList.toggle('locked', lock.locked);
+        let lockTag = btn.querySelector('.proj-btn-lock');
+        if (lock.locked) {
+          if (!lockTag) {
+            lockTag = document.createElement('div');
+            lockTag.className = 'proj-btn-lock';
+            btn.appendChild(lockTag);
+          }
+          lockTag.textContent = lockLabel(lock);
+        } else if (lockTag) {
+          lockTag.remove();
+        }
       });
     }
     refreshBarDone();
@@ -373,16 +530,12 @@
         document.getElementById(`proj-btn-${n}`)?.classList.toggle('active', n === nr);
       });
 
-      const records    = projektMap[nr];
-      const entscheide = getLS('projektEntscheide') || {};
-      const selected   = entscheide[nr];
+      const records  = projektMap[nr];
+      const selected = entscheide[nr];
+      const lock     = getLockInfo(nr);
 
       /* Wirkung-Spalten aus erstem Record */
-      const wirkungCols = [];
-      for (let i = 1; i <= 8; i++) {
-        const name = records[0][`wirkungName${i}`];
-        if (name) wirkungCols.push({ key: i, name });
-      }
+      const wirkungCols = (records[0].wirkungen || []).filter(w => w.name);
 
       const detail = document.getElementById('proj-detail');
       const thWirkungen = wirkungCols.map(w =>
@@ -392,14 +545,14 @@
       const rows = records.map((r, idx) => {
         const levelLabel = `Level ${idx + 1}`;
         const isSel      = selected && selected.levelKosten === r.levelKosten && selected.levelBezeichnung === r.levelBezeichnung;
-        const tdWirkungen = wirkungCols.map(w =>
-          `<td>${r[`wirkungWert${w.key}`] ?? ''}</td>`
-        ).join('');
-        const starHtml = isSel
-          ? `<button class="star-btn selected" data-idx="${idx}">●</button>`
-          : `<button class="star-btn"          data-idx="${idx}">○</button>`;
+        const tdWirkungen = wirkungCols.map(w => {
+          const match = (r.wirkungen || []).find(x => x.name === w.name);
+          return `<td>${match ? (match.wert ?? '') : ''}</td>`;
+        }).join('');
+        const starClass = 'star-btn' + (isSel ? ' selected' : '') + (lock.locked ? ' disabled' : '');
+        const starHtml = `<button class="${starClass}" data-idx="${idx}">${isSel ? '●' : '○'}</button>`;
 
-        return `<tr class="${isSel ? 'selected' : ''}" data-idx="${idx}" style="cursor:pointer;">
+        return `<tr class="${isSel ? 'selected' : ''}" data-idx="${idx}" style="cursor:${lock.locked ? 'default' : 'pointer'};">
           <td>${r.levelBezeichnung}<br><small style="font-weight:400;color:#888;font-size:0.72rem;"></td>
           <td>${r.levelKosten}</td>
           ${tdWirkungen}
@@ -410,9 +563,15 @@
       positionOverlay();
       overlay.classList.add('open');
 
+      const lockTagHtml = lock.locked
+        ? `<span class="detail-lock-tag">${lock.hard
+            ? '🔒 Projektauswahl bestätigt – nur der Spielleiter kann sie noch ändern'
+            : `🔒 gesperrt bis Runde ${lock.until} – Investition läuft noch`}</span>`
+        : '';
+
       detail.innerHTML = `
         <button class="detail-close" id="detail-close">✕</button>
-        <div class="detail-title">${records[0].projektName}</div>
+        <div class="detail-title">${records[0].projektName}${lockTagHtml}</div>
         <table class="detail-table">
           <thead>
             <tr>
@@ -429,18 +588,20 @@
       /* Close-Button neu binden (innerHTML hat ihn ersetzt) */
       detail.querySelector('#detail-close')?.addEventListener('click', closeOverlayDetail);
 
-      /* Zeilen-Klick Handler */
-      detail.querySelectorAll('tbody tr').forEach(tr => {
-        tr.addEventListener('click', () => {
-          const idx = Number(tr.dataset.idx);
-          onStarClick(nr, idx, records[idx]);
+      /* Zeilen-Klick Handler (nur wenn nicht gesperrt) */
+      if (!lock.locked) {
+        detail.querySelectorAll('tbody tr').forEach(tr => {
+          tr.addEventListener('click', () => {
+            const idx = Number(tr.dataset.idx);
+            onStarClick(nr, idx, records[idx]);
+          });
         });
-      });
+      }
     }
 
     /* ══ Stern-Klick: Undo + Redo ════════════════════════════════════════ */
     function onStarClick(projektNr, levelIdx, record) {
-      const entscheide = getLS('projektEntscheide') || {};
+      if (getLockInfo(projektNr).locked) return;
       const prev       = entscheide[projektNr];
       const teamNr     = Number(localStorage.getItem('teamNumber')) || 1;
       const teamLabel  = localStorage.getItem('klinikName') || `Team ${teamNr}`;
@@ -462,9 +623,6 @@
         bilanzArr[idx] = bilanzEntry;
         setLS('bilanzStart', bilanzData.Anfangsbilanz ? { ...bilanzData, Anfangsbilanz: bilanzArr } : bilanzArr);
       }
-
-      const INVEST_TYPEN = ['Investitionen Gebäude', 'Investitionen Infrastruktur'];
-      const isInvestition = INVEST_TYPEN.includes(record.option1);
 
       /* ── Undo vorherige Wahl (Flüssige Mittel immer zurück) ── */
       if (prev) {
@@ -491,6 +649,11 @@
         levelBezeichnung: record.levelBezeichnung,
         projektName:      record.projektName
       };
+      /* Mehrperioden-Projekt: Rundenstempel für Sperr-/Ablauflogik mitschreiben */
+      if (record.projektPeriode && record.projektPeriode > 1) {
+        entscheide[projektNr].projektPeriode  = record.projektPeriode;
+        entscheide[projektNr].gewaehltInRunde = currentRunde;
+      }
 
       /* ── Investitionen UND Kosten_Projekte komplett neu berechnen ── */
       if (bilanzEntry?.Bilanz) {
@@ -501,9 +664,11 @@
           const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
                     || recs.find(r => r.levelKosten === ent.levelKosten);
           if (!rec) return;
-          if (rec.option1 === 'Investitionen Gebäude')       sumGeb    += Number(rec.optionWert1) || 0;
-          else if (rec.option1 === 'Investitionen Infrastruktur') sumInfra += Number(rec.optionWert1) || 0;
-          else sumKosten += ent.levelKosten;
+          const hatGebOpt   = (rec.optionen || []).some(o => o.name === 'Abschreibung Gebäude');
+          const hatMaschOpt = (rec.optionen || []).some(o => o.name === 'Abschreibung Maschinen');
+          if (hatGebOpt)        sumGeb    += ent.levelKosten;
+          else if (hatMaschOpt) sumInfra  += ent.levelKosten;
+          else                   sumKosten += ent.levelKosten;
         });
         bilanzEntry.Bilanz.Investitionen_Gebaeude      = sumGeb;
         bilanzEntry.Bilanz.Investitionen_Infrastruktur = sumInfra;
@@ -531,9 +696,8 @@
     document.addEventListener('click', function(e) {
       if (!e.target.closest('#nav-next')) return;
 
-      const entscheide = getLS('projektEntscheide') || {};
-      const fehlend    = projektNrs.filter(nr => !entscheide[nr]);
-      if (fehlend.length === 0) return;
+      const fehlend = projektNrs.filter(nr => !entscheide[nr]);
+      if (fehlend.length === 0) { exportProjektPeriode(); exportZusatzPatienten(); return; }
 
       e.stopImmediatePropagation();
 

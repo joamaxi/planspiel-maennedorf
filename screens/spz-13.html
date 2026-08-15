@@ -74,7 +74,7 @@
 
 <body
   class="bg-white min-h-screen flex flex-col items-center"
-  data-prev="spz-12.html"
+  data-prev="spz-12.5.html"
   data-next="spz-14.html"
   data-spielzug-label="Spielzug 13"
   data-step-current="13"
@@ -124,7 +124,7 @@
       const data = getLS('spielaufgaben');
       if (!data) return;
       const arr  = data.spielaufgaben || data;
-      const item = arr.find(e => e.Spielzug === 'spz-13');
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
       if (!item) return;
 
       function parseBlock(text) {

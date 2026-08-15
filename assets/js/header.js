@@ -28,7 +28,7 @@ export function renderHeader() {
           id="neosight-logo"
           src="../assets/logos/neosight-logo.png"
           alt="Neosight Logo"
-          style="height: 25px; width: auto; display: block; flex-shrink: 0; cursor: pointer;"
+          style="height: 30px; width: auto; display: block; flex-shrink: 0; cursor: pointer;"
         />
 
         <!-- Mitte: Team + Runde -->
@@ -45,12 +45,12 @@ export function renderHeader() {
           <span id="header-runde-label" style="font-weight:400; color:#7aabcc;">${rundeLabel}</span>
         </span>
 
-        <!-- Rechts: Spital Bülach Logo -->
+        <!-- Rechts: Spital Männedorf Logo -->
         <img
           id="spital-logo"
-          src="../assets/logos/spital-buelach-logo.png"
-          alt="Spital Bülach"
-          style="height: 15px; width: auto; display: block; flex-shrink: 0;"
+          src="../assets/logos/maennedorf_logo.png"
+          alt="Spital Männedorf"
+          style="height: 30px; width: auto; display: block; flex-shrink: 0;"
         />
 
       </div>

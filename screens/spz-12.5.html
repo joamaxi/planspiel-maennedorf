@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Personalplanung – Planspiel Bülach</title>
+  <title>Externe Personalplanung – Planspiel Bülach</title>
 
   <link rel="stylesheet" href="../assets/css/app.css" />
   <link rel="stylesheet" href="../assets/css/tailwind.css" />
@@ -230,10 +230,10 @@
 
 <body
   class="bg-white min-h-screen flex flex-col items-center"
-  data-prev="spz-08.html"
-  data-next="spz-10.html"
-  data-spielzug-label="Spielzug 9"
-  data-step-current="9"
+  data-prev="spz-12.html"
+  data-next="spz-13.html"
+  data-spielzug-label="Spielzug 12.5"
+  data-step-current="12.5"
   data-step-total="20"
   data-wirkung="00-wirkungen.png"
   data-disable-handbuch="true"
@@ -272,7 +272,7 @@
         <div class="personal-wrapper">
 
           <!-- Titel oben links -->
-          <span class="personal-wrapper-title">Personalplanung</span>
+          <span class="personal-wrapper-title">Personalplanung Extern</span>
 
           <!-- Picto oben rechts -->
           <img class="personal-wrapper-picto"
@@ -346,10 +346,10 @@
     (function() {
       const data = getLS('personalKosten');
       if (!data) return;
-      const bereiche = (data.personal || data).filter(b => b.bezeichnung === 'intern');
+      const bereiche = (data.personal || data).filter(b => b.bezeichnung === 'extern');
 
       /* Gespeicherte Eingaben laden */
-      const saved = getLS('personalplanung') || {};
+      const saved = getLS('personalplanungExtern') || {};
 
       const grid      = document.getElementById('personal-grid');
       const totalBadge = document.getElementById('total-badge');
@@ -369,7 +369,7 @@
         bereiche.forEach((b, i) => {
           saveObj[b.marktName] = parseFloat(inputs[i]?.el.value) || 0;
         });
-        setLS('personalplanung', saveObj);
+        setLS('personalplanungExtern', saveObj);
       }
 
       bereiche.forEach(b => {
@@ -384,7 +384,7 @@
           <div class="personal-header" style="background:rgb(${rgb});">${b.marktName}</div>
           <div class="personal-body">
             <div class="personal-input-row">
-              <span class="personal-label">Personal-<br>Einheiten</span>
+              <span class="personal-label">Externe<br>Einheiten</span>
               <input class="personal-input" type="number" min="0" step="1"
                      value="${savedVal}"
                      style="border-color:rgb(${rgb}); color:rgb(${rgb});"
@@ -422,11 +422,11 @@
     document.addEventListener('click', function(e) {
       if (!e.target.closest('#nav-next')) return;
 
-      /* Total aus personalplanung × preis berechnen */
-      const planung  = getLS('personalplanung') || {};
+      /* Total aus personalplanungExtern × preis berechnen */
+      const planung  = getLS('personalplanungExtern') || {};
       const pkData   = getLS('personalKosten');
       if (!pkData) return;
-      const bereiche = (pkData.personal || pkData).filter(b => b.bezeichnung === 'intern');
+      const bereiche = (pkData.personal || pkData).filter(b => b.bezeichnung === 'extern');
 
       let total = 0;
       bereiche.forEach(b => {
@@ -435,7 +435,7 @@
       total = Math.round(total);
 
       /* Delta gegenüber bereits gebuchtem Betrag berechnen */
-      const committed = Number(getLS('spz10_committed')) || 0;
+      const committed = Number(getLS('spz125_committed')) || 0;
       const delta     = total - committed;
 
       /* Bilanz: FluessigeMittel nur um die Differenz anpassen */
@@ -455,13 +455,13 @@
         }
       }
 
-      /* Erfolgsrechnung: Personalaufwand immer überschreiben */
+      /* Erfolgsrechnung: Personalaufwand_Extern immer überschreiben */
       const er = getLS('erfolgsrechnung') || {};
-      er.Personalaufwand = total;
+      er.Personalaufwand_Extern = total;
       setLS('erfolgsrechnung', er);
 
       /* Gebuchten Betrag merken */
-      setLS('spz10_committed', total);
+      setLS('spz125_committed', total);
 
       /* Protokoll (nur bei Änderung) */
       if (delta !== 0) {
@@ -469,10 +469,10 @@
         const protokoll = getLS('protokoll') || [];
         protokoll.push({
           zeit:     new Date().toISOString(),
-          spielzug: 'spz-09',
-          aktion:   delta > 0 ? 'Personalkosten erhöht' : 'Personalkosten reduziert',
+          spielzug: 'spz-12.5',
+          aktion:   delta > 0 ? 'Externe Personalkosten erhöht' : 'Externe Personalkosten reduziert',
           von:      'Flüssige Mittel',
-          nach:     'Personalaufwand',
+          nach:     'Personalaufwand Extern',
           betrag:   delta,
           team:     localStorage.getItem('klinikName') || `Team ${teamNr}`
         });
