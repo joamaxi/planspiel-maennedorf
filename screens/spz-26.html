@@ -337,6 +337,13 @@
     document.addEventListener('nav:next', () => {
       localStorage.setItem('done_spz26_projekte', 'true');
     });
+
+    /* ══ Zurück-Button deaktivieren, sobald die Projektauswahl bestätigt ist ══ */
+    if (localStorage.getItem('done_spz26_projekte') === 'true') {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('nav-back')?.classList.add('disabled');
+      });
+    }
   </script>
 </body>
 </html>
