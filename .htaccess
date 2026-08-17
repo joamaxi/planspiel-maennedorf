@@ -1,0 +1,7 @@
+# Browser sollen HTML/JS/JSON immer beim Server neu prüfen (kein "hängenbleiben"
+# auf alten Versionen nach einem Update, v.a. relevant für iPad Home-Screen-App).
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|json)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>

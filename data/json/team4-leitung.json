@@ -1,28 +1,28 @@
 {
-  "klinikName": "Erste Klinik",
+  "klinikName": "Vierte Klinik",
   "geschaeftsleitung": [
     {
-      "name": "Harry",
+      "name": "Christian",
       "funktion": "Ärztliche/r Direktor/in"
     },
     {
-      "name": "Harry",
+      "name": "Christian",
       "funktion": "Leiter/in Bereich HRM"
     },
     {
-      "name": "Harry",
+      "name": "Christian",
       "funktion": "Leiter/in Bereich Finanzen"
     },
     {
-      "name": "Harry",
+      "name": "Christian",
       "funktion": "Leiter/in Bereich Pflege (operatives Tagesgeschäft)"
     },
     {
-      "name": "Harry",
+      "name": "Christian",
       "funktion": "Leiter/in Bereich Unternehmensentwicklung"
     },
     {
-      "name": "Harry",
+      "name": "Christian",
       "funktion": "Leiter/in Bereich Services"
     }
   ]

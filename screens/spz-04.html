@@ -151,9 +151,8 @@
       if (item.Picto1)
         document.getElementById('card-picto').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
 
-      /* Block 2: ab Runde 2 */
-      const runde = Number(localStorage.getItem('rundeNumber') || '1');
-      if (runde >= 2) {
+      /* Block 2: sichtbar, sobald Aufgabe_2 in Spielaufgaben.json gefüllt ist */
+      if (item.Aufgabe_2) {
         const b2 = parseBlock(item.Aufgabe_2);
         if (item.AufgabenArt_2) document.getElementById('card-title-2').textContent    = item.AufgabenArt_2;
         if (b2.subtitle)        document.getElementById('card-subtitle-2').textContent = b2.subtitle;

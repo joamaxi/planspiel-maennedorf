@@ -4,6 +4,12 @@ import { renderFooter } from './footer.js';
 /* ─── Letzten Screen merken (für "Weiterspielen" auf index.html) ────────────── */
 localStorage.setItem('lastScreen', window.location.pathname);
 
+/* ─── Persistenten Speicher anfordern (iOS löscht sonst localStorage bei
+   Home-Screen-Apps unter Speicherdruck/Inaktivität) ──────────────────────── */
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist().catch(() => {});
+}
+
 /* ─── Header ──────────────────────────────────────────────────────────────── */
 const headerTarget = document.getElementById('app-header');
 if (headerTarget) {
