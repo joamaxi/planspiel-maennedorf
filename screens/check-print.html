@@ -567,10 +567,15 @@
           const _allRecs = _rawPrj ? (_rawPrj.projekte || _rawPrj) : [];
           const _pMap    = {};
           _allRecs.forEach(r => { if (!_pMap[r.projektNr]) _pMap[r.projektNr] = []; _pMap[r.projektNr].push(r); });
+          const _currentRunde = Number(localStorage.getItem('rundeNumber')) || 1;
           let investInfra = 0, investGeb = 0;
           let rateInfraEff = rateInfra;
           Object.entries(_entsch).forEach(([nr, ent]) => {
             if (ent.levelKosten === undefined || ent.levelKosten === null) return;
+            /* Mehrperioden-Projekte aus einer Vorrunde sind bereits in der
+               Bilanz-Basis enthalten — nicht nochmals als Investition
+               dieser Runde zählen. */
+            if (ent.projektPeriode > 1 && ent.gewaehltInRunde !== _currentRunde) return;
             const recs = _pMap[Number(nr)] || [];
             const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
                       || recs.find(r => r.levelKosten === ent.levelKosten);

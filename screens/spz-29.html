@@ -219,9 +219,10 @@
     const reduktionsSatz = Number(bilanzEntry?.Abschreibungsreduktion) || 0;
 
     /* Projekt-Investitionen aus projektEntscheide + projekte */
-    const entscheide = getLS('projektEntscheide') || {};
-    const rawPrj     = getLS('projekte');
-    const alleRecs   = rawPrj ? (rawPrj.projekte || rawPrj) : [];
+    const entscheide   = getLS('projektEntscheide') || {};
+    const rawPrj       = getLS('projekte');
+    const alleRecs      = rawPrj ? (rawPrj.projekte || rawPrj) : [];
+    const currentRunde = Number(localStorage.getItem('rundeNumber')) || 1;
 
     const projektMap = {};
     alleRecs.forEach(r => {
@@ -233,6 +234,10 @@
 
     Object.entries(entscheide).forEach(([nr, ent]) => {
       if (!ent.levelKosten) return;
+      /* Mehrperioden-Projekte aus einer Vorrunde sind bereits in der
+         Bilanz-Basis (Infrastruktur_Anlage/Gebaude_Anlage) enthalten —
+         nicht nochmals als Investition dieser Runde zählen. */
+      if (ent.projektPeriode > 1 && ent.gewaehltInRunde !== currentRunde) return;
       const records = projektMap[Number(nr)] || [];
       const rec = records.find(r =>
         r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung

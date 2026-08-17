@@ -660,6 +660,10 @@
         let sumGeb = 0, sumInfra = 0, sumKosten = 0;
         Object.entries(entscheide).forEach(([nr, ent]) => {
           if (!ent.levelKosten) return;
+          /* Mehrperioden-Projekte aus einer Vorrunde (noch gesperrt, aber
+             diese Runde nicht neu gewählt) zählen nicht nochmals mit —
+             ihre Kosten wurden bereits in der Wahl-Runde verbucht. */
+          if (ent.projektPeriode > 1 && ent.gewaehltInRunde !== currentRunde) return;
           const recs = projektMap[Number(nr)] || [];
           const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
                     || recs.find(r => r.levelKosten === ent.levelKosten);
