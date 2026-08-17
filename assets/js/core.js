@@ -1,6 +1,9 @@
 import { renderHeader } from './header.js';
 import { renderFooter } from './footer.js';
 
+/* ─── Letzten Screen merken (für "Weiterspielen" auf index.html) ────────────── */
+localStorage.setItem('lastScreen', window.location.pathname);
+
 /* ─── Header ──────────────────────────────────────────────────────────────── */
 const headerTarget = document.getElementById('app-header');
 if (headerTarget) {

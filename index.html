@@ -69,6 +69,13 @@
     }
     .btn-start:hover  { background: #2e86c1; }
     .btn-start:active { transform: scale(0.97); }
+    .btn-secondary {
+      display: block;
+      margin-top: 16px;
+      color: var(--color-accent);
+      font-size: 0.9rem;
+      text-decoration: underline;
+    }
   </style>
 </head>
 
@@ -80,13 +87,24 @@
       class="logo"
     />
     <h1>Planspiel<br>Spital Männedorf</h1>
-    <p>Starte das Spiel, lade die Spielerdaten<br>und wähle dein Team aus.</p>
-    <a class="btn-start" href="./screens/spz-00.html">Spiel starten →</a>
+    <p id="start-text">Starte das Spiel, lade die Spielerdaten<br>und wähle dein Team aus.</p>
+    <a class="btn-start" id="btn-primary" href="./screens/spz-00.html">Spiel starten →</a>
+    <a class="btn-secondary" id="btn-secondary" href="./screens/spz-00.html" style="display:none;">Neu starten</a>
   </div>
 
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js');
+    }
+
+    /* Weiterspielen anbieten, falls ein Spielstand vorhanden ist */
+    const lastScreen = localStorage.getItem('lastScreen');
+    if (lastScreen) {
+      document.getElementById('start-text').textContent = 'Du hast ein laufendes Spiel gefunden.';
+      const primary = document.getElementById('btn-primary');
+      primary.href = lastScreen;
+      primary.textContent = 'Weiterspielen →';
+      document.getElementById('btn-secondary').style.display = 'inline-block';
     }
   </script>
 </body>

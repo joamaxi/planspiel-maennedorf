@@ -16,9 +16,9 @@
     "projektPeriode": 2
   },
   "114": {
-    "levelIdx": 3,
-    "levelKosten": 32,
-    "levelBezeichnung": "hoch",
+    "levelIdx": 2,
+    "levelKosten": 16,
+    "levelBezeichnung": "mittel",
     "projektName": "Projekt: Gebäudeinfrastruktur Standort Männedorf",
     "gewaehltInRunde": 1,
     "projektPeriode": 2

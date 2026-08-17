@@ -144,7 +144,7 @@
       const totalBetrieb = (v('Ertraege_Spitalbetrieb',0)||0) + (v('Andere_Ertraege',0)||0) + (v('Ausserordentliche_Ertraege',0)||0);
       const totalVar     = Math.round((v('Variable_Kosten_Spital',0)||0) + (v('Variable_Kosten_Medikamente',0)||0) - (v('Variable_Kostenreduktion',0)||0));
       const db1          = totalBetrieb - totalVar;
-      const totalFix     = (v('Personalaufwand',0)||0) + (v('Kosten_Projekte',0)||0) + (v('Lebensmittel',0)||0) + (v('Unterhalt',0)||0) + (v('Energie',0)||0) + (v('Buero',0)||0) + (v('Rekrutierung',0)||0) + (v('Ausserordentliche',0)||0);
+      const totalFix     = (v('Personalaufwand',0)||0) + (v('Personalaufwand_Extern',0)||0) + (v('Kosten_Projekte',0)||0) + (v('Lebensmittel',0)||0) + (v('Unterhalt',0)||0) + (v('Energie',0)||0) + (v('Buero',0)||0) + (v('Rekrutierung',0)||0) + (v('Ausserordentliche',0)||0);
       const ebitdar      = db1 - totalFix;
       const ebit         = ebitdar - (v('Mietzins',0)||0) - abschreibungen;
       const zinsen       = v('Zinsen_Bank', 0);
@@ -178,6 +178,7 @@
       colRight.innerHTML = `
         <p class="er-col-title">Aufwände</p>
         ${row('Personalaufwand für Mitarbeitende',              fmt(v('Personalaufwand', 0)))}
+        ${row('Personalaufwand extern',                         fmt(v('Personalaufwand_Extern', 0)))}
         ${row('Kosten aller Projekte des laufenden Jahres',     fmt(v('Kosten_Projekte', null)))}
         ${row('Lebensmittel und Haushaltaufwand',               fmt(v('Lebensmittel', null)))}
         ${row('Unterhalt und Reparaturen',                      fmt(v('Unterhalt', null)))}
@@ -211,6 +212,7 @@
         TOTAL_Variable_Kosten:     totalVar,
         Deckungsbeitrag_1:         db1,
         Personalaufwand:           v('Personalaufwand', 0),
+        Personalaufwand_Extern:    v('Personalaufwand_Extern', 0),
         Kosten_Projekte:           v('Kosten_Projekte', 0),
         Lebensmittel:              v('Lebensmittel', 0),
         Unterhalt:                 v('Unterhalt', 0),

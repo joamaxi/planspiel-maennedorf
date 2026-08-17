@@ -257,6 +257,8 @@
       }
       inpF.addEventListener('input', save);
       inpV.addEventListener('input', save);
+      inpF.addEventListener('focus', () => inpF.select());
+      inpV.addEventListener('focus', () => inpV.select());
     })();
 
     /* ══ Variable Kostenreduktion berechnen ══════════════════════════════ */

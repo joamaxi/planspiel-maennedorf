@@ -8,18 +8,18 @@
       "Bilanz": {
         "Aktive_Rechnungsabgrenzung": 22,
         "Darlehen_Bank": 309,
-        "Eigenkapital": 499,
+        "Eigenkapital": 447,
         "FluessigeMittel": 303,
         "Forderungen": 301,
         "Fremdkapital": 344,
-        "Gebaude_Anlage": 138,
+        "Gebaude_Anlage": 107,
         "Immaterielle_Werte_Anlage": 0,
-        "Infrastruktur_Anlage": 71,
+        "Infrastruktur_Anlage": 50,
         "Passive_Rechnungsabgrenzung": 26,
         "Ruckstellungen": 1,
-        "TOTAL_Aktiven": 843,
-        "TOTAL_Anlagevermögen": 209,
-        "TOTAL_Passiven": 843,
+        "TOTAL_Aktiven": 791,
+        "TOTAL_Anlagevermögen": 157,
+        "TOTAL_Passiven": 791,
         "TOTAL_Umlaufvermoegen": 634,
         "Verbindlichkeiten": 8,
         "Vorraete": 8,
@@ -27,7 +27,7 @@
         "Investitionen_Infrastruktur": 0,
         "Abschreibungen_Infrastruktur": 0,
         "Abschreibungen_Gebaeude": 0,
-        "TOTAL_Anlage": 209
+        "TOTAL_Anlage": 157
       },
       "KostenReduktion": 2,
       "Steuern": 20
