@@ -1,0 +1,36 @@
+{
+  "Anfangsbilanz": [
+    {
+      "AbschreibungGebaude": 2,
+      "AbschreibungMaschinen": 12.5,
+      "Abschreibungsreduktion": 8.3,
+      "BankZinsen": 6,
+      "Bilanz": {
+        "Aktive_Rechnungsabgrenzung": 22,
+        "Darlehen_Bank": 0,
+        "Eigenkapital": 475,
+        "FluessigeMittel": 101,
+        "Forderungen": 227,
+        "Fremdkapital": 35,
+        "Gebaude_Anlage": 97,
+        "Immaterielle_Werte_Anlage": 0,
+        "Infrastruktur_Anlage": 59,
+        "Passive_Rechnungsabgrenzung": 26,
+        "Ruckstellungen": 1,
+        "TOTAL_Aktiven": 510,
+        "TOTAL_Anlagevermögen": 156,
+        "TOTAL_Passiven": 510,
+        "TOTAL_Umlaufvermoegen": 354,
+        "Verbindlichkeiten": 8,
+        "Vorraete": 4,
+        "Investitionen_Gebaeude": 0,
+        "Investitionen_Infrastruktur": 0,
+        "Abschreibungen_Infrastruktur": 0,
+        "Abschreibungen_Gebaeude": 0,
+        "TOTAL_Anlage": 156
+      },
+      "KostenReduktion": 2,
+      "Steuern": 20
+    }
+  ]
+}

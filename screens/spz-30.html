@@ -286,12 +286,6 @@
       setLS('erfolgsrechnung', er);
 
       /* Protokoll */
-      protokoll.push({
-        zeit: new Date().toISOString(), spielzug: 'spz-30',
-        aktion: `Bankdarlehen aktualisiert (${schulden} Mio)`,
-        von: '–', nach: 'Bilanz',
-        betrag: schulden, team: teamLabel
-      });
       if (zinsen > 0) protokoll.push({
         zeit: new Date().toISOString(), spielzug: 'spz-30',
         aktion: `Zinsen Bankdarlehen (${zinssatz}%)`,

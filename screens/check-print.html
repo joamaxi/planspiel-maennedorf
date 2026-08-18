@@ -535,7 +535,15 @@
         const applied = getLS('bankApplied') || {};
         const auf   = Number(applied.aufnahme)    || 0;
         const rueck = Number(applied.rueckzahlung) || 0;
-        const netto = auf - rueck;
+
+        /* "Netto Darlehen" = aktueller Darlehensbestand (nicht die Bewegung
+           dieser Runde) — direkt aus der Bilanz gelesen */
+        const _bd    = getLS('bilanzStart');
+        const _arr   = _bd ? (_bd.Anfangsbilanz || _bd) : null;
+        const _tNr   = Number(localStorage.getItem('teamNumber')) || 1;
+        const _entry = _arr ? (_arr[_tNr] ?? _arr[_tNr-1] ?? _arr[0]) : null;
+        const netto  = Number(_entry?.Bilanz?.Darlehen_Bank) || 0;
+
         if (auf > 0 || rueck > 0) {
           document.getElementById('bank-aufnahme').innerHTML    = `${auf}<span class="bank-move-unit">Mio</span>`;
           document.getElementById('bank-rueckzahlung').innerHTML = `${rueck}<span class="bank-move-unit">Mio</span>`;
