@@ -275,8 +275,8 @@
     <table id="proto-table" style="display:none;">
       <thead>
         <tr>
-          <th>Spielzug</th><th>Team</th><th>Aktion</th><th>Von</th><th>Nach</th>
-          <th style="text-align:right;">Betrag (Mio)</th><th>Zeit</th>
+          <th>Spielzug</th><th>TeamNr</th><th>Aktion</th><th>Von</th><th>Nach</th>
+          <th style="text-align:right;">Betrag</th><th style="text-align:right;">Saldo</th><th>Zeit</th>
         </tr>
       </thead>
       <tbody id="proto-body"></tbody>
@@ -430,9 +430,29 @@
       const tbody = document.getElementById('proto-body');
       const table = document.getElementById('proto-table');
       const empty = document.getElementById('proto-empty');
+      const protoTeamNr = localStorage.getItem('teamNumber') || '–';
 
       if (protokoll.length > 0) {
-        protokoll.forEach(p => {
+        /* Saldo "Flüssige Mittel" je Zeile rückwärts aus dem aktuellen
+           Bilanz-Stand rekonstruieren (Protokoll speichert keine Snapshots) */
+        const _bd    = getLS('bilanzStart');
+        const _arr   = _bd ? (_bd.Anfangsbilanz || _bd) : null;
+        const _tNr   = Number(localStorage.getItem('teamNumber')) || 1;
+        const _entry = _arr ? (_arr[_tNr] ?? _arr[_tNr-1] ?? _arr[0]) : null;
+        let laufsaldo = Number(_entry?.Bilanz?.FluessigeMittel) || 0;
+
+        const salden = new Array(protokoll.length);
+        for (let i = protokoll.length - 1; i >= 0; i--) {
+          const p = protokoll[i];
+          salden[i] = laufsaldo;
+          const betrag = Number(p.betrag) || 0;
+          let effekt = 0;
+          if (p.von  === 'Flüssige Mittel') effekt -= betrag;
+          if (p.nach === 'Flüssige Mittel') effekt += betrag;
+          laufsaldo -= effekt;
+        }
+
+        protokoll.forEach((p, i) => {
           const tr = document.createElement('tr');
           const zeit = p.zeit ? new Date(p.zeit).toLocaleString('de-CH', {
             day:'2-digit', month:'2-digit', year:'2-digit',
@@ -440,11 +460,12 @@
           }) : '–';
           tr.innerHTML = `
             <td style="font-weight:700;color:var(--accent);">${p.spielzug || '–'}</td>
-            <td>${(p.team || '–').toString().replace(/team\s*/i, '')}</td>
+            <td>${protoTeamNr}</td>
             <td>${p.aktion || '–'}</td>
             <td>${p.von || '–'}</td>
             <td>${p.nach || '–'}</td>
             <td style="font-weight:700;color:var(--accent);text-align:right;">${p.betrag !== undefined ? p.betrag : '–'}</td>
+            <td style="font-weight:700;color:var(--accent);text-align:right;">${salden[i]}</td>
             <td style="color:var(--label);">${zeit}</td>
           `;
           tbody.appendChild(tr);
