@@ -359,7 +359,9 @@
         container.appendChild(div);
 
         // Auto-save bei Änderung
-        div.querySelector('.gl-name-input').addEventListener('input', save);
+        const glNameInput = div.querySelector('.gl-name-input');
+        glNameInput.addEventListener('input', save);
+        glNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') glNameInput.blur(); });
         div.querySelector('.gl-funktion-select').addEventListener('change', save);
       });
     }
@@ -373,6 +375,7 @@
       const lbl = document.getElementById('header-team-label');
       if (lbl && klinikInput.value) lbl.textContent = klinikInput.value;
     });
+    klinikInput.addEventListener('keydown', e => { if (e.key === 'Enter') klinikInput.blur(); });
 
     /* ── Init ── */
     buildGLRows();

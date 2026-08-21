@@ -261,6 +261,8 @@
       inpV.addEventListener('input', save);
       inpF.addEventListener('focus', () => inpF.select());
       inpV.addEventListener('focus', () => inpV.select());
+      inpF.addEventListener('keydown', e => { if (e.key === 'Enter') inpF.blur(); });
+      inpV.addEventListener('keydown', e => { if (e.key === 'Enter') inpV.blur(); });
     })();
 
     /* ══ Variable Kostenreduktion berechnen ══════════════════════════════ */

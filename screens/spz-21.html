@@ -269,6 +269,7 @@
         if (input.value !== '' && String(rounded) !== input.value) input.value = rounded;
         setLS('spz21_materialverbrauch', rounded);
       });
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
     })();
 
     /* ══ Warnung: Vorräte reichen nicht ═══════════════════════════════════ */

@@ -234,6 +234,7 @@
       inp.addEventListener('input', () => {
         setLS('spz28_rekrutierung', Math.round(parseFloat(inp.value) || 0));
       });
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
     })();
 
     /* ══ Transfer beim Weiter-Klick ══════════════════════════════════════ */

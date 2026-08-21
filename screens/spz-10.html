@@ -282,6 +282,7 @@
         setLS('variablekosten', val);
       });
       input.addEventListener('focus', () => input.select());
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
     })();
 
     /* ══ Transfer beim Next-Klick (Delta-Korrektur, wiederholbar) ═════════ */

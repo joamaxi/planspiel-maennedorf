@@ -327,6 +327,7 @@
 
     function handleKeydown(event) {
         if (event.key !== 'Enter') return;
+        event.target.blur();
         const val = toNumber(event.target.value);
         if (val !== 0) {
             saveEventValues();

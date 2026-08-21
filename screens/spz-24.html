@@ -264,6 +264,8 @@
 
       inpF.addEventListener('input', save);
       inpD.addEventListener('input', save);
+      inpF.addEventListener('keydown', e => { if (e.key === 'Enter') inpF.blur(); });
+      inpD.addEventListener('keydown', e => { if (e.key === 'Enter') inpD.blur(); });
 
       /* Enter springt zum nächsten Feld */
       inpF.addEventListener('keydown', function(e) {

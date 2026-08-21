@@ -419,6 +419,7 @@
 
         input.addEventListener('input', updateResult);
         input.addEventListener('focus', () => input.select());
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
 
         /* Initial berechnen falls Wert bereits gespeichert */
         if (savedVal !== '') updateResult();

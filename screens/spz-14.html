@@ -372,6 +372,9 @@
         inpPhp.addEventListener('focus',  () => inpPhp.select());
         inpAllg.addEventListener('focus', () => inpAllg.select());
         inpAmb.addEventListener('focus',  () => inpAmb.select());
+        inpPhp.addEventListener('keydown',  e => { if (e.key === 'Enter') inpPhp.blur(); });
+        inpAllg.addEventListener('keydown', e => { if (e.key === 'Enter') inpAllg.blur(); });
+        inpAmb.addEventListener('keydown',  e => { if (e.key === 'Enter') inpAmb.blur(); });
       });
 
       /* Initial-Total */

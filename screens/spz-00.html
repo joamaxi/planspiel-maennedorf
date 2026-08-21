@@ -462,6 +462,7 @@
         localStorage.setItem('serverIp', ipInput.value.trim());
         updateImportState();
       });
+      ipInput.addEventListener('keydown', e => { if (e.key === 'Enter') ipInput.blur(); });
 
       /* Gate + Dateiname initial setzen */
       if (!gestartet) {
