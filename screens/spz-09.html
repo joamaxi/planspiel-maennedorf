@@ -171,11 +171,18 @@
     }
     .personal-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
+    /* Zeile: Label links, Kostenfeld rechts */
+    .personal-result-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
     /* Kostenfeld: gleiche Breite wie Input */
     .personal-result {
       height: 36px;
       width: 64px;
-      align-self: flex-end;
       border-radius: 6px;
       background: var(--color-accent);
       color: #fff;
@@ -390,7 +397,10 @@
                      style="border-color:rgb(${rgb}); color:rgb(${rgb});"
                      placeholder="" />
             </div>
-            <div class="personal-result" id="result-${b.marktNr}">–</div>
+            <div class="personal-result-row">
+              <span class="personal-label">Kosten</span>
+              <div class="personal-result" id="result-${b.marktNr}">–</div>
+            </div>
           </div>
         `;
         grid.appendChild(box);

@@ -1,29 +1,29 @@
 {
-  "klinikName": "Erste Klinik",
+  "klinikName": "Klinik Joachim",
   "geschaeftsleitung": [
     {
-      "name": "Harry",
-      "funktion": "Ärztliche/r Direktor/in"
-    },
-    {
-      "name": "Harry",
-      "funktion": "Leiter/in Bereich HRM"
-    },
-    {
-      "name": "Harry",
-      "funktion": "Leiter/in Bereich Finanzen"
-    },
-    {
-      "name": "Harry",
+      "name": "Joachim",
       "funktion": "Leiter/in Bereich Pflege (operatives Tagesgeschäft)"
     },
     {
-      "name": "Harry",
+      "name": "Joachim",
+      "funktion": "Leiter/in Bereich Services"
+    },
+    {
+      "name": "Joachim",
       "funktion": "Leiter/in Bereich Unternehmensentwicklung"
     },
     {
-      "name": "Harry",
-      "funktion": "Leiter/in Bereich Services"
+      "name": "Joachim",
+      "funktion": "Ärztliche/r Direktor/in"
+    },
+    {
+      "name": "Joachim",
+      "funktion": "Leiter/in Bereich HRM"
+    },
+    {
+      "name": "Joachim",
+      "funktion": "Leiter/in Bereich Finanzen"
     }
   ]
 }

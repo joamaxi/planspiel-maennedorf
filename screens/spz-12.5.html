@@ -186,6 +186,22 @@
       font-weight: 700;
     }
 
+    /* ── Intern-Referenz (nur Anzeige, keine Eingabe) ──────────────────────── */
+    .personal-value-readonly {
+      width: 64px;
+      height: 36px;
+      border-radius: 6px;
+      border: 1.5px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #888;
+      background: #f0f0f0;
+      flex-shrink: 0;
+    }
+
     /* ── Total-Zeile ────────────────────────────────────────────────────── */
     .total-row {
       display: flex;
@@ -239,6 +255,7 @@
   data-disable-handbuch="true"
   data-disable-bank="false"
   data-disable-ereignis="true"
+  data-disable-back="true"
 >
   <div id="app-header" class="w-full"></div>
 
@@ -272,13 +289,13 @@
         <div class="personal-wrapper">
 
           <!-- Titel oben links -->
-          <span class="personal-wrapper-title">Personalplanung Extern</span>
+          <span class="personal-wrapper-title">Personalplanung</span>
 
           <!-- Picto oben rechts -->
           <img class="personal-wrapper-picto"
                src="../assets/pictos/personal.png" alt="" />
 
-          <!-- Markt-Boxen -->
+          <!-- Markt-Boxen: Intern-Referenz + Extern-Eingabe kombiniert -->
           <div class="personal-grid" id="personal-grid">
             <!-- wird per JS befüllt -->
           </div>
@@ -286,7 +303,7 @@
           <!-- Total -->
           <div class="total-row">
             <div class="total-label-wrap">
-              <div class="total-label">TOTAL Personalkosten</div>
+              <div class="total-label">TOTAL Personalkosten (Intern + Extern)</div>
               <div class="total-sublabel">Betrag gerundet in Mio</div>
             </div>
             <div class="total-badge" id="total-badge">–</div>
@@ -342,40 +359,50 @@
         document.getElementById('card-picto-2').src = `../assets/pictos/${item.Picto2.toLowerCase()}`;
     })();
 
-    /* ══ Personalplanung ═══════════════════════════════════════════════════ */
+    /* ══ Personalplanung: Intern-Referenz + Extern-Eingabe kombiniert ═══════ */
     (function() {
       const data = getLS('personalKosten');
       if (!data) return;
-      const bereiche = (data.personal || data).filter(b => b.bezeichnung === 'extern');
+      const alle          = data.personal || data;
+      const bereicheExtern = alle.filter(b => b.bezeichnung === 'extern');
+      const bereicheIntern = alle.filter(b => b.bezeichnung === 'intern');
+      const planungIntern  = getLS('personalplanung') || {};
 
-      /* Gespeicherte Eingaben laden */
+      /* Gespeicherte Extern-Eingaben laden */
       const saved = getLS('personalplanungExtern') || {};
 
-      const grid      = document.getElementById('personal-grid');
+      const grid       = document.getElementById('personal-grid');
       const totalBadge = document.getElementById('total-badge');
 
       /* Eingaben + Ergebnisse sammeln für Neuberechnung */
-      const inputs = [];   // { input-Element, preis }
+      const inputs = [];   // { el, preis }
+      let internTotal = 0;
 
       function recalcTotal() {
-        let sum = 0;
+        let externSum = 0;
         inputs.forEach(({ el, preis }) => {
           const val = parseFloat(el.value) || 0;
-          sum += val * preis;
+          externSum += val * preis;
         });
-        totalBadge.textContent = Math.round(sum);
+        totalBadge.textContent = Math.round(externSum) + internTotal;
         /* Speichern */
         const saveObj = {};
-        bereiche.forEach((b, i) => {
+        bereicheExtern.forEach((b, i) => {
           saveObj[b.marktName] = parseFloat(inputs[i]?.el.value) || 0;
         });
         setLS('personalplanungExtern', saveObj);
       }
 
-      bereiche.forEach(b => {
+      bereicheExtern.forEach(b => {
         /* Farbe: marktFarbe nutzt | als Trenner */
         const rgb = (b.marktFarbe || '37|117|176').replace(/\|/g, ',');
         const savedVal = saved[b.marktName] || '';
+
+        /* Interne Referenzwerte (aus spz-09) für denselben Bereich */
+        const bIntern      = bereicheIntern.find(x => x.marktNr === b.marktNr) || {};
+        const einheitenIntern = Number(planungIntern[b.marktName]) || 0;
+        const kostenIntern     = einheitenIntern * (bIntern.preis || 0);
+        internTotal += kostenIntern;
 
         const box = document.createElement('div');
         box.className = 'personal-box';
@@ -384,19 +411,30 @@
           <div class="personal-header" style="background:rgb(${rgb});">${b.marktName}</div>
           <div class="personal-body">
             <div class="personal-input-row">
-              <span class="personal-label">Externe<br>Einheiten</span>
+              <span class="personal-label">Interne<br>Einheiten</span>
+              <div class="personal-value-readonly">${einheitenIntern}</div>
+            </div>
+            <div class="personal-input-row">
+              <span class="personal-label">Kosten</span>
+              <div class="personal-result">${kostenIntern % 1 === 0 ? kostenIntern : kostenIntern.toFixed(1)}</div>
+            </div>
+            <div class="personal-input-row" style="margin-top:14px;">
+              <span class="personal-label">Temporäre<br>Einheiten</span>
               <input class="personal-input" type="number" min="0" step="1"
                      value="${savedVal}"
                      style="border-color:rgb(${rgb}); color:rgb(${rgb});"
                      placeholder="" />
             </div>
-            <div class="personal-result" id="result-${b.marktNr}">–</div>
+            <div class="personal-input-row">
+              <span class="personal-label">Kosten</span>
+              <div class="personal-result" id="result-${b.marktNr}">–</div>
+            </div>
           </div>
         `;
         grid.appendChild(box);
 
         const input      = box.querySelector('.personal-input');
-        const resultEl   = box.querySelector('.personal-result');
+        const resultEl   = box.querySelector('.personal-result[id]');
         inputs.push({ el: input, preis: b.preis, resultEl });
 
         /* Einzelergebnis aktualisieren */
@@ -413,6 +451,8 @@
         /* Initial berechnen falls Wert bereits gespeichert */
         if (savedVal !== '') updateResult();
       });
+
+      internTotal = Math.round(internTotal);
 
       /* Initial-Total setzen */
       recalcTotal();

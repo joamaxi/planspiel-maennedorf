@@ -284,48 +284,52 @@
       input.addEventListener('focus', () => input.select());
     })();
 
-    /* ══ Transfer beim Next-Klick ════════════════════════════════════════ */
+    /* ══ Transfer beim Next-Klick (Delta-Korrektur, wiederholbar) ═════════ */
     document.addEventListener('click', function(e) {
       if (!e.target.closest('#nav-next')) return;
-      if (localStorage.getItem('done_spz11_variablekosten') === 'true') return;
 
       const betrag = Math.round(parseFloat(getLS('variablekosten')) || 0);
 
-      if (betrag === 0) {
-        return;
-      }
+      /* Delta gegenüber bereits gebuchtem Betrag berechnen */
+      const committed = Number(getLS('spz10_vk_committed')) || 0;
+      const delta      = betrag - committed;
 
-      /* Bilanz: FluessigeMittel -= betrag, Vorraete += betrag */
-      const bilanzData = getLS('bilanzStart');
-      if (bilanzData) {
-        const arr    = bilanzData.Anfangsbilanz || bilanzData;
-        const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
-        const idx    = arr[teamNr] !== undefined ? teamNr : (arr[teamNr-1] !== undefined ? teamNr-1 : 0);
-        const entry  = arr[idx];
-        if (entry && entry.Bilanz) {
-          entry.Bilanz.FluessigeMittel = (Number(entry.Bilanz.FluessigeMittel) || 0) - betrag;
-          entry.Bilanz.Vorraete        = (Number(entry.Bilanz.Vorraete)        || 0) + betrag;
-          arr[idx] = entry;
-          setLS('bilanzStart', bilanzData.Anfangsbilanz
-            ? { ...bilanzData, Anfangsbilanz: arr } : arr);
+      /* Bilanz: FluessigeMittel/Vorraete nur um die Differenz anpassen */
+      if (delta !== 0) {
+        const bilanzData = getLS('bilanzStart');
+        if (bilanzData) {
+          const arr    = bilanzData.Anfangsbilanz || bilanzData;
+          const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
+          const idx    = arr[teamNr] !== undefined ? teamNr : (arr[teamNr-1] !== undefined ? teamNr-1 : 0);
+          const entry  = arr[idx];
+          if (entry && entry.Bilanz) {
+            entry.Bilanz.FluessigeMittel = (Number(entry.Bilanz.FluessigeMittel) || 0) - delta;
+            entry.Bilanz.Vorraete        = (Number(entry.Bilanz.Vorraete)        || 0) + delta;
+            arr[idx] = entry;
+            setLS('bilanzStart', bilanzData.Anfangsbilanz
+              ? { ...bilanzData, Anfangsbilanz: arr } : arr);
+          }
         }
       }
 
-      /* Protokoll */
-      const teamNr    = Number(localStorage.getItem('teamNumber')) || 1;
-      const protokoll = getLS('protokoll') || [];
-      protokoll.push({
-        zeit:     new Date().toISOString(),
-        spielzug: 'spz-10',
-        aktion:   'Medikamente/Material Einkauf',
-        von:      'Flüssige Mittel',
-        nach:     'Vorräte',
-        betrag:   betrag,
-        team:     localStorage.getItem('klinikName') || `Team ${teamNr}`
-      });
-      setLS('protokoll', protokoll);
+      /* Gebuchten Betrag merken */
+      setLS('spz10_vk_committed', betrag);
 
-      localStorage.setItem('done_spz11_variablekosten', 'true');
+      /* Protokoll (nur bei Änderung) */
+      if (delta !== 0) {
+        const teamNr    = Number(localStorage.getItem('teamNumber')) || 1;
+        const protokoll = getLS('protokoll') || [];
+        protokoll.push({
+          zeit:     new Date().toISOString(),
+          spielzug: 'spz-10',
+          aktion:   delta > 0 ? 'Medikamente/Material Einkauf erhöht' : 'Medikamente/Material Einkauf reduziert',
+          von:      'Flüssige Mittel',
+          nach:     'Vorräte',
+          betrag:   delta,
+          team:     localStorage.getItem('klinikName') || `Team ${teamNr}`
+        });
+        setLS('protokoll', protokoll);
+      }
 
     }, true);
   </script>
