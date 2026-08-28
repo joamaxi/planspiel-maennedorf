@@ -83,7 +83,7 @@ if (footerTarget) {
     if (btn) btn.classList.toggle('disabled', !_handbuchVerfuegbar);
   }
 
-  /* JSON laden (UTF-16LE mit BOM oder UTF-8) – gleiche Daten wie im Import (spz-00.html) */
+  /* JSON laden (UTF-16LE mit BOM oder UTF-8) – gleiche Daten wie im Import (000-spielstart.html) */
   async function _fetchUTF16Json(url) {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -109,10 +109,10 @@ if (footerTarget) {
     .catch(() => {});
 
   function _getHandbuchFile() {
-    /* Für spz-25: Compound-Key mit aktiver ProjektNr */
-    if (_currentScreen === 'spz-25.html') {
+    /* Für die Projekte-Seite: Compound-Key mit aktiver ProjektNr */
+    if (_currentScreen === '240-projekte.html') {
       const nr = localStorage.getItem('aktivProjektNr');
-      if (nr) return _handbuchMap[`spz-25.html:${nr}`] || null;
+      if (nr) return _handbuchMap[`240-projekte.html:${nr}`] || null;
       return null;
     }
     return _handbuchMap[_currentScreen] || document.body.dataset.handbuch || null;
@@ -638,7 +638,7 @@ if (footerTarget) {
     if (e.target && e.target.id === 'neosight-logo') { modalMode = 'check'; openModal(); }
   });
 
-  /* Für einzelne Screens (z.B. spz-25.html) nutzbar, um dasselbe Moderatoren-
+  /* Für einzelne Screens (z.B. 240-projekte.html) nutzbar, um dasselbe Moderatoren-
      Passwort-Modal für einen anderen Zweck als "check.html öffnen" zu triggern. */
   window.openModeratorModal = function(mode) {
     modalMode = mode;

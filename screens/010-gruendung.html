@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entscheidung – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#ffffff; }
+    * { box-sizing:border-box; }
+    #spital-logo { cursor: pointer; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 36px 32px 20px 32px;
+      display: flex;
+      gap: 48px;
+      align-items: flex-start;
+    }
+
+    /* ══ LINKE SPALTE ══════════════════════════════════════════════════════ */
+    .col-left {
+      width: 340px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* Entscheidungs-Karte */
+    .decision-card {
+      position: relative;
+      border-top: 1.5px solid var(--color-border);
+      border-left: 1.5px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 24px 28px 20px;
+      background: #fff;
+      min-height: 200px;
+      margin-top: 26px; /* bündig mit Eingabefeld rechts (Label-Höhe überbrücken) */
+    }
+
+   .card-illustration {
+      position: absolute;
+      top: -30px;
+      right: 12px;
+      width: auto;
+      height: 55px;
+      display: block;
+      background: #fff;
+    }
+
+    .card-title {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--color-accent);
+      margin: 0 0 14px 0;
+      line-height: 1.05;
+    }
+
+    .card-subtitle {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #222;
+      margin: 0 0 8px 0;
+    }
+
+    .card-text {
+      font-size: 0.88rem;
+      color: #333;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    /* Logo-Zeichenbereich */
+    .logo-draw-area {
+      margin-top: 20px;
+      position: relative;
+      height: 100px;
+    }
+
+    /* L-Klammer: nur untere-linke Ecke sichtbar */
+    .logo-bracket {
+      position: absolute;
+      left: 24px;
+      top: 0;
+      width: 180px;
+      height: 88px;
+      border-left: 1.5px solid var(--color-border);
+      border-bottom: 1.5px solid var(--color-border);
+      border-bottom-left-radius: 4px;
+    }
+
+    /* Pfeil rechts */
+    .logo-arrow {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .logo-arrow-line {
+      width: 50px;
+      height: 1.5px;
+      background: var(--color-border);
+    }
+    .logo-arrow-head {
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 9px solid var(--color-border);
+    }
+
+    /* ══ RECHTE SPALTE ═════════════════════════════════════════════════════ */
+    .col-right {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Klinik-Name */
+    .field-label {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-bottom: 6px;
+    }
+
+    .klinik-input {
+      width: 102%;
+      height: 52px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0 14px;
+      font-size: 1rem;
+      color: #333;
+      outline: none;
+      background: #fff;
+    }
+    .klinik-input:focus { border-color: var(--color-accent); }
+
+    /* Geschäftsleitung */
+    .gl-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      margin: 0 0 10px 0;
+    }
+
+    .gl-headers {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 10px;
+      margin-bottom: 6px;
+      padding: 0 2px;
+    }
+    .gl-header-cell {
+      font-size: 0.78rem;
+      color: var(--color-label);
+    }
+
+    .gl-row {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .gl-name-input {
+      height: 42px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0 12px;
+      font-size: 0.88rem;
+      color: #333;
+      outline: none;
+      background: #fff;
+    }
+    .gl-name-input:focus { border-color: var(--color-accent); }
+
+    .gl-funktion-select {
+      height: 42px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0 12px;
+      font-size: 0.88rem;
+      color: var(--color-accent);
+      outline: none;
+      background: #fff;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%232575b0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+      cursor: pointer;
+    }
+    .gl-funktion-select:focus { border-color: var(--color-accent); }
+  </style>
+</head>
+
+<body
+  class="bg-white min-h-screen flex flex-col items-center"
+  data-prev=""
+  data-next="020-indexstart.html"
+  data-spielzug-label="Spielzug 1"
+  data-step-current="1"
+  data-step-total="20"
+  data-wirkung="00-wirkungen.png"
+  data-handbuch="hb-spz01.html"
+  data-disable-bank="true"
+  data-disable-ereignis="true"
+  data-disable-back="true"
+>
+  <div id="app-header" class="w-full bg-white"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <!-- ══ LINKE SPALTE ══ -->
+      <div class="col-left">
+
+        <!-- Karte 1: aus Spielaufgaben Aufgabe_1 -->
+        <div class="decision-card">
+          <img id="card-picto-1" src="../assets/pictos/picto_meeting.png"
+               class="card-illustration" alt="" />
+          <h1 class="card-title" id="card-art-1">Entscheidung</h1>
+          <p class="card-subtitle" id="card-sub-1">Gründung einer Klinik</p>
+          <p class="card-text" id="card-text-1">
+            Zu Beginn des Spiel, geben Sie Ihrer Klinik einen Namen,
+            zeichnen ein Logo und bestimmen Sie die Geschäftsleitung
+          </p>
+        </div>
+
+        <!-- Karte 2: aus Spielaufgaben Aufgabe_2 (wird per JS befüllt) -->
+        <div class="decision-card" id="card-2" style="display:none;">
+          <img id="card-picto-2" src="" class="card-illustration" alt="" />
+          <h1 class="card-title" id="card-art-2"></h1>
+          <p class="card-text" id="card-text-2"></p>
+        </div>
+
+      </div>
+
+      <!-- ══ RECHTE SPALTE ══ -->
+      <div class="col-right">
+
+        <!-- Name der Klinik -->
+        <div>
+          <p class="field-label">Name der Klinik</p>
+          <input
+            type="text"
+            id="klinik-name"
+            class="klinik-input"
+            placeholder=""
+          />
+        </div>
+
+        <!-- Geschäftsleitung -->
+        <div>
+          <p class="gl-title">Geschäftsleitung</p>
+
+          <div class="gl-headers">
+            <span class="gl-header-cell">Name</span>
+            <span class="gl-header-cell">Funktion</span>
+          </div>
+
+          <div id="gl-rows">
+            <!-- wird per JS befüllt -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <div id="app-footer" class="w-full bg-transparent"></div>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    /* ── Funktionen: aus localStorage (Funktionen.json) oder Fallback ── */
+    const DEFAULT_FUNKTIONEN = [
+      'Leiter/in Bereich Pflege (operatives Tagesgeschäft)',
+      'Leiter/in Bereich Services',
+      'Leiter/in Bereich Unternehmensentwicklung',
+      'Ärztliche/r Direktor/in',
+      'Leiter/in Bereich HRM',
+      'Leiter/in Bereich Finanzen',
+    ];
+
+    function getFunktionen() {
+      try {
+        const raw = localStorage.getItem('funktionen');
+        if (!raw) return DEFAULT_FUNKTIONEN;
+        const data = JSON.parse(raw);
+        const arr  = data.funktionen || data;
+        if (Array.isArray(arr) && arr.length) {
+          return arr.map(f => f.funktion || f);
+        }
+      } catch(e) {}
+      return DEFAULT_FUNKTIONEN;
+    }
+
+    /* ── Gespeicherte Daten laden ── */
+    function getSaved() {
+      try {
+        const raw = localStorage.getItem('geschaeftsleitung');
+        return raw ? JSON.parse(raw) : [];
+      } catch(e) { return []; }
+    }
+
+    function save() {
+      const rows = [];
+      document.querySelectorAll('.gl-row-item').forEach((row, i) => {
+        rows.push({
+          name:     row.querySelector('.gl-name-input').value,
+          funktion: row.querySelector('.gl-funktion-select').value,
+        });
+      });
+      localStorage.setItem('geschaeftsleitung', JSON.stringify(rows));
+    }
+
+    /* ── GL-Zeilen aufbauen ── */
+    function buildGLRows() {
+      const funktionen = getFunktionen();
+      const saved      = getSaved();
+      const container  = document.getElementById('gl-rows');
+
+      funktionen.forEach((fn, i) => {
+        const savedRow = saved[i] || {};
+        const div = document.createElement('div');
+        div.className = 'gl-row gl-row-item';
+
+        // Optionen für Dropdown
+        const options = funktionen.map(f =>
+          `<option value="${f}"${f === (savedRow.funktion || fn) ? ' selected' : ''}>${f}</option>`
+        ).join('');
+
+        div.innerHTML = `
+          <input
+            type="text"
+            class="gl-name-input"
+            value="${savedRow.name || ''}"
+            placeholder=""
+          />
+          <select class="gl-funktion-select">${options}</select>
+        `;
+        container.appendChild(div);
+
+        // Auto-save bei Änderung
+        const glNameInput = div.querySelector('.gl-name-input');
+        glNameInput.addEventListener('input', save);
+        glNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') glNameInput.blur(); });
+        div.querySelector('.gl-funktion-select').addEventListener('change', save);
+      });
+    }
+
+    /* ── Klinik-Name ── */
+    const klinikInput = document.getElementById('klinik-name');
+    klinikInput.value = localStorage.getItem('klinikName') || '';
+    klinikInput.addEventListener('input', () => {
+      localStorage.setItem('klinikName', klinikInput.value);
+      // Header-Label aktualisieren
+      const lbl = document.getElementById('header-team-label');
+      if (lbl && klinikInput.value) lbl.textContent = klinikInput.value;
+    });
+    klinikInput.addEventListener('keydown', e => { if (e.key === 'Enter') klinikInput.blur(); });
+
+    /* ── Init ── */
+    buildGLRows();
+
+    /* ── Von Server laden (ab Runde 2) ── */
+    (async function() {
+      const runde  = Number(localStorage.getItem('rundeNumber') || '1');
+      const teamNr = localStorage.getItem('teamNumber') || '1';
+      if (runde < 2) return;
+
+      try {
+        const res = await fetch(`../data/json/team${teamNr}-leitung.json?v=${Date.now()}`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data.klinikName) {
+          klinikInput.value = data.klinikName;
+          localStorage.setItem('klinikName', data.klinikName);
+        }
+
+        if (Array.isArray(data.geschaeftsleitung)) {
+          document.querySelectorAll('.gl-row-item').forEach((row, i) => {
+            const entry = data.geschaeftsleitung[i];
+            if (!entry) return;
+            const nameInput  = row.querySelector('.gl-name-input');
+            const funkSelect = row.querySelector('.gl-funktion-select');
+            if (nameInput)  nameInput.value  = entry.name     || '';
+            if (funkSelect) funkSelect.value = entry.funktion || '';
+          });
+          localStorage.setItem('geschaeftsleitung', JSON.stringify(data.geschaeftsleitung));
+        }
+      } catch(e) {
+        console.warn('leitung.json nicht geladen:', e);
+      }
+    })();
+
+    /* ── Export beim Verlassen ── */
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#nav-next')) return;
+
+      const teamNr = localStorage.getItem('teamNumber') || '0';
+      const klinik = klinikInput.value.trim();
+      const rows   = [];
+      document.querySelectorAll('.gl-row-item').forEach(row => {
+        rows.push({
+          name:     row.querySelector('.gl-name-input').value,
+          funktion: row.querySelector('.gl-funktion-select').value,
+        });
+      });
+
+      const filename = `team${teamNr}-leitung.json`;
+      fetch('../data/json/save.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename,
+          data: JSON.stringify({ klinikName: klinik, geschaeftsleitung: rows }, null, 2)
+        }),
+        keepalive: true
+      }).catch(err => console.error('Leitung-Export fehlgeschlagen:', err));
+    }, true);
+
+    /* ── Spielaufgaben → Karten befüllen ── */
+    (function() {
+      try {
+        const raw  = localStorage.getItem('spielaufgaben');
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        const arr  = data.spielaufgaben || data;
+        const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
+        if (!item) return;
+
+        function parseText(text) {
+          const parts = (text || '').split('\r');
+          return {
+            subtitle: parts.length > 1 ? parts[0].trim() : '',
+            body:     parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim()
+          };
+        }
+
+        /* Karte 1 */
+        const a1 = parseText(item.Aufgabe_1);
+        if (item.AufgabenArt_1) document.getElementById('card-art-1').textContent  = item.AufgabenArt_1;
+        if (a1.subtitle)        document.getElementById('card-sub-1').textContent  = a1.subtitle;
+        if (a1.body)            document.getElementById('card-text-1').textContent = a1.body;
+        if (item.Picto1)        document.getElementById('card-picto-1').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
+
+        /* Karte 2 – nur anzeigen wenn AufgabenArt_2 vorhanden */
+        if (item.AufgabenArt_2) {
+          const a2 = parseText(item.Aufgabe_2);
+          document.getElementById('card-art-2').textContent  = item.AufgabenArt_2;
+          document.getElementById('card-text-2').textContent = a2.body || a2.subtitle;
+          if (item.Picto2)
+            document.getElementById('card-picto-2').src = `../assets/pictos/${item.Picto2.toLowerCase()}`;
+          document.getElementById('card-2').style.display = 'block';
+        }
+      } catch(e) { console.warn('Spielaufgaben spz-01:', e); }
+    })();
+
+    /* ── Rechtes Logo → spz-00 ─────────────────────────────────────────── */
+    document.addEventListener('click', function(e) {
+      if (e.target.id === 'spital-logo') window.location.href = '000-spielstart.html';
+    });
+  </script>
+</body>
+</html>

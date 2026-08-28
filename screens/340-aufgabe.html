@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spielbrett-Aufgabe – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#fff; }
+    * { box-sizing:border-box; }
+    #spital-logo { cursor: pointer; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 160px 32px 24px 32px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    /* ── Aufgaben-Karte ──────────────────────────────────────────────────── */
+    .aufgabe-card {
+      position: relative;
+      width: 100%;
+      max-width: 550px;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 12px;
+      padding: 36px 40px 40px 40px;
+      background: #fff;
+    }
+
+    /* Picto oben rechts, überlappt Rahmen */
+    .card-picto {
+      position: absolute;
+      top: -38px;
+      right: 20px;
+      width: auto;
+      height: 60px;
+      display: block;
+      background: #fff;
+    }
+
+    .card-title {
+      font-size: 2.0rem !important;
+      font-weight: 800;
+      color: var(--color-accent);
+      margin: 0 0 20px 0;
+      line-height: 1.05;
+      white-space: nowrap;
+    }
+
+    .card-subtitle {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0 0 6px 0;
+    }
+
+    .card-text {
+      font-size: 0.9rem;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ── Bestätigungs-Modal (Runde abschliessen) ── */
+    .confirm-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-backdrop.visible { display: flex; }
+    .confirm-box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 32px 36px;
+      width: 360px;
+      max-width: calc(100vw - 40px);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-align: center;
+    }
+    .confirm-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--color-accent);
+    }
+    .confirm-text {
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.5;
+    }
+    .confirm-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .confirm-btn {
+      flex: 1;
+      height: 44px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+    }
+    .confirm-btn.cancel { background: #eef2f6; color: #666; }
+    .confirm-btn.cancel:hover { background: #e2e8ee; }
+    .confirm-btn.ok { background: var(--color-accent); color: #fff; }
+    .confirm-btn.ok:hover { background: var(--color-accent-dark); }
+  </style>
+</head>
+
+<body
+  class="bg-white min-h-screen flex flex-col items-center"
+  data-prev="330-bilanz.html"
+  data-spielzug-label="Spielzug 35"
+  data-step-current="35"
+  data-step-total="20"
+  data-wirkung="00-wirkungen.png"
+  data-disable-handbuch="true"
+  data-disable-wirkungen="true"
+  data-disable-bank="true"
+  data-disable-ereignis="true"
+  data-disable-next="true"
+>
+  <!-- Bestätigungs-Modal (Runde abschliessen) -->
+  <div class="confirm-backdrop" id="confirm-backdrop">
+    <div class="confirm-box">
+      <div class="confirm-title" id="confirm-title"></div>
+      <div class="confirm-text" id="confirm-text"></div>
+      <div class="confirm-actions" id="confirm-actions"></div>
+    </div>
+  </div>
+
+  <div id="app-header" class="w-full"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <div class="aufgabe-card">
+
+        <img id="card-picto" class="card-picto"
+             src="../assets/pictos/picto_aufgabe.png" alt="" />
+
+        <h1 class="card-title" id="card-art">Spielbrett-Aufgabe</h1>
+        <p class="card-subtitle" id="card-subtitle"></p>
+        <p class="card-text"    id="card-text"></p>
+
+      </div>
+
+    </div>
+  </main>
+
+  <div id="app-footer" class="w-full bg-transparent"></div>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    function getLS(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+    }
+    function boldQuotes(text) {
+      return text.replace(/"([^"]+)"/g, '<strong>"$1"</strong>');
+    }
+
+    (function() {
+      const data = getLS('spielaufgaben');
+      if (!data) return;
+      const arr  = data.spielaufgaben || data;
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
+      if (!item) return;
+
+      if (item.AufgabenArt_1)
+        document.getElementById('card-art').textContent = item.AufgabenArt_1;
+
+      const parts    = (item.Aufgabe_1 || '').split('\r');
+      const subtitle = parts.length > 1 ? parts[0].trim() : '';
+      const body     = parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim();
+
+      if (subtitle) document.getElementById('card-subtitle').textContent = subtitle;
+      document.getElementById('card-text').innerHTML = boldQuotes(body);
+
+      if (item.Picto1)
+        document.getElementById('card-picto').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
+    })();
+
+    /* ── Rechtes Logo → Runde abschliessen (nur hier aktiv) ───────────── */
+    document.addEventListener('click', function(e) {
+      if (e.target.id !== 'spital-logo') return;
+
+      const team  = localStorage.getItem('teamNumber') || '';
+      const runde = Number(localStorage.getItem('rundeNumber')) || 1;
+      const maxR  = Number(localStorage.getItem('maxRunden')) || 0;
+      const ip    = localStorage.getItem('serverIp') || '';
+
+      const backdrop = document.getElementById('confirm-backdrop');
+      const title    = document.getElementById('confirm-title');
+      const text     = document.getElementById('confirm-text');
+      const actions  = document.getElementById('confirm-actions');
+
+      function closeModal() { backdrop.classList.remove('visible'); }
+
+      /* Letzte Runde bereits erreicht → Hinweis + Weiterleitung zu spz-00 */
+      if (maxR && runde >= maxR) {
+        title.textContent = 'Spiel beendet';
+        text.textContent  = `Die letzte Runde (${maxR} von ${maxR}) ist bereits erreicht. Das Spiel wird beendet.`;
+        actions.innerHTML = '<button class="confirm-btn ok" id="confirm-ok">OK</button>';
+        backdrop.classList.add('visible');
+        document.getElementById('confirm-ok').addEventListener('click', () => {
+          window.location.href = '000-spielstart.html';
+        });
+        return;
+      }
+
+      /* Bestätigung für Rundenwechsel */
+      const nextRunde = runde + 1;
+      title.textContent = 'Nächste Runde starten?';
+      text.textContent  = `Alle aktuellen Rundendaten werden gelöscht. Runde ${nextRunde}${maxR ? ' von ' + maxR : ''} beginnt danach neu.`;
+      actions.innerHTML = `
+        <button class="confirm-btn cancel" id="confirm-cancel">Abbrechen</button>
+        <button class="confirm-btn ok" id="confirm-ok">Bestätigen</button>
+      `;
+      backdrop.classList.add('visible');
+
+      document.getElementById('confirm-cancel').addEventListener('click', closeModal);
+      document.getElementById('confirm-ok').addEventListener('click', () => {
+        localStorage.clear();
+        localStorage.setItem('teamNumber', team);
+        localStorage.setItem('rundeNumber', String(nextRunde));
+        localStorage.setItem('serverIp', ip);
+        if (maxR) localStorage.setItem('maxRunden', String(maxR));
+        window.location.href = '000-spielstart.html';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Externe Personalplanung – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#fff; }
+    * { box-sizing:border-box; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 60px 32px 24px 32px;
+      display: flex;
+      gap: 60px;
+      align-items: flex-start;
+    }
+
+    /* ══ LINKE SPALTE ══════════════════════════════════════════════════════ */
+    .col-left {
+      width: 300px;
+      flex-shrink: 0;
+    }
+
+    .decision-card {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 20px 28px 20px;
+      background: #fff;
+      margin-top: 52px;
+    }
+    .decision-card + .decision-card {
+      margin-top: 28px;
+    }
+
+    .card-illustration {
+      position: absolute;
+      top: -28px;
+      right: 12px;
+      height: 52px;
+      width: auto;
+      display: block;
+      background: #fff;
+    }
+
+    .card-title {
+      font-weight: 800;
+      color: var(--color-accent);
+      margin: 0 0 12px 0;
+      line-height: 1.1;
+    }
+
+    .card-text {
+      font-size: 0.86rem;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ══ RECHTE SPALTE ═════════════════════════════════════════════════════ */
+    .col-right {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Wrapper mit L-Rahmen + Titel oben links + Picto oben rechts */
+    .personal-wrapper {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 20px 24px 20px;
+      margin-top: 52px;   /* Platz für Titel + Picto */
+    }
+
+    .personal-wrapper-title {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: #aaa;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      padding: 0px 0px 0px 20px;
+    }
+
+    .personal-wrapper-picto {
+      position: absolute;
+      top: -60px;
+      right: 0;
+      height: 72px;
+      width: auto;
+      display: block;
+      padding: 0px 20px 0px 0px;
+    }
+
+    /* ── Markt-Grid ─────────────────────────────────────────────────────── */
+    .personal-grid {
+      display: flex;
+      gap: 12px;
+    }
+
+    .personal-box {
+      flex: 1;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      overflow: hidden;
+    }
+
+    .personal-header {
+      padding: 8px 12px;
+      text-align: center;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+
+    .personal-body {
+      padding: 12px 12px 14px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Zeile: Label links, Input rechts */
+    .personal-input-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .personal-label {
+      font-size: 0.78rem;
+      color: #888;
+      line-height: 1.3;
+      flex: 1;
+    }
+
+    .personal-input {
+      width: 64px;
+      height: 36px;
+      border-radius: 6px;
+      border: 1.5px solid;
+      padding: 0 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .personal-input::-webkit-inner-spin-button,
+    .personal-input::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .personal-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+    /* Kostenfeld: gleiche Breite wie Input */
+    .personal-result {
+      height: 36px;
+      width: 64px;
+      align-self: flex-end;
+      border-radius: 6px;
+      background: var(--color-accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    /* ── Intern-Referenz (nur Anzeige, keine Eingabe) ──────────────────────── */
+    .personal-value-readonly {
+      width: 64px;
+      height: 36px;
+      border-radius: 6px;
+      border: 1.5px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #888;
+      background: #f0f0f0;
+      flex-shrink: 0;
+    }
+
+    /* ── Total-Zeile ────────────────────────────────────────────────────── */
+    .total-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 16px;
+      margin-top: 18px;
+      padding-right: 2px;
+    }
+
+    .total-label-wrap {
+      text-align: right;
+    }
+
+    .total-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #aaa;
+    }
+
+    .total-sublabel {
+      font-size: 0.74rem;
+      color: #aaa;
+      margin-top: 1px;
+    }
+
+    .total-badge {
+      min-width: 80px;
+      height: 40px;
+      background: var(--color-accent);
+      color: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      padding: 0 16px;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-white min-h-screen flex flex-col items-center"
+  data-prev="100-aufgabe.html"
+  data-next="120-aufgabe.html"
+  data-spielzug-label="Spielzug 12.5"
+  data-step-current="12.5"
+  data-step-total="20"
+  data-wirkung="00-wirkungen.png"
+  data-disable-handbuch="true"
+  data-disable-bank="false"
+  data-disable-ereignis="true"
+  data-disable-back="true"
+>
+  <div id="app-header" class="w-full"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <!-- ══ LINKE SPALTE ══ -->
+      <div class="col-left">
+
+        <!-- Karte 1: Eingabe -->
+        <div class="decision-card">
+          <img id="card-picto-1" src="../assets/pictos/picto_eingabe.png"
+               class="card-illustration" alt="" />
+          <h1 class="card-title" id="art-1">Eingabe</h1>
+          <p class="card-text" id="text-1"></p>
+        </div>
+
+        <!-- Karte 2: Aufgabe -->
+        <div class="decision-card">
+          <img id="card-picto-2" src="../assets/pictos/picto_aufgabe.png"
+               class="card-illustration" alt="" />
+          <h1 class="card-title" id="art-2">Aufgabe</h1>
+          <p class="card-text" id="text-2"></p>
+        </div>
+
+      </div>
+
+      <!-- ══ RECHTE SPALTE ══ -->
+      <div class="col-right">
+
+        <div class="personal-wrapper">
+
+          <!-- Titel oben links -->
+          <span class="personal-wrapper-title">Personalplanung</span>
+
+          <!-- Picto oben rechts -->
+          <img class="personal-wrapper-picto"
+               src="../assets/pictos/personal.png" alt="" />
+
+          <!-- Markt-Boxen: Intern-Referenz + Extern-Eingabe kombiniert -->
+          <div class="personal-grid" id="personal-grid">
+            <!-- wird per JS befüllt -->
+          </div>
+
+          <!-- Total -->
+          <div class="total-row">
+            <div class="total-label-wrap">
+              <div class="total-label">TOTAL Personalkosten (Intern + Extern)</div>
+              <div class="total-sublabel">Betrag gerundet in Mio</div>
+            </div>
+            <div class="total-badge" id="total-badge">–</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="app-footer" class="w-full bg-transparent"></div>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    function getLS(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+    }
+    function setLS(key, val) {
+      localStorage.setItem(key, JSON.stringify(val));
+    }
+    function boldQuotes(text) {
+      return text.replace(/"([^"]+)"/g, '<strong>"$1"</strong>');
+    }
+
+    /* ══ Spielaufgaben → linke Karten ═════════════════════════════════════ */
+    (function() {
+      const data = getLS('spielaufgaben');
+      if (!data) return;
+      const arr  = data.spielaufgaben || data;
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
+      if (!item) return;
+
+      function parseAufgabe(text) {
+        const parts = (text || '').split('\r');
+        return {
+          label: parts[0] || '',
+          body:  parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim()
+        };
+      }
+
+      const a1 = parseAufgabe(item.Aufgabe_1);
+      const a2 = parseAufgabe(item.Aufgabe_2);
+
+      if (item.AufgabenArt_1) document.getElementById('art-1').textContent = item.AufgabenArt_1;
+      if (item.AufgabenArt_2) document.getElementById('art-2').textContent = item.AufgabenArt_2;
+      document.getElementById('text-1').innerHTML = boldQuotes(a1.body);
+      document.getElementById('text-2').innerHTML = boldQuotes(a2.body);
+
+      if (item.Picto1)
+        document.getElementById('card-picto-1').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
+      if (item.Picto2)
+        document.getElementById('card-picto-2').src = `../assets/pictos/${item.Picto2.toLowerCase()}`;
+    })();
+
+    /* ══ Personalplanung: Intern-Referenz + Extern-Eingabe kombiniert ═══════ */
+    (function() {
+      const data = getLS('personalKosten');
+      if (!data) return;
+      const alle          = data.personal || data;
+      const bereicheExtern = alle.filter(b => b.bezeichnung === 'extern');
+      const bereicheIntern = alle.filter(b => b.bezeichnung === 'intern');
+      const planungIntern  = getLS('personalplanung') || {};
+
+      /* Gespeicherte Extern-Eingaben laden */
+      const saved = getLS('personalplanungExtern') || {};
+
+      const grid       = document.getElementById('personal-grid');
+      const totalBadge = document.getElementById('total-badge');
+
+      /* Eingaben + Ergebnisse sammeln für Neuberechnung */
+      const inputs = [];   // { el, preis }
+      let internTotal = 0;
+
+      function recalcTotal() {
+        let externSum = 0;
+        inputs.forEach(({ el, preis }) => {
+          const val = parseFloat(el.value) || 0;
+          externSum += val * preis;
+        });
+        totalBadge.textContent = Math.round(externSum) + internTotal;
+        /* Speichern */
+        const saveObj = {};
+        bereicheExtern.forEach((b, i) => {
+          saveObj[b.marktName] = parseFloat(inputs[i]?.el.value) || 0;
+        });
+        setLS('personalplanungExtern', saveObj);
+      }
+
+      bereicheExtern.forEach(b => {
+        /* Farbe: marktFarbe nutzt | als Trenner */
+        const rgb = (b.marktFarbe || '37|117|176').replace(/\|/g, ',');
+        const savedVal = saved[b.marktName] || '';
+
+        /* Interne Referenzwerte (aus spz-09) für denselben Bereich */
+        const bIntern      = bereicheIntern.find(x => x.marktNr === b.marktNr) || {};
+        const einheitenIntern = Number(planungIntern[b.marktName]) || 0;
+        const kostenIntern     = einheitenIntern * (bIntern.preis || 0);
+        internTotal += kostenIntern;
+
+        const box = document.createElement('div');
+        box.className = 'personal-box';
+        box.style.borderColor = `rgb(${rgb})`;
+        box.innerHTML = `
+          <div class="personal-header" style="background:rgb(${rgb});">${b.marktName}</div>
+          <div class="personal-body">
+            <div class="personal-input-row">
+              <span class="personal-label">Interne<br>Einheiten</span>
+              <div class="personal-value-readonly">${einheitenIntern}</div>
+            </div>
+            <div class="personal-input-row">
+              <span class="personal-label">Kosten</span>
+              <div class="personal-result">${kostenIntern % 1 === 0 ? kostenIntern : kostenIntern.toFixed(1)}</div>
+            </div>
+            <div class="personal-input-row" style="margin-top:14px;">
+              <span class="personal-label">Temporäre<br>Einheiten</span>
+              <input class="personal-input" type="number" min="0" step="1"
+                     value="${savedVal}"
+                     style="border-color:rgb(${rgb}); color:rgb(${rgb});"
+                     placeholder="" />
+            </div>
+            <div class="personal-input-row">
+              <span class="personal-label">Kosten</span>
+              <div class="personal-result" id="result-${b.marktNr}">–</div>
+            </div>
+          </div>
+        `;
+        grid.appendChild(box);
+
+        const input      = box.querySelector('.personal-input');
+        const resultEl   = box.querySelector('.personal-result[id]');
+        inputs.push({ el: input, preis: b.preis, resultEl });
+
+        /* Einzelergebnis aktualisieren */
+        function updateResult() {
+          const val = parseFloat(input.value) || 0;
+          const res = val * b.preis;
+          resultEl.textContent = res % 1 === 0 ? res : res.toFixed(1);
+          recalcTotal();
+        }
+
+        input.addEventListener('input', updateResult);
+        input.addEventListener('focus', () => input.select());
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
+
+        /* Initial berechnen falls Wert bereits gespeichert */
+        if (savedVal !== '') updateResult();
+      });
+
+      internTotal = Math.round(internTotal);
+
+      /* Initial-Total setzen */
+      recalcTotal();
+    })();
+
+    /* ══ Transfer beim Next-Klick ════════════════════════════════════════ */
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#nav-next')) return;
+
+      /* Total aus personalplanungExtern × preis berechnen */
+      const planung  = getLS('personalplanungExtern') || {};
+      const pkData   = getLS('personalKosten');
+      if (!pkData) return;
+      const bereiche = (pkData.personal || pkData).filter(b => b.bezeichnung === 'extern');
+
+      let total = 0;
+      bereiche.forEach(b => {
+        total += (Number(planung[b.marktName]) || 0) * b.preis;
+      });
+      total = Math.round(total);
+
+      /* Delta gegenüber bereits gebuchtem Betrag berechnen */
+      const committed = Number(getLS('spz125_committed')) || 0;
+      const delta     = total - committed;
+
+      /* Bilanz: FluessigeMittel nur um die Differenz anpassen */
+      if (delta !== 0) {
+        const bilanzData = getLS('bilanzStart');
+        if (bilanzData) {
+          const arr    = bilanzData.Anfangsbilanz || bilanzData;
+          const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
+          const idx    = arr[teamNr] !== undefined ? teamNr : (arr[teamNr-1] !== undefined ? teamNr-1 : 0);
+          const entry  = arr[idx];
+          if (entry && entry.Bilanz) {
+            entry.Bilanz.FluessigeMittel = (Number(entry.Bilanz.FluessigeMittel) || 0) - delta;
+            arr[idx] = entry;
+            setLS('bilanzStart', bilanzData.Anfangsbilanz
+              ? { ...bilanzData, Anfangsbilanz: arr } : arr);
+          }
+        }
+      }
+
+      /* Erfolgsrechnung: Personalaufwand_Extern immer überschreiben */
+      const er = getLS('erfolgsrechnung') || {};
+      er.Personalaufwand_Extern = total;
+      setLS('erfolgsrechnung', er);
+
+      /* Gebuchten Betrag merken */
+      setLS('spz125_committed', total);
+
+      /* Protokoll (nur bei Änderung) */
+      if (delta !== 0) {
+        const teamNr    = Number(localStorage.getItem('teamNumber')) || 1;
+        const protokoll = getLS('protokoll') || [];
+        protokoll.push({
+          zeit:     new Date().toISOString(),
+          spielzug: 'spz-12.5',
+          aktion:   delta > 0 ? 'Externe Personalkosten erhöht' : 'Externe Personalkosten reduziert',
+          von:      'Flüssige Mittel',
+          nach:     'Personalaufwand Extern',
+          betrag:   delta,
+          team:     localStorage.getItem('klinikName') || `Team ${teamNr}`
+        });
+        setLS('protokoll', protokoll);
+      }
+
+    }, true);
+  </script>
+</body>
+</html>

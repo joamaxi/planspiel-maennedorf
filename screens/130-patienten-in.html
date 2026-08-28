@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patientenaufnahme – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#fff; }
+    * { box-sizing:border-box; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 50px 32px 24px 32px;
+      display: flex;
+      gap: 60px;
+      align-items: flex-start;
+    }
+
+    /* ══ LINKE SPALTE ══════════════════════════════════════════════════════ */
+    .col-left {
+      width: 300px;
+      flex-shrink: 0;
+    }
+
+    .decision-card {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 20px 28px 20px;
+      background: #fff;
+      margin-top: 80px;
+    }
+
+    .card-illustration {
+      position: absolute;
+      top: -28px;
+      right: 12px;
+      height: 52px;
+      width: auto;
+      display: block;
+      background: transparent;
+    }
+
+    .card-title {
+      font-weight: 800;
+      color: var(--color-accent);
+      margin: 0 0 12px 0;
+      line-height: 1.1;
+    }
+
+    .card-text {
+      font-size: 0.86rem;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ══ RECHTE SPALTE ═════════════════════════════════════════════════════ */
+    .col-right {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Wrapper mit L-Rahmen */
+    .patient-wrapper {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 20px 24px 20px;
+      margin-top: 80px;
+    }
+
+    .patient-wrapper-title {
+      position: absolute;
+      top: -48px;
+      left: 0;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--color-label);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      padding: 0 0 0 20px;
+    }
+
+    .patient-wrapper-picto {
+      position: absolute;
+      top: -85px;
+      right: 0;
+      height: 100px;
+      width: auto;
+      display: block;
+      padding: 0 20px 0 0;
+    }
+
+    /* ── Patienten-Grid ─────────────────────────────────────────────────── */
+    .patient-grid {
+      display: flex;
+      gap: 10px;
+    }
+
+    .patient-box {
+      flex: 1;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      overflow: hidden;
+    }
+
+    .patient-header {
+      padding: 8px 10px;
+      text-align: center;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+
+    .patient-body {
+      padding: 12px 10px 14px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Label oben, Input darunter – beide volle Breite */
+    .patient-input-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .patient-label {
+      font-size: 0.72rem;
+      color: var(--color-label);
+      text-align: center;
+    }
+
+    .patient-input {
+      width: 100%;
+      height: 38px;
+      border-radius: 6px;
+      border: 1.5px solid;
+      padding: 0 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+      background: #fff;
+    }
+    .patient-input::-webkit-inner-spin-button,
+    .patient-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .patient-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+    /* ── Total-Zeile ────────────────────────────────────────────────────── */
+    .total-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .total-label {
+      text-align: right;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--color-label);
+    }
+
+    .total-badge-wrap {
+      width: 100px;
+    }
+
+    .total-badge {
+      width: 100%;
+      height: 40px;
+      background: var(--color-accent);
+      color: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-white min-h-screen flex flex-col items-center"
+  data-prev="120-aufgabe.html"
+  data-next="140-aufgabe.html"
+  data-spielzug-label="Spielzug 14"
+  data-step-current="14"
+  data-step-total="20"
+  data-wirkung="00-wirkungen.png"
+  data-disable-handbuch="true"
+  data-disable-bank="true"
+  data-disable-ereignis="true"
+>
+  <div id="app-header" class="w-full"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <!-- ══ LINKE SPALTE ══ -->
+      <div class="col-left">
+        <div class="decision-card">
+          <img id="card-picto-1" src="../assets/pictos/picto_eingabe.png"
+               class="card-illustration" alt="" />
+          <h1 class="card-title" id="art-1">Eingabe</h1>
+          <p class="card-text" id="text-1"></p>
+        </div>
+      </div>
+
+      <!-- ══ RECHTE SPALTE ══ -->
+      <div class="col-right">
+        <div class="patient-wrapper">
+
+          <!-- Titel oben links -->
+          <span class="patient-wrapper-title">Patientenaufnahme</span>
+
+          <!-- Picto oben rechts -->
+          <img class="patient-wrapper-picto"
+               src="../assets/pictos/patient.png" alt="" />
+
+          <!-- Patienten-Grid -->
+          <div class="patient-grid" id="patient-grid">
+            <!-- 3 Marktbereiche per JS + Ambulant fix -->
+          </div>
+
+          <!-- Total -->
+          <div class="total-row">
+            <div class="total-label">TOTAL Patienten in der Klinik</div>
+            <div class="total-badge-wrap">
+              <div class="total-badge" id="total-badge">–</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="app-footer" class="w-full bg-transparent"></div>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    function getLS(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+    }
+    function setLS(key, val) {
+      localStorage.setItem(key, JSON.stringify(val));
+    }
+    function boldQuotes(text) {
+      return text.replace(/"([^"]+)"/g, '<strong>"$1"</strong>');
+    }
+
+    /* ══ Spielaufgaben → linke Karte ══════════════════════════════════════ */
+    (function() {
+      const data = getLS('spielaufgaben');
+      if (!data) return;
+      const arr  = data.spielaufgaben || data;
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
+      if (!item) return;
+
+      if (item.AufgabenArt_1)
+        document.getElementById('art-1').textContent = item.AufgabenArt_1;
+
+      const parts = (item.Aufgabe_1 || '').split('\r');
+      const body  = parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim();
+      document.getElementById('text-1').innerHTML = boldQuotes(body);
+
+      if (item.Picto1)
+        document.getElementById('card-picto-1').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
+    })();
+
+    /* ══ Patientenaufnahme-Grid ════════════════════════════════════════════ */
+    (function() {
+      /* Fallback falls marktStart noch nicht importiert wurde */
+      const FALLBACK_STAT = [
+        { marktName: 'Medizin',      marktNr: 1, rgb: '230,51,41'  },
+        { marktName: 'Chirurgie',    marktNr: 2, rgb: '249,178,51' },
+        { marktName: 'Geburtshilfe', marktNr: 3, rgb: '58,170,53'  },
+      ];
+      const FALLBACK_AMB = { marktName: 'Ambulant', marktNr: 4, rgb: '144,144,144' };
+
+      const marktData  = getLS('marktStart');
+      const raw        = marktData ? (marktData.markt || marktData.Marktbereiche || marktData) : [];
+      const alle       = (Array.isArray(raw) && raw.length > 0) ? raw : [...FALLBACK_STAT, FALLBACK_AMB];
+      const bereiche   = alle.filter(b => (b.marktNr || 0) < 4 && b.marktName !== (FALLBACK_AMB.marktName));
+      const ambulantMarkt = alle.find(b => (b.marktNr === 4) || b.marktName === 'Ambulant-C') || FALLBACK_AMB;
+      const stationaere = bereiche.length > 0 ? bereiche : FALLBACK_STAT;
+
+      const saved      = getLS('patientenAufnahme') || {};
+      const grid       = document.getElementById('patient-grid');
+      const totalBadge = document.getElementById('total-badge');
+
+      /* Alle Input-Referenzen für Gesamtberechnung */
+      const allInputs = [];
+
+      function recalcTotal() {
+        let sum = 0;
+        allInputs.forEach(inp => { sum += parseInt(inp.value) || 0; });
+        totalBadge.textContent = sum > 0 ? sum : '–';
+        /* Speichern (Schlüssel = marktNr, stabil auch bei Namensänderungen) */
+        const saveObj = {};
+        stationaere.forEach(b => {
+          saveObj[b.marktNr] = {
+            PHP:      parseInt(document.getElementById(`inp-${b.marktNr}-php`)?.value)  || 0,
+            Allgemein:parseInt(document.getElementById(`inp-${b.marktNr}-allg`)?.value) || 0,
+            Ambulant: parseInt(document.getElementById(`inp-${b.marktNr}-amb`)?.value)  || 0,
+          };
+        });
+        setLS('patientenAufnahme', saveObj);
+      }
+
+      /* ── 3 stationäre Marktbereiche ── */
+      stationaere.forEach(b => {
+        const rgb     = (b.rgb || '160,184,200');
+        const savedB  = saved[b.marktNr] || {};
+
+        const box = document.createElement('div');
+        box.className = 'patient-box';
+        box.style.borderColor = `rgb(${rgb})`;
+        box.innerHTML = `
+          <div class="patient-header" style="background:rgb(${rgb});">${b.marktName}</div>
+          <div class="patient-body">
+            <div class="patient-input-row">
+              <span class="patient-label">P/HP</span>
+              <input class="patient-input" id="inp-${b.marktNr}-php" type="number"
+                     min="0" step="1" placeholder=""
+                     value="${savedB.PHP || ''}"
+                     style="border-color:rgb(${rgb}); color:rgb(${rgb});" />
+            </div>
+            <div class="patient-input-row">
+              <span class="patient-label">Allgemein</span>
+              <input class="patient-input" id="inp-${b.marktNr}-allg" type="number"
+                     min="0" step="1" placeholder=""
+                     value="${savedB.Allgemein || ''}"
+                     style="border-color:rgb(${rgb}); color:rgb(${rgb});" />
+            </div>
+            <div class="patient-input-row">
+              <span class="patient-label">Ambulant</span>
+              <input class="patient-input" id="inp-${b.marktNr}-amb" type="number"
+                     min="0" step="1" placeholder=""
+                     value="${savedB.Ambulant || ''}"
+                     style="border-color:rgb(${rgb}); color:rgb(${rgb});" />
+            </div>
+          </div>
+        `;
+        grid.appendChild(box);
+
+        const [inpPhp, inpAllg, inpAmb] = box.querySelectorAll('.patient-input');
+        allInputs.push(inpPhp, inpAllg, inpAmb);
+        inpPhp.addEventListener('input',  recalcTotal);
+        inpAllg.addEventListener('input', recalcTotal);
+        inpAmb.addEventListener('input',  recalcTotal);
+        inpPhp.addEventListener('focus',  () => inpPhp.select());
+        inpAllg.addEventListener('focus', () => inpAllg.select());
+        inpAmb.addEventListener('focus',  () => inpAmb.select());
+        inpPhp.addEventListener('keydown',  e => { if (e.key === 'Enter') inpPhp.blur(); });
+        inpAllg.addEventListener('keydown', e => { if (e.key === 'Enter') inpAllg.blur(); });
+        inpAmb.addEventListener('keydown',  e => { if (e.key === 'Enter') inpAmb.blur(); });
+      });
+
+      /* Initial-Total */
+      recalcTotal();
+    })();
+  </script>
+</body>
+</html>

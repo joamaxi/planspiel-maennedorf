@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Umlaufvermögen – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#fff; }
+    * { box-sizing:border-box; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 60px 32px 24px 32px;
+      display: flex;
+      gap: 160px;
+      align-items: flex-start;
+    }
+
+    /* ══ LINKE SPALTE ══════════════════════════════════════════════════════ */
+    .col-left {
+      width: 300px;
+      flex-shrink: 0;
+    }
+
+    .decision-card {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 20px 28px 20px;
+      background: #fff;
+      margin-top: 120px;
+    }
+
+    .card-illustration {
+      position: absolute;
+      top: -28px;
+      right: 12px;
+      height: 52px;
+      width: auto;
+      display: block;
+      background: #fff;
+    }
+
+    .card-title {
+      font-weight: 800;
+      color: var(--color-accent);
+      margin: 0 0 12px 0;
+      line-height: 1.1;
+    }
+
+    .card-text {
+      font-size: 0.86rem;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ══ RECHTE SPALTE ═════════════════════════════════════════════════════ */
+    .col-right {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .uv-wrapper {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 32px 40px 20px;
+      margin-top: 120px;
+    }
+
+    .uv-wrapper-title {
+      position: absolute;
+      top: -60px;
+      left: 0;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--color-label);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      padding: 0 0 0 20px;
+    }
+
+    .uv-wrapper-subtitle {
+      position: absolute;
+      top: -26px;
+      left: 0;
+      font-size: 0.78rem;
+      color: var(--color-label-light);
+      padding: 0 0 0 22px;
+      white-space: nowrap;
+    }
+
+    /* Zwei Felder nebeneinander */
+    .uv-grid {
+      display: flex;
+      gap: 50px;
+      justify-content: left;
+      align-items: flex-start;
+      padding: 0 0 0 22px;
+    }
+
+    .uv-field {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    .uv-arrow {
+      font-size: 2rem;
+      color: var(--color-accent);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .uv-input {
+      width: 140px;
+      height: 52px;
+      border-radius: 8px;
+      border: 2px solid var(--color-accent);
+      padding: 0 16px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      outline: none;
+      background: #fff;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .uv-input::placeholder {
+      color: #c0d8e8;
+      font-weight: 400;
+    }
+    .uv-input::-webkit-inner-spin-button,
+    .uv-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .uv-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+    .uv-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-white min-h-screen flex flex-col items-center"
+  data-prev="220-ertragsrechnung.html"
+  data-next="240-projekte.html"
+  data-spielzug-label="Spielzug 24"
+  data-step-current="24"
+  data-step-total="20"
+  data-wirkung="00-wirkungen.png"
+  data-disable-handbuch="true"
+  
+>
+  <div id="app-header" class="w-full"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <!-- ══ LINKE SPALTE ══ -->
+      <div class="col-left">
+        <div class="decision-card">
+          <img id="card-picto-1" src="../assets/pictos/picto_aufgabe.png"
+               class="card-illustration" alt="" />
+          <h1 class="card-title" id="art-1">Aufgabe</h1>
+          <p class="card-text" id="text-1"></p>
+        </div>
+      </div>
+
+      <!-- ══ RECHTE SPALTE ══ -->
+      <div class="col-right">
+        <div class="uv-wrapper">
+
+          <span class="uv-wrapper-title">Umlaufvermögen</span>
+          <span class="uv-wrapper-subtitle">Gesamtertrag auf Flüssige Mittel und Forderungen aufteilen</span>
+
+          <div class="uv-grid">
+
+            <div class="uv-field">
+              <div class="uv-arrow">↓</div>
+              <input class="uv-input" id="inp-fluessig" type="number"
+                     min="0" step="1" placeholder="" />
+              <span class="uv-label">Flüssige Mittel</span>
+            </div>
+
+            <div class="uv-field">
+              <div class="uv-arrow">↓</div>
+              <input class="uv-input" id="inp-forderungen" type="number"
+                     min="0" step="1" placeholder="" />
+              <span class="uv-label">Forderungen</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="app-footer" class="w-full bg-transparent"></div>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    function getLS(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+    }
+    function setLS(key, val) {
+      localStorage.setItem(key, JSON.stringify(val));
+    }
+    function boldQuotes(text) {
+      return text.replace(/"([^"]+)"/g, '<strong>"$1"</strong>');
+    }
+
+    /* ══ Spielaufgaben → linke Karte ══════════════════════════════════════ */
+    (function() {
+      const data = getLS('spielaufgaben');
+      if (!data) return;
+      const arr  = data.spielaufgaben || data;
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
+      if (!item) return;
+
+      if (item.AufgabenArt_1) document.getElementById('art-1').textContent = item.AufgabenArt_1;
+      const parts = (item.Aufgabe_1 || '').split('\r');
+      const body  = parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim();
+      document.getElementById('text-1').innerHTML = boldQuotes(body);
+      if (item.Picto1)
+        document.getElementById('card-picto-1').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
+    })();
+
+    /* ══ Eingabe laden + speichern ════════════════════════════════════════ */
+    (function() {
+      const inpF = document.getElementById('inp-fluessig');
+      const inpD = document.getElementById('inp-forderungen');
+
+      const saved = getLS('spz24_umlauf') || {};
+      if (saved.fluessig)    inpF.value = saved.fluessig;
+      if (saved.forderungen) inpD.value = saved.forderungen;
+
+      inpF.addEventListener('focus', () => inpF.select());
+      inpD.addEventListener('focus', () => inpD.select());
+
+      function save() {
+        setLS('spz24_umlauf', {
+          fluessig:    Math.round(parseFloat(inpF.value) || 0),
+          forderungen: Math.round(parseFloat(inpD.value) || 0)
+        });
+      }
+
+      inpF.addEventListener('input', save);
+      inpD.addEventListener('input', save);
+      inpF.addEventListener('keydown', e => { if (e.key === 'Enter') inpF.blur(); });
+      inpD.addEventListener('keydown', e => { if (e.key === 'Enter') inpD.blur(); });
+
+      /* Enter springt zum nächsten Feld */
+      inpF.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') inpD.focus();
+      });
+    })();
+
+    /* ══ Transfer beim Next-Klick ════════════════════════════════════════ */
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#nav-next')) return;
+
+      const saved       = getLS('spz24_umlauf') || {};
+      const fluessig    = Math.round(parseFloat(saved.fluessig)    || 0);
+      const forderungen = Math.round(parseFloat(saved.forderungen) || 0);
+
+      /* Delta gegenüber bereits gebuchten Werten */
+      const committed     = getLS('spz24_committed') || { fluessig: 0, forderungen: 0 };
+      const deltaF        = fluessig    - (Number(committed.fluessig)    || 0);
+      const deltaD        = forderungen - (Number(committed.forderungen) || 0);
+
+      /* Bilanz: nur Differenz anwenden */
+      if (deltaF !== 0 || deltaD !== 0) {
+        const bilanzData = getLS('bilanzStart');
+        if (bilanzData) {
+          const arr    = bilanzData.Anfangsbilanz || bilanzData;
+          const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
+          const idx    = arr[teamNr] !== undefined ? teamNr : (arr[teamNr-1] !== undefined ? teamNr-1 : 0);
+          const entry  = arr[idx];
+          if (entry && entry.Bilanz) {
+            entry.Bilanz.FluessigeMittel = (Number(entry.Bilanz.FluessigeMittel) || 0) + deltaF;
+            entry.Bilanz.Forderungen     = (Number(entry.Bilanz.Forderungen)     || 0) + deltaD;
+            arr[idx] = entry;
+            setLS('bilanzStart', bilanzData.Anfangsbilanz
+              ? { ...bilanzData, Anfangsbilanz: arr } : arr);
+          }
+        }
+      }
+
+      /* Gebuchte Werte merken */
+      setLS('spz24_committed', { fluessig, forderungen });
+
+      /* Erfolgsrechnung: Erträge aus spz-23 (immer überschreiben) */
+      const ertraege       = Number(localStorage.getItem('spz23_ertraege'))       || 0;
+      const andereErtraege = Number(localStorage.getItem('spz23_andereErtraege')) || 0;
+      const er = getLS('erfolgsrechnung') || {};
+      er.Ertraege_Spitalbetrieb = ertraege;
+      er.Andere_Ertraege        = andereErtraege;
+      setLS('erfolgsrechnung', er);
+
+      /* Protokoll (nur bei Änderung) */
+      const teamNr    = Number(localStorage.getItem('teamNumber')) || 1;
+      const teamLabel = localStorage.getItem('klinikName') || `Team ${teamNr}`;
+      const protokoll = getLS('protokoll') || [];
+      if (deltaF !== 0) protokoll.push({
+        zeit: new Date().toISOString(), spielzug: 'spz-24',
+        aktion: deltaF > 0 ? 'Gesamtertrag → Flüssige Mittel' : 'Korrektur Flüssige Mittel',
+        von: 'Gesamtertrag', nach: 'Flüssige Mittel', betrag: deltaF, team: teamLabel
+      });
+      if (deltaD !== 0) protokoll.push({
+        zeit: new Date().toISOString(), spielzug: 'spz-24',
+        aktion: deltaD > 0 ? 'Gesamtertrag → Forderungen' : 'Korrektur Forderungen',
+        von: 'Gesamtertrag', nach: 'Forderungen', betrag: deltaD, team: teamLabel
+      });
+      setLS('protokoll', protokoll);
+    }, true);
+  </script>
+</body>
+</html>

@@ -18,7 +18,7 @@ export function renderFooter() {
     totalSteps    = spielaufgaben.length;
     spielzugLabel = `Spielzug ${currentStep}`;
   } else {
-    /* Fallback for screens without a Spielaufgaben entry (e.g. spz-00.html) */
+    /* Fallback for screens without a Spielaufgaben entry (e.g. 000-spielstart.html) */
     spielzugLabel = document.body?.dataset?.spielzugLabel || 'Spielzug';
     currentStep   = Number(document.body?.dataset?.stepCurrent || 1);
     totalSteps    = Number(document.body?.dataset?.stepTotal || 20);

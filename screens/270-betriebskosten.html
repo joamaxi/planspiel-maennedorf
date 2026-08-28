@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Betriebskosten – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#fff; }
+    * { box-sizing:border-box; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 40px 100px 24px 100px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 120px;
+      align-items: start;
+    }
+
+    /* ══ Betriebskosten (rechte Spalte) ════════════════════════════════════ */
+    .kosten-col { 
+      min-width: 0;
+   }
+
+    .kosten-section-label {
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--color-label);
+      letter-spacing: 0.01em;
+      margin: 0 0 14px;
+    }
+
+    .kosten-list {
+      border-top: 1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-radius: 8px 0 0 0;
+    }
+
+    .kosten-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 0 13px 16px;
+      border-bottom: 1px solid var(--color-border-light);
+      gap: 16px;
+    }
+    .kosten-row:last-child { border-bottom: none; }
+
+    .kosten-label {
+      color: var(--color-accent);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .val-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      border-radius: 10px;
+      min-width: 64px;
+      height: 38px;
+      padding: 0 16px;
+      flex-shrink: 0;
+    }
+
+    .kosten-divider { height: 20px; }
+
+    .kosten-input-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 0 13px 16px;
+      border-top: 1px solid var(--color-border-light);
+      gap: 16px;
+    }
+
+    .kosten-input {
+      width: 90px;
+      height: 38px;
+      border: 1.5px solid var(--color-accent);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--color-accent);
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+      flex-shrink: 0;
+    }
+    .kosten-input:focus { box-shadow: 0 0 0 2px rgba(37,117,176,0.15); }
+    .kosten-input::-webkit-inner-spin-button,
+    .kosten-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .kosten-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+    /* ══ Spielbrett-Aufgabe (linke Spalte) ══════════════════════════════ */
+    .task-col { padding-top: 0; }
+
+    .task-card {
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 18px 22px;
+      background: #fff;
+      margin-top: 60px;
+    }
+
+    .task-card-icon {
+      position: absolute;
+      top: -26px; right: 10px;
+      height: 48px; width: auto;
+    }
+
+    .task-card-title {
+      font-weight: 800;
+      color: var(--color-accent);
+      margin: 0 0 9px;
+      font-size: 0.95rem;
+    }
+
+    .task-card-text {
+      font-size: 0.82rem;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-white min-h-screen flex flex-col items-center"
+  data-prev="260-indexend.html"
+  data-next="280-abschreibungen.html"
+  data-spielzug-label="Spielzug 28"
+  data-step-current="28"
+  data-step-total="20"
+  data-wirkung="00-wirkungen.png"
+>
+  <div id="app-header" class="w-full"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <!-- Linke Spalte: Spielbrett-Aufgabe -->
+      <aside class="task-col">
+        <div class="task-card">
+          <img id="picto-1" src="../assets/pictos/picto_aufgabe.png" class="task-card-icon" alt="" />
+          <h2 class="task-card-title" id="art-1">Spielbrett-Aufgabe</h2>
+          <p class="task-card-text" id="text-1"></p>
+        </div>
+      </aside>
+
+      <!-- Rechte Spalte: Betriebskosten -->
+      <section class="kosten-col">
+        <p class="kosten-section-label">Betriebsaufwendungen</p>
+        <div class="kosten-list" id="kosten-list">
+          <!-- per JS -->
+        </div>
+        <div class="kosten-divider"></div>
+        <div class="kosten-input-row">
+          <label class="kosten-label" for="inp-rekrutierung">
+            Rekrutierungskosten: gemäss Angaben der Spielleitung
+          </label>
+          <input id="inp-rekrutierung" class="kosten-input" type="number"
+                 inputmode="decimal" placeholder="0" min="0" step="1" autocomplete="off" />
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="app-footer" class="w-full bg-transparent"></div>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    function getLS(k) { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } }
+    function setLS(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+    function boldQuotes(t) { return (t||'').replace(/"([^"]+)"/g, '<strong>"$1"</strong>'); }
+    function toNum(v) { const n = Number(String(v||'').replace(',','.')); return isFinite(n) ? n : 0; }
+
+    /* ══ Spielaufgaben ═══════════════════════════════════════════════════ */
+    (function() {
+      const data = getLS('spielaufgaben');
+      if (!data) return;
+      const arr  = data.spielaufgaben || data;
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
+      if (!item) return;
+      function parseBody(t) {
+        const p = (t||'').split('\r');
+        return p.length > 1 ? p.slice(1).join(' ').trim() : p[0].trim();
+      }
+      if (item.AufgabenArt_1) document.getElementById('art-1').textContent = item.AufgabenArt_1;
+      document.getElementById('text-1').innerHTML = boldQuotes(parseBody(item.Aufgabe_1));
+      if (item.Picto1) document.getElementById('picto-1').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
+    })();
+
+    /* ══ Betriebskosten rendern ══════════════════════════════════════════ */
+    const ER_FIELD = { e1:'Buero', e2:'Energie', e3:'Lebensmittel', e4:'Unterhalt', e7:'Mietzins' };
+
+    const raw        = getLS('betriebskosten');
+    const alleKosten = raw ? (raw.betriebskosten || raw) : [];
+    const fixItems   = alleKosten.filter(k => k.bKostIstWas === 'fix');
+
+    const list = document.getElementById('kosten-list');
+    fixItems.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'kosten-row';
+      row.innerHTML = `
+        <span class="kosten-label">${item.bKostBezeichnung}</span>
+        <span class="val-box">${item.bKostWert}</span>
+      `;
+      list.appendChild(row);
+    });
+
+    /* ══ Rekrutierungskosten laden + bei Eingabe sofort speichern ══════════ */
+    (function() {
+      const inp   = document.getElementById('inp-rekrutierung');
+      const saved = getLS('spz28_rekrutierung');
+      if (saved != null) inp.value = saved;
+      inp.addEventListener('input', () => {
+        setLS('spz28_rekrutierung', Math.round(parseFloat(inp.value) || 0));
+      });
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+    })();
+
+    /* ══ Transfer beim Weiter-Klick ══════════════════════════════════════ */
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#nav-next')) return;
+      if (localStorage.getItem('done_spz28') === 'true') return;
+
+      const rekr        = Number(getLS('spz28_rekrutierung')) || 0;
+      const er          = getLS('erfolgsrechnung') || {};
+      const protokoll   = getLS('protokoll')       || [];
+      const teamNr      = Number(localStorage.getItem('teamNumber')) || 1;
+      const teamLabel   = localStorage.getItem('klinikName') || `Team ${teamNr}`;
+
+      /* Bilanz holen */
+      const bilanzData  = getLS('bilanzStart');
+      let bilanzEntry = null, bilanzArr = null;
+      if (bilanzData) {
+        bilanzArr   = bilanzData.Anfangsbilanz || bilanzData;
+        const idx   = bilanzArr[teamNr] !== undefined ? teamNr : (bilanzArr[teamNr-1] !== undefined ? teamNr-1 : 0);
+        bilanzEntry = bilanzArr[idx];
+      }
+      function saveBilanz() {
+        if (!bilanzData || !bilanzEntry) return;
+        const idx = bilanzArr[teamNr] !== undefined ? teamNr : (bilanzArr[teamNr-1] !== undefined ? teamNr-1 : 0);
+        bilanzArr[idx] = bilanzEntry;
+        setLS('bilanzStart', bilanzData.Anfangsbilanz ? { ...bilanzData, Anfangsbilanz: bilanzArr } : bilanzArr);
+      }
+
+      /* Fix-Kosten buchen */
+      fixItems.forEach(item => {
+        const field = ER_FIELD[item.erfolgsrechnungNr];
+        if (!field) return;
+        er[field] = (Number(er[field]) || 0) + item.bKostWert;
+        if (bilanzEntry?.Bilanz) {
+          bilanzEntry.Bilanz.FluessigeMittel = (Number(bilanzEntry.Bilanz.FluessigeMittel) || 0) - item.bKostWert;
+        }
+        protokoll.push({
+          zeit: new Date().toISOString(), spielzug: 'spz-28',
+          aktion: item.bKostBezeichnung,
+          von: 'Flüssige Mittel', nach: 'Betriebskosten',
+          betrag: item.bKostWert, team: teamLabel
+        });
+      });
+
+      /* Rekrutierungskosten buchen */
+      if (rekr > 0) {
+        er.Rekrutierung = (Number(er.Rekrutierung) || 0) + rekr;
+        if (bilanzEntry?.Bilanz) {
+          bilanzEntry.Bilanz.FluessigeMittel = (Number(bilanzEntry.Bilanz.FluessigeMittel) || 0) - rekr;
+        }
+        protokoll.push({
+          zeit: new Date().toISOString(), spielzug: 'spz-28',
+          aktion: 'Rekrutierungskosten',
+          von: 'Flüssige Mittel', nach: 'Betriebskosten',
+          betrag: rekr, team: teamLabel
+        });
+      }
+
+      saveBilanz();
+      setLS('erfolgsrechnung', er);
+      setLS('protokoll', protokoll);
+      localStorage.setItem('done_spz28', 'true');
+    }, true);
+  </script>
+</body>
+</html>

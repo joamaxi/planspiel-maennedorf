@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projekte – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#fff; }
+    * { box-sizing:border-box; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 30px 32px 24px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ══ Headline ════════════════════════════════════════════════════════ */
+    .proj-headline {
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--color-label);
+      letter-spacing: 0.01em;
+      margin: 0;
+      text-align: center;
+    }
+
+    /* ══ Projektbalken ════════════════════════════════════════════════════ */
+    .proj-bar-container {
+      background: #e8f2f9;
+      border-radius: 14px 14px 0 0;
+      padding: 12px;
+    }
+
+    .proj-bar-track {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .proj-bar-track::-webkit-scrollbar { display: none; }
+
+    .proj-btn {
+      flex-shrink: 0;
+      width: 172px;
+      scroll-snap-align: start;
+      border: 2px solid #c8dde8;
+      border-radius: 10px;
+      background: #fff;
+      padding: 8px 10px 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .proj-btn:hover  { border-color: var(--color-accent); }
+    .proj-btn.active { border-color: var(--color-accent); background: #daeaf6; }
+    .proj-btn.done   { border-color: #27ae60; }
+    .proj-btn.locked { border-color: #b0c8dc; background: #eef3f7; cursor: not-allowed; }
+    .proj-btn.locked .proj-btn-nr { background: #b0c8dc; }
+
+    .proj-btn-lock {
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: #7a90a3;
+      margin-top: 3px;
+    }
+
+    .proj-btn-nr {
+      display: inline-block;
+      background: #a8c4d8;
+      color: #fff;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 1px 8px;
+      margin-bottom: 5px;
+    }
+    .proj-btn.active .proj-btn-nr { background: var(--color-accent); }
+    .proj-btn.done   .proj-btn-nr { background: #27ae60; }
+
+    .proj-btn-name {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--color-accent);
+      line-height: 1.3;
+    }
+
+    /* ══ Detail-Overlay ══════════════════════════════════════════════════ */
+    .detail-overlay {
+      display: none;
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      /* top wird per JS gesetzt */
+      background: #e8f2f9;
+      z-index: 200;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 12px 16px 0;
+    }
+    .detail-overlay.open { display: flex; }
+
+    .detail-panel {
+      background: #fff;
+      border-radius: 0 0 20px 20px;
+      width: 100%;
+      max-width: 960px;
+      overflow-y: auto;
+      padding: 8px 32px 8px;
+      position: relative;
+      box-shadow: 0 -6px 32px rgba(0,0,0,0.18);
+    }
+
+    .detail-close {
+      position: absolute;
+      top: 18px; right: 20px;
+      background: #f0f4f8;
+      border: none;
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color-label);
+      transition: background 0.12s;
+    }
+    .detail-close:hover { background: #dce6ef; }
+
+    .detail-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      margin: 0 48px 14px 0;
+    }
+
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    .detail-table th {
+      color: var(--color-label);
+      font-weight: 600;
+      font-size: 0.78rem;
+      padding: 2px 14px;
+      text-align: center;
+      border-bottom: 1px solid var(--color-border);
+      white-space: nowrap;
+    }
+    .detail-table th:first-child { text-align: left; }
+
+    .detail-table td {
+      padding: 2px 14px;
+      text-align: center;
+      border-bottom: 1px solid var(--color-border-light);
+      color: #444;
+    }
+    .detail-table td:first-child {
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-accent);
+    }
+    .detail-table tr:last-child td { border-bottom: none; }
+    .detail-table tr.selected td  { background: #eef4e8; color: #2a6a2a; }
+    .detail-table tr.selected td:first-child { color: #2a6a2a; }
+
+    .star-btn {
+      background: none;
+      border: 1.5px solid #c8dde8;
+      border-radius: 8px;
+      width: 42px;
+      height: 34px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .star-btn:hover    { background: #eef4e8; border-color: #27ae60; }
+    .star-btn.selected { background: transparent; border: none; }
+    .star-btn.disabled { cursor: not-allowed; opacity: 0.5; pointer-events: none; }
+
+    .detail-lock-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #7a6000;
+      background: #fff3cd;
+      border: 1px solid #f0c040;
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* ══ Spielaufgaben-Karten ═════════════════════════════════════════════ */
+    .task-row {
+      display: flex;
+      gap: 32px;
+      margin-top: 4px;
+    }
+
+    .task-card {
+      flex: 1;
+      position: relative;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 8px;
+      padding: 20px 20px 24px;
+      background: #fff;
+      margin-top: 32px;
+    }
+
+    .task-card-icon {
+      position: absolute;
+      top: -28px; right: 12px;
+      height: 52px; width: auto;
+      display: block;
+      background: #fff;
+    }
+
+    .task-card-title {
+      font-weight: 800;
+      color: var(--color-accent);
+      margin: 0 0 10px;
+      line-height: 1.1;
+    }
+
+    .task-card-text {
+      font-size: 0.86rem;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-white min-h-screen flex flex-col items-center"
+  data-prev="230-einnahmen.html"
+  data-next="250-projektliste.html"
+  data-spielzug-label="Spielzug 25"
+  data-step-current="25"
+  data-step-total="20"
+  data-wirkung="00-wirkungen.png"
+  data-disable-handbuch="true"
+>
+  <div id="app-header" class="w-full"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <!-- Headline -->
+      <h2 class="proj-headline">Projekte zur Unternehmensentwicklung</h2>
+
+      <!-- Projektbalken -->
+      <div class="proj-bar-container">
+        <div class="proj-bar-track" id="proj-bar-track">
+          <!-- per JS -->
+        </div>
+      </div>
+
+      <!-- Detail-Overlay -->
+      <div class="detail-overlay" id="detail-overlay">
+        <div class="detail-panel" id="proj-detail">
+          <button class="detail-close" id="detail-close">✕</button>
+          <!-- Inhalt per JS -->
+        </div>
+      </div>
+
+      <!-- Spielaufgaben -->
+      <div class="task-row">
+        <div class="task-card">
+          <img id="picto-1" src="../assets/pictos/picto_meeting.png" class="task-card-icon" alt="" />
+          <h2 class="task-card-title" id="art-1">Entscheidung</h2>
+          <p class="task-card-text" id="text-1"></p>
+        </div>
+        <div class="task-card">
+          <img id="picto-2" src="../assets/pictos/picto_aufgabe.png" class="task-card-icon" alt="" />
+          <h2 class="task-card-title" id="art-2">Aufgabe</h2>
+          <p class="task-card-text" id="text-2"></p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="app-footer" class="w-full bg-transparent"></div>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    function getLS(k) { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } }
+    function setLS(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+    function boldQuotes(t) { return (t||'').replace(/"([^"]+)"/g, '<strong>"$1"</strong>'); }
+
+    /* ══ Spielaufgaben ═══════════════════════════════════════════════════ */
+    (function() {
+      const data = getLS('spielaufgaben');
+      if (!data) return;
+      const arr  = data.spielaufgaben || data;
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
+      if (!item) return;
+
+      function parseBody(text) {
+        const parts = (text || '').split('\r');
+        return parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim();
+      }
+
+      if (item.AufgabenArt_1) document.getElementById('art-1').textContent = item.AufgabenArt_1;
+      if (item.AufgabenArt_2) document.getElementById('art-2').textContent = item.AufgabenArt_2;
+      document.getElementById('text-1').innerHTML = boldQuotes(parseBody(item.Aufgabe_1));
+      document.getElementById('text-2').innerHTML = boldQuotes(parseBody(item.Aufgabe_2));
+      if (item.Picto1) document.getElementById('picto-1').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
+      if (item.Picto2) document.getElementById('picto-2').src = `../assets/pictos/${item.Picto2.toLowerCase()}`;
+    })();
+
+    /* ══ Projektdaten aufbereiten ════════════════════════════════════════ */
+    const raw = getLS('projekte');
+    const alleRecords = raw ? (raw.projekte || raw) : [];
+    const currentRunde = Number(localStorage.getItem('rundeNumber')) || 1;
+    const teamNrGlobal  = Number(localStorage.getItem('teamNumber')) || 1;
+
+    /* Gruppieren nach projektNr, sortiert nach levelKosten */
+    const projektMap = {};
+    alleRecords.forEach(r => {
+      const nr = r.projektNr;
+      if (!projektMap[nr]) projektMap[nr] = [];
+      projektMap[nr].push(r);
+    });
+    Object.keys(projektMap).forEach(nr => {
+      projektMap[nr].sort((a, b) => a.levelKosten - b.levelKosten);
+    });
+
+    const projektNrs = Object.keys(projektMap).map(Number).sort((a, b) => a - b);
+
+    /* ══ Mehrperioden-Projekte: Merge (geräteübergreifend) + Ablauf-Bereinigung ══ */
+    function mergeAndPruneProjektEntscheide() {
+      const local    = getLS('projektEntscheide') || {};
+      const imported = getLS('projektPeriode') || {};
+      let changed = false;
+
+      /* Vom Server importierte Wahl übernehmen, falls lokal nicht vorhanden
+         oder die importierte Wahl neuer ist (anderes Gerät hat zwischenzeitlich gewählt) */
+      Object.entries(imported).forEach(([nr, ent]) => {
+        const loc = local[nr];
+        if (!loc || (ent.gewaehltInRunde || 0) > (loc.gewaehltInRunde || 0)) {
+          local[nr] = { ...ent };
+          changed = true;
+        }
+      });
+
+      /* Abgelaufene Mehrperioden-Wahlen entfernen */
+      Object.entries(local).forEach(([nr, ent]) => {
+        if (!ent.projektPeriode || ent.projektPeriode <= 1) return;
+        const seit = currentRunde - (ent.gewaehltInRunde || currentRunde);
+        if (seit >= ent.projektPeriode) {
+          delete local[nr];
+          changed = true;
+        }
+      });
+
+      if (changed) setLS('projektEntscheide', local);
+      return local;
+    }
+
+    let entscheide = mergeAndPruneProjektEntscheide();
+
+    /* Sperr-Status eines Projekts ermitteln */
+    function getLockInfo(nr) {
+      if (localStorage.getItem('done_spz26_projekte') === 'true') {
+        return { locked: true, hard: true };
+      }
+      const ent = entscheide[nr];
+      if (!ent || !ent.projektPeriode || ent.projektPeriode <= 1) return { locked: false };
+      const seit = currentRunde - (ent.gewaehltInRunde || currentRunde);
+      if (seit > 0 && seit < ent.projektPeriode) {
+        return { locked: true, until: ent.gewaehltInRunde + ent.projektPeriode };
+      }
+      return { locked: false };
+    }
+
+    /* Anzeigetext für ein gesperrtes Projekt */
+    function lockLabel(lock) {
+      return lock.hard ? '🔒 bestätigt' : `🔒 bis Runde ${lock.until}`;
+    }
+
+    /* Zurück-Button deaktivieren, sobald die Projektauswahl bestätigt ist */
+    if (localStorage.getItem('done_spz26_projekte') === 'true') {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('nav-back')?.classList.add('disabled');
+      });
+    }
+
+    /* Rechtes Logo (nur auf dieser Seite): Spielleiter-Passwort → Sperre aufheben */
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'spital-logo') window.openModeratorModal?.('unlock');
+    });
+
+    /* ══ Mehrperioden-Wahlen an den Server sichern (für nächste Runde/Gerät) ══ */
+    function exportProjektPeriode() {
+      const payload = {};
+      Object.entries(entscheide).forEach(([nr, ent]) => {
+        if (!ent.projektPeriode || ent.projektPeriode <= 1) return;
+        const seitNaechsteRunde = (currentRunde + 1) - (ent.gewaehltInRunde || currentRunde);
+        if (seitNaechsteRunde < ent.projektPeriode) {
+          payload[nr] = {
+            levelIdx:         ent.levelIdx,
+            levelKosten:      ent.levelKosten,
+            levelBezeichnung: ent.levelBezeichnung,
+            projektName:      ent.projektName,
+            gewaehltInRunde:  ent.gewaehltInRunde,
+            projektPeriode:   ent.projektPeriode
+          };
+        }
+      });
+
+      const filename = `team${teamNrGlobal}-runde${currentRunde + 1}-projektPeriode.json`;
+      fetch('../data/json/save.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename, data: JSON.stringify(payload, null, 2) }),
+        keepalive: true
+      }).catch(err => console.error('Projekt-Perioden-Export fehlgeschlagen:', err));
+    }
+
+    /* ══ Zusätzliche Patienten aus gewählten Projekten für FileMaker exportieren ══ */
+    function exportZusatzPatienten() {
+      const patienten = [];
+      Object.entries(entscheide).forEach(([nr, ent]) => {
+        const recs = projektMap[Number(nr)] || [];
+        const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
+                  || recs.find(r => r.levelKosten === ent.levelKosten);
+        if (!rec) return;
+        const opt = (rec.optionen || []).find(o => o.name === 'Zusätzliche Patienten');
+        if (!opt) return;
+        patienten.push({
+          projektNr:        Number(nr),
+          projektName:      ent.projektName,
+          levelBezeichnung: ent.levelBezeichnung,
+          levelKosten:      ent.levelKosten,
+          zusatzPatienten:  Number(opt.wert) || 0
+        });
+      });
+
+      const filename = `team${teamNrGlobal}-runde${currentRunde}-zusatzPatienten.json`;
+      fetch('../data/json/save.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename, data: JSON.stringify({ patienten }, null, 2) }),
+        keepalive: true
+      }).catch(err => console.error('Zusatz-Patienten-Export fehlgeschlagen:', err));
+    }
+
+    /* ══ Projektbalken aufbauen ══════════════════════════════════════════ */
+    let aktivNr = null;
+    const track = document.getElementById('proj-bar-track');
+
+    projektNrs.forEach(nr => {
+      const first = projektMap[nr][0];
+      const lock  = getLockInfo(nr);
+      const btn   = document.createElement('button');
+      btn.className = 'proj-btn' + (lock.locked ? ' locked' : '');
+      btn.id = `proj-btn-${nr}`;
+      btn.innerHTML = `
+        <div class="proj-btn-nr">${nr}</div>
+        <div class="proj-btn-name">${first.projektName}</div>
+        ${lock.locked ? `<div class="proj-btn-lock">${lockLabel(lock)}</div>` : ''}
+      `;
+      btn.addEventListener('click', () => selectProject(nr));
+      track.appendChild(btn);
+    });
+
+    /* Overlay öffnen / schliessen */
+    const overlay = document.getElementById('detail-overlay');
+    document.getElementById('detail-close').addEventListener('click', closeOverlayDetail);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeOverlayDetail(); });
+    function closeOverlayDetail() {
+      overlay.classList.remove('open');
+      projektNrs.forEach(n => document.getElementById(`proj-btn-${n}`)?.classList.remove('active'));
+    }
+
+    function positionOverlay() {
+      const bar = document.querySelector('.proj-bar-container');
+      if (bar) overlay.style.top = (bar.getBoundingClientRect().bottom + 8) + 'px';
+    }
+
+    /* Bereits gewählte Projekte markieren */
+    function refreshBarDone() {
+      projektNrs.forEach(nr => {
+        const btn = document.getElementById(`proj-btn-${nr}`);
+        if (!btn) return;
+        const lock = getLockInfo(nr);
+        btn.classList.toggle('done', !!entscheide[nr]);
+        btn.classList.toggle('locked', lock.locked);
+        let lockTag = btn.querySelector('.proj-btn-lock');
+        if (lock.locked) {
+          if (!lockTag) {
+            lockTag = document.createElement('div');
+            lockTag.className = 'proj-btn-lock';
+            btn.appendChild(lockTag);
+          }
+          lockTag.textContent = lockLabel(lock);
+        } else if (lockTag) {
+          lockTag.remove();
+        }
+      });
+    }
+    refreshBarDone();
+
+    /* ══ Projekt auswählen + Tabelle rendern ═════════════════════════════ */
+    function selectProject(nr) {
+      aktivNr = nr;
+      localStorage.setItem('aktivProjektNr', nr);
+
+      /* Balken-Highlight */
+      projektNrs.forEach(n => {
+        document.getElementById(`proj-btn-${n}`)?.classList.toggle('active', n === nr);
+      });
+
+      const records  = projektMap[nr];
+      const selected = entscheide[nr];
+      const lock     = getLockInfo(nr);
+
+      /* Wirkung-Spalten aus erstem Record */
+      const wirkungCols = (records[0].wirkungen || []).filter(w => w.name);
+
+      const detail = document.getElementById('proj-detail');
+      const thWirkungen = wirkungCols.map(w =>
+        `<th>${w.name}</th>`
+      ).join('');
+
+      const rows = records.map((r, idx) => {
+        const levelLabel = `Level ${idx + 1}`;
+        const isSel      = selected && selected.levelKosten === r.levelKosten && selected.levelBezeichnung === r.levelBezeichnung;
+        const tdWirkungen = wirkungCols.map(w => {
+          const match = (r.wirkungen || []).find(x => x.name === w.name);
+          return `<td>${match ? (match.wert ?? '') : ''}</td>`;
+        }).join('');
+        const starClass = 'star-btn' + (isSel ? ' selected' : '') + (lock.locked ? ' disabled' : '');
+        const starHtml = `<button class="${starClass}" data-idx="${idx}">${isSel ? '●' : '○'}</button>`;
+
+        return `<tr class="${isSel ? 'selected' : ''}" data-idx="${idx}" style="cursor:${lock.locked ? 'default' : 'pointer'};">
+          <td>${r.levelBezeichnung}<br><small style="font-weight:400;color:#888;font-size:0.72rem;"></td>
+          <td>${r.levelKosten}</td>
+          ${tdWirkungen}
+          <td>${starHtml}</td>
+        </tr>`;
+      }).join('');
+
+      positionOverlay();
+      overlay.classList.add('open');
+
+      const lockTagHtml = lock.locked
+        ? `<span class="detail-lock-tag">${lock.hard
+            ? '🔒 Projektauswahl bestätigt – nur der Spielleiter kann sie noch ändern'
+            : `🔒 gesperrt bis Runde ${lock.until} – Investition läuft noch`}</span>`
+        : '';
+
+      detail.innerHTML = `
+        <button class="detail-close" id="detail-close">✕</button>
+        <div class="detail-title">${records[0].projektName}${lockTagHtml}</div>
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th>Investition</th>
+              <th>Kosten</th>
+              ${thWirkungen}
+              <th>Auswahl</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+
+      /* Close-Button neu binden (innerHTML hat ihn ersetzt) */
+      detail.querySelector('#detail-close')?.addEventListener('click', closeOverlayDetail);
+
+      /* Zeilen-Klick Handler (nur wenn nicht gesperrt) */
+      if (!lock.locked) {
+        detail.querySelectorAll('tbody tr').forEach(tr => {
+          tr.addEventListener('click', () => {
+            const idx = Number(tr.dataset.idx);
+            onStarClick(nr, idx, records[idx]);
+          });
+        });
+      }
+    }
+
+    /* ══ Stern-Klick: Undo + Redo ════════════════════════════════════════ */
+    function onStarClick(projektNr, levelIdx, record) {
+      if (getLockInfo(projektNr).locked) return;
+      const prev       = entscheide[projektNr];
+      const teamNr     = Number(localStorage.getItem('teamNumber')) || 1;
+      const teamLabel  = localStorage.getItem('klinikName') || `Team ${teamNr}`;
+      const protokoll  = getLS('protokoll') || [];
+      const er         = getLS('erfolgsrechnung') || {};
+
+      /* Bilanz holen */
+      const bilanzData = getLS('bilanzStart');
+      let bilanzEntry  = null, bilanzArr = null;
+      if (bilanzData) {
+        bilanzArr   = bilanzData.Anfangsbilanz || bilanzData;
+        const idx   = bilanzArr[teamNr] !== undefined ? teamNr : (bilanzArr[teamNr-1] !== undefined ? teamNr-1 : 0);
+        bilanzEntry = bilanzArr[idx];
+      }
+
+      function saveBilanz() {
+        if (!bilanzData || !bilanzEntry) return;
+        const idx = bilanzArr[teamNr] !== undefined ? teamNr : (bilanzArr[teamNr-1] !== undefined ? teamNr-1 : 0);
+        bilanzArr[idx] = bilanzEntry;
+        setLS('bilanzStart', bilanzData.Anfangsbilanz ? { ...bilanzData, Anfangsbilanz: bilanzArr } : bilanzArr);
+      }
+
+      /* ── Undo vorherige Wahl (Flüssige Mittel immer zurück) ── */
+      if (prev) {
+        if (bilanzEntry?.Bilanz) {
+          bilanzEntry.Bilanz.FluessigeMittel = (Number(bilanzEntry.Bilanz.FluessigeMittel) || 0) + prev.levelKosten;
+        }
+        protokoll.push({
+          zeit: new Date().toISOString(), spielzug: 'spz-25',
+          aktion: `Korrektur Projekt ${projektNr}`,
+          von: 'Projekt-Feld', nach: 'Flüssige Mittel',
+          betrag: prev.levelKosten, team: teamLabel
+        });
+      }
+
+      /* ── Neuen Level anwenden (Flüssige Mittel immer abziehen) ── */
+      if (bilanzEntry?.Bilanz) {
+        bilanzEntry.Bilanz.FluessigeMittel = (Number(bilanzEntry.Bilanz.FluessigeMittel) || 0) - record.levelKosten;
+      }
+
+      /* ── Entscheid in Memory setzen (vor Neuberechnung) ── */
+      entscheide[projektNr] = {
+        levelIdx:         levelIdx,
+        levelKosten:      record.levelKosten,
+        levelBezeichnung: record.levelBezeichnung,
+        projektName:      record.projektName
+      };
+      /* Mehrperioden-Projekt: Rundenstempel für Sperr-/Ablauflogik mitschreiben */
+      if (record.projektPeriode && record.projektPeriode > 1) {
+        entscheide[projektNr].projektPeriode  = record.projektPeriode;
+        entscheide[projektNr].gewaehltInRunde = currentRunde;
+      }
+
+      /* ── Investitionen UND Kosten_Projekte komplett neu berechnen ── */
+      if (bilanzEntry?.Bilanz) {
+        let sumGeb = 0, sumInfra = 0, sumKosten = 0;
+        Object.entries(entscheide).forEach(([nr, ent]) => {
+          if (!ent.levelKosten) return;
+          /* Mehrperioden-Projekte aus einer Vorrunde (noch gesperrt, aber
+             diese Runde nicht neu gewählt) zählen nicht nochmals mit —
+             ihre Kosten wurden bereits in der Wahl-Runde verbucht. */
+          if (ent.projektPeriode > 1 && ent.gewaehltInRunde !== currentRunde) return;
+          const recs = projektMap[Number(nr)] || [];
+          const rec  = recs.find(r => r.levelKosten === ent.levelKosten && r.levelBezeichnung === ent.levelBezeichnung)
+                    || recs.find(r => r.levelKosten === ent.levelKosten);
+          if (!rec) return;
+          const hatGebOpt   = (rec.optionen || []).some(o => o.name === 'Abschreibung Gebäude');
+          const hatMaschOpt = (rec.optionen || []).some(o => o.name === 'Abschreibung Maschinen');
+          if (hatGebOpt)        sumGeb    += ent.levelKosten;
+          else if (hatMaschOpt) sumInfra  += ent.levelKosten;
+          else                   sumKosten += ent.levelKosten;
+        });
+        bilanzEntry.Bilanz.Investitionen_Gebaeude      = sumGeb;
+        bilanzEntry.Bilanz.Investitionen_Infrastruktur = sumInfra;
+        er.Kosten_Projekte = sumKosten;
+      }
+      protokoll.push({
+        zeit: new Date().toISOString(), spielzug: 'spz-25',
+        aktion: `Projekt ${projektNr}: Level ${levelIdx + 1} (${record.levelBezeichnung})`,
+        von: 'Flüssige Mittel', nach: 'Projekt-Feld',
+        betrag: record.levelKosten, team: teamLabel
+      });
+
+      /* ── Speichern ── */
+      saveBilanz();
+      setLS('erfolgsrechnung', er);
+      setLS('protokoll', protokoll);
+      setLS('projektEntscheide', entscheide);
+
+      /* UI aktualisieren */
+      refreshBarDone();
+      selectProject(projektNr);
+    }
+
+    /* ══ Validierung beim Weiter-Klick ══════════════════════════════════ */
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#nav-next')) return;
+
+      const fehlend = projektNrs.filter(nr => !entscheide[nr]);
+      if (fehlend.length === 0) { exportProjektPeriode(); exportZusatzPatienten(); return; }
+
+      e.stopImmediatePropagation();
+
+      /* Warn-Banner anzeigen */
+      let banner = document.getElementById('proj-warn-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'proj-warn-banner';
+        banner.style.cssText = `
+          position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
+          background: #e74c3c; color: #fff; font-weight: 700; font-size: 0.9rem;
+          padding: 12px 28px; border-radius: 10px; z-index: 9999;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.2); white-space: nowrap;
+        `;
+        document.body.appendChild(banner);
+      }
+      banner.textContent = `Bitte für alle Projekte eine Option wählen (noch ${fehlend.length} offen).`;
+      banner.style.display = 'block';
+      clearTimeout(banner._t);
+      banner._t = setTimeout(() => { banner.style.display = 'none'; }, 3000);
+    }, true);
+  </script>
+</body>
+</html>

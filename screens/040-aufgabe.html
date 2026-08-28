@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spielbrett-Aufgabe – Planspiel Bülach</title>
+
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/tailwind.css" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="../assets/pictos/neosight-192.png" />
+
+  <style>
+    html, body { margin:0; padding:0; min-height:100vh; background:#fff; }
+    * { box-sizing:border-box; }
+
+    .page-main {
+      width: 100%;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 160px 32px 24px 32px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    /* ── Aufgaben-Karte ──────────────────────────────────────────────────── */
+    .aufgabe-card {
+      position: relative;
+      flex: 1;
+      max-width: 550px;
+      border-top:  1px solid var(--color-border);
+      border-left: 1px solid var(--color-border);
+      border-top-left-radius: 12px;
+      padding: 36px 40px 40px 40px;
+      background: #fff;
+    }
+
+    /* Picto oben rechts, überlappt Rahmen */
+    .card-picto {
+      position: absolute;
+      top: -38px;
+      right: 20px;
+      width: auto;
+      height: 60px;
+      display: block;
+      background: #fff;
+    }
+
+    .card-title {
+      font-size: 2.0rem !important;
+      font-weight: 800;
+      color: var(--color-accent);
+      margin: 0 0 20px 0;
+      line-height: 1.05;
+      white-space: nowrap;
+    }
+
+    .card-subtitle {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0 0 6px 0;
+    }
+
+    .card-text {
+      font-size: 0.9rem;
+      color: #333;
+      line-height: 1.6;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-white min-h-screen flex flex-col items-center"
+  data-prev="030-anfangsbilanz.html"
+  data-next="050-aufgabe.html"
+  data-spielzug-label="Spielzug 4"
+  data-step-current="4"
+  data-step-total="20"
+  data-wirkung="00-wirkungen.png"
+  data-disable-handbuch="true"
+  data-disable-bank="true"
+  data-disable-ereignis="true"
+>
+  <div id="app-header" class="w-full"></div>
+
+  <main class="w-full flex-1">
+    <div class="page-main">
+
+      <!-- Block 1: immer sichtbar -->
+      <div class="aufgabe-card">
+        <img id="card-picto" class="card-picto"
+             src="../assets/pictos/picto_aufgabe.png" alt="" />
+        <h1 class="card-title">Spielbrett-Aufgabe</h1>
+        <p class="card-subtitle" id="card-subtitle">Finanzen:</p>
+        <p class="card-text"    id="card-text"></p>
+      </div>
+
+      <!-- Block 2: ab Runde 2 sichtbar -->
+      <div class="aufgabe-card" id="card-2" style="display:none;">
+        <img id="card-picto-2" class="card-picto"
+             src="../assets/pictos/picto_aufgabe.png" alt="" />
+        <h1 class="card-title" id="card-title-2">Spielbrett-Aufgabe</h1>
+        <p class="card-subtitle" id="card-subtitle-2"></p>
+        <p class="card-text"    id="card-text-2"></p>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="app-footer" class="w-full bg-transparent"></div>
+
+  <script type="module" src="../assets/js/core.js"></script>
+
+  <script>
+    /* ── Hilfsfunktionen ── */
+    function getLS(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+    }
+    function setLS(key, val) {
+      localStorage.setItem(key, JSON.stringify(val));
+    }
+    function boldQuotes(text) {
+      return text.replace(/"([^"]+)"/g, '<strong>"$1"</strong>');
+    }
+
+    /* ── Spielaufgaben → Karten-Text ── */
+    (function() {
+      const data = getLS('spielaufgaben');
+      if (!data) return;
+      const arr  = data.spielaufgaben || data;
+      const item = arr.find(e => e.screenFile === location.pathname.split('/').pop());
+      if (!item) return;
+
+      function parseBlock(text) {
+        const parts = (text || '').split('\r');
+        return {
+          subtitle: parts.length > 1 ? parts[0].trim() : '',
+          body:     parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim()
+        };
+      }
+
+      /* Block 1 */
+      const b1 = parseBlock(item.Aufgabe_1);
+      if (b1.subtitle) document.getElementById('card-subtitle').textContent = b1.subtitle;
+      document.getElementById('card-text').innerHTML = boldQuotes(b1.body);
+      if (item.Picto1)
+        document.getElementById('card-picto').src = `../assets/pictos/${item.Picto1.toLowerCase()}`;
+
+      /* Block 2: sichtbar, sobald Aufgabe_2 in Spielaufgaben.json gefüllt ist */
+      if (item.Aufgabe_2) {
+        const b2 = parseBlock(item.Aufgabe_2);
+        if (item.AufgabenArt_2) document.getElementById('card-title-2').textContent    = item.AufgabenArt_2;
+        if (b2.subtitle)        document.getElementById('card-subtitle-2').textContent = b2.subtitle;
+        document.getElementById('card-text-2').innerHTML = boldQuotes(b2.body);
+        if (item.Picto2)
+          document.getElementById('card-picto-2').src = `../assets/pictos/${item.Picto2.toLowerCase()}`;
+        document.getElementById('card-2').style.display = 'block';
+      }
+    })();
+
+    /* ══ Transfer beim Next-Klick (capturing → läuft vor core.js) ════════ */
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#nav-next')) return;
+
+      /* Flag-Check: nur einmal ausführen */
+      if (localStorage.getItem('done_spz04_forderungen') === 'true') return;
+
+      const data   = getLS('bilanzStart');
+      if (!data) return;
+      const arr    = data.Anfangsbilanz || data;
+      const teamNr = Number(localStorage.getItem('teamNumber')) || 1;
+      const idx    = arr[teamNr] !== undefined ? teamNr : (arr[teamNr-1] !== undefined ? teamNr-1 : 0);
+      const entry  = arr[idx];
+      if (!entry || !entry.Bilanz) return;
+
+      const b           = entry.Bilanz;
+      const forderungen = Number(b.Forderungen) || 0;
+      if (forderungen === 0) {
+        localStorage.setItem('done_spz04_forderungen', 'true');
+        return;
+      }
+
+      /* Betrag verschieben */
+      const vorher = Number(b.FluessigeMittel) || 0;
+      b.FluessigeMittel = vorher + forderungen;
+      b.Forderungen     = 0;
+      arr[idx] = entry;
+
+      /* In localStorage zurückschreiben */
+      const saveData = data.Anfangsbilanz
+        ? { ...data, Anfangsbilanz: arr }
+        : arr;
+      setLS('bilanzStart', saveData);
+
+      /* Protokoll-Eintrag */
+      const protokoll = getLS('protokoll') || [];
+      protokoll.push({
+        zeit:     new Date().toISOString(),
+        spielzug: 'spz-04',
+        aktion:   'Transfer Forderungen → Flüssige Mittel',
+        von:      'Forderungen',
+        nach:     'Flüssige Mittel',
+        betrag:   forderungen,
+        team:     localStorage.getItem('klinikName') || `Team ${teamNr}`
+      });
+      setLS('protokoll', protokoll);
+
+      /* Flag setzen */
+      localStorage.setItem('done_spz04_forderungen', 'true');
+
+    }, true /* capture: läuft vor dem nav-next Handler in core.js */);
+  </script>
+</body>
+</html>
