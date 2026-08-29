@@ -73,10 +73,22 @@ if (footerTarget) {
   const handbuchBtn = document.getElementById('nav-handbuch');
   const wirkungBtn  = document.getElementById('nav-wirkungen');
 
-  /* Lookup-Map aus handbuch.json: spielzug → handbuch-Datei */
+  /* Lookup-Map aus handbuch.json: spielzug (stabile Kennung, z.B. "spz-06") → handbuch-Datei */
   let _handbuchMap = {};
   let _handbuchVerfuegbar = false;
   const _currentScreen = window.location.pathname.split('/').pop();
+
+  /* Stabile Spielzug-Kennung des aktuellen Screens ermitteln (Reverse-Lookup
+     über Spielaufgaben.json: screenFile → Spielzug). So bleibt handbuch.json
+     unabhängig vom tatsächlichen Dateinamen – wie schon bei Spielaufgaben.json
+     selbst, das den Dateinamen ja auch nur über das screenFile-Feld referenziert. */
+  let _currentSpielzug = null;
+  try {
+    const sa  = JSON.parse(localStorage.getItem('spielaufgaben'));
+    const arr = sa ? (sa.spielaufgaben || sa) : null;
+    const own = Array.isArray(arr) ? arr.find(e => e.screenFile === _currentScreen) : null;
+    if (own) _currentSpielzug = own.Spielzug;
+  } catch (e) { /* kein Spielaufgaben-Eintrag für diesen Screen */ }
 
   function _applyHandbuchState() {
     const btn = document.getElementById('nav-handbuch');
@@ -103,19 +115,18 @@ if (footerTarget) {
   _fetchUTF16Json('../data/json/handbuch.json')
     .then(data => {
       (data.Handbuch || []).forEach(e => { _handbuchMap[e.spielzug] = e.handbuch; });
-      _handbuchVerfuegbar = Object.keys(_handbuchMap).some(k => k === _currentScreen || k.startsWith(_currentScreen + ':'));
+      _handbuchVerfuegbar = !!_currentSpielzug &&
+        Object.keys(_handbuchMap).some(k => k === _currentSpielzug || k.startsWith(_currentSpielzug + ':'));
       _applyHandbuchState();
     })
     .catch(() => {});
 
   function _getHandbuchFile() {
-    /* Für die Projekte-Seite: Compound-Key mit aktiver ProjektNr */
-    if (_currentScreen === '240-projekte.html') {
-      const nr = localStorage.getItem('aktivProjektNr');
-      if (nr) return _handbuchMap[`240-projekte.html:${nr}`] || null;
-      return null;
-    }
-    return _handbuchMap[_currentScreen] || document.body.dataset.handbuch || null;
+    if (!_currentSpielzug) return document.body.dataset.handbuch || null;
+    /* Compound-Key mit aktiver ProjektNr (z.B. für die Projekte-Seite), falls vorhanden */
+    const nr = localStorage.getItem('aktivProjektNr');
+    if (nr && _handbuchMap[`${_currentSpielzug}:${nr}`]) return _handbuchMap[`${_currentSpielzug}:${nr}`];
+    return _handbuchMap[_currentSpielzug] || document.body.dataset.handbuch || null;
   }
 
   /* Overlay + iframe in DOM injizieren */

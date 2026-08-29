@@ -3,27 +3,23 @@
   "geschaeftsleitung": [
     {
       "name": "",
-      "funktion": "Ärztliche/r Direktor/in"
+      "funktion": "Medizinische/r Direktor/in"
     },
     {
       "name": "",
-      "funktion": "Leiter/in Bereich HRM"
+      "funktion": "Leiter/in Bereich HR"
     },
     {
       "name": "",
-      "funktion": "Leiter/in Bereich Finanzen"
+      "funktion": "Leiter/in Finanzen & Services"
     },
     {
       "name": "",
-      "funktion": "Leiter/in Bereich Pflege (operatives Tagesgeschäft)"
+      "funktion": "Leiter/in Bereich Pflege"
     },
     {
       "name": "",
-      "funktion": "Leiter/in Bereich Unternehmensentwicklung"
-    },
-    {
-      "name": "",
-      "funktion": "Leiter/in Bereich Services"
+      "funktion": "CEO"
     }
   ]
 }
