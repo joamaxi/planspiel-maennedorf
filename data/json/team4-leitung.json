@@ -1,29 +1,25 @@
 {
-  "klinikName": "Vierte Klinik",
+  "klinikName": "Joachim Klinik",
   "geschaeftsleitung": [
     {
-      "name": "Christian",
-      "funktion": "Ärztliche/r Direktor/in"
+      "name": "Joachim",
+      "funktion": "Medizinische/r Direktor/in"
     },
     {
-      "name": "Christian",
-      "funktion": "Leiter/in Bereich HRM"
+      "name": "Joachim",
+      "funktion": "Leiter/in Bereich HR"
     },
     {
-      "name": "Christian",
-      "funktion": "Leiter/in Bereich Finanzen"
+      "name": "Joachim",
+      "funktion": "Leiter/in Finanzen & Services"
     },
     {
-      "name": "Christian",
-      "funktion": "Leiter/in Bereich Pflege (operatives Tagesgeschäft)"
+      "name": "Joachim",
+      "funktion": "Leiter/in Bereich Pflege"
     },
     {
-      "name": "Christian",
-      "funktion": "Leiter/in Bereich Unternehmensentwicklung"
-    },
-    {
-      "name": "Christian",
-      "funktion": "Leiter/in Bereich Services"
+      "name": "Joachim",
+      "funktion": "CEO"
     }
   ]
 }

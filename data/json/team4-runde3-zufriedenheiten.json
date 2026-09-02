@@ -3,27 +3,27 @@
     {
       "Zufriedenheit_Kuerzel": "MIZI",
       "Zufriedenheit_Name": "Mitarbeitenden-Zufriedenheit",
-      "Zufriedenheit_Wert": 90
+      "Zufriedenheit_Wert": 114
     },
     {
       "Zufriedenheit_Kuerzel": "PAZI",
       "Zufriedenheit_Name": "Patienten-Zufriedenheit",
-      "Zufriedenheit_Wert": 77.5
+      "Zufriedenheit_Wert": 100.5
     },
     {
       "Zufriedenheit_Kuerzel": "BEZI",
       "Zufriedenheit_Name": "Besuchenden-Zufriedenheit",
-      "Zufriedenheit_Wert": 57.5
+      "Zufriedenheit_Wert": 56.5
     },
     {
       "Zufriedenheit_Kuerzel": "ZUZI",
       "Zufriedenheit_Name": "Zuweisenden-Zufriedenheit",
-      "Zufriedenheit_Wert": 65
+      "Zufriedenheit_Wert": 71.5
     },
     {
       "Zufriedenheit_Kuerzel": "EIZI",
       "Zufriedenheit_Name": "Eigentümer-Zufriedenheit",
-      "Zufriedenheit_Wert": 67.5
+      "Zufriedenheit_Wert": 66.5
     }
   ],
   "Zugang_Arbeitsmarkt": 0

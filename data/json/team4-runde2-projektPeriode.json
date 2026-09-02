@@ -1,21 +1,13 @@
 {
-  "108": {
-    "levelIdx": 1,
-    "levelKosten": 11,
-    "levelBezeichnung": "mittel",
-    "projektName": "Projekt: Ambulante Klinik Meilen",
-    "gewaehltInRunde": 1,
-    "projektPeriode": 2
-  },
   "110": {
     "levelIdx": 1,
-    "levelKosten": 2,
+    "levelKosten": 6,
     "levelBezeichnung": "ja",
     "projektName": "Projekt: Neues KIS",
     "gewaehltInRunde": 1,
     "projektPeriode": 2
   },
-  "114": {
+  "117": {
     "levelIdx": 1,
     "levelKosten": 8,
     "levelBezeichnung": "gering",

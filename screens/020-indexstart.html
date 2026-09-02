@@ -336,7 +336,8 @@
 
       function parseAufgabe(text) {
         const parts = (text || '').split('\r');
-        return { label: parts[0] || '', body: parts.slice(1).join(' ').trim() };
+        const body  = parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim();
+        return { label: parts[0] || '', body };
       }
 
       const a1 = parseAufgabe(item.Aufgabe_1);

@@ -114,7 +114,7 @@ if (footerTarget) {
 
   _fetchUTF16Json('../data/json/handbuch.json')
     .then(data => {
-      (data.Handbuch || []).forEach(e => { _handbuchMap[e.spielzug] = e.handbuch; });
+      (data.Handbuch || data.handbuch || []).forEach(e => { _handbuchMap[e.spielzug] = e.handbuch; });
       _handbuchVerfuegbar = !!_currentSpielzug &&
         Object.keys(_handbuchMap).some(k => k === _currentSpielzug || k.startsWith(_currentSpielzug + ':'));
       _applyHandbuchState();
@@ -364,7 +364,8 @@ if (footerTarget) {
 
   /* Prüfen, ob für den aktuellen Screen + Runde ein noch nicht gesehener Hinweis existiert */
   (function checkHinweis() {
-    const spielzug = _currentScreen.replace(/\.html$/, '');
+    const spielzug = _currentSpielzug;
+    if (!spielzug) return;
     const runde    = localStorage.getItem('rundeNumber') || '1';
     let data;
     try { data = JSON.parse(localStorage.getItem('hinweis')); } catch(e) { data = null; }

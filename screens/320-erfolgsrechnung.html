@@ -163,7 +163,7 @@
         ${row('Andere betriebliche Erträge',       fmt(v('Andere_Ertraege', 0)))}
         ${row('Ausserordentliche Erträge',         fmt(v('Ausserordentliche_Ertraege', 0)))}
         ${row('TOTAL Betriebsertrag (gerundet)',   totalBetrieb, 'subtotal')}
-        <p class="er-col-title" style="margin-top:18px;">Aufwände</p>
+        <p class="er-col-title" style="margin-top:18px;">Aufwände (variabel)</p>
         ${row('Variable Kosten aus Spitalbetrieb',         fmt(v('Variable_Kosten_Spital', 0)))}
         ${row('Variable Kosten für Medikamente / Material', fmt(v('Variable_Kosten_Medikamente', 0)))}
         ${row('Variable Kostenreduktion',                  fmt(v('Variable_Kostenreduktion', 0)))}
@@ -178,7 +178,7 @@
       const colRight = document.createElement('div');
       colRight.className = 'er-col';
       colRight.innerHTML = `
-        <p class="er-col-title">Aufwände</p>
+        <p class="er-col-title">Aufwände (fix)</p>
         ${row('Personalaufwand für Mitarbeitende',              fmt(v('Personalaufwand', 0)))}
         ${row('Personalaufwand temporär',                         fmt(v('Personalaufwand_Extern', 0)))}
         ${row('Kosten aller Projekte des laufenden Jahres',     fmt(v('Kosten_Projekte', null)))}

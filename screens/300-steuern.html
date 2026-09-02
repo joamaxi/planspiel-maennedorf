@@ -70,6 +70,18 @@
       margin: 0 0 14px;
     }
 
+    .steuer-header-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .steuer-mio-hint {
+      font-size: 0.75rem;
+      color: var(--color-label-light);
+      padding-right: 8px;
+    }
+
     .steuer-list {
       border-top: 1px solid var(--color-border);
       border-left: 1px solid var(--color-border);
@@ -135,7 +147,10 @@
 
       <!-- Rechte Spalte: Steuern -->
       <section class="steuer-col">
-        <p class="section-label">Steuern</p>
+        <div class="steuer-header-row">
+          <p class="section-label">Steuern</p>
+          <span class="steuer-mio-hint">in Mio</span>
+        </div>
         <div class="steuer-list">
           <div class="steuer-row">
             <span class="steuer-label">Steuern auf übrige<br>betriebliche Erträge</span>

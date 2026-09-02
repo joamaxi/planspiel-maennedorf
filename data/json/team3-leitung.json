@@ -1,29 +1,25 @@
 {
-  "klinikName": "Joachim Klinik",
+  "klinikName": "Harry Klinik",
   "geschaeftsleitung": [
     {
-      "name": "Joachim",
-      "funktion": "Ärztliche/r Direktor/in"
+      "name": "H",
+      "funktion": "Medizinische/r Direktor/in"
     },
     {
-      "name": "Joachim",
-      "funktion": "Leiter/in Bereich HRM"
+      "name": "A",
+      "funktion": "Leiter/in Bereich HR"
     },
     {
-      "name": "Joachim",
-      "funktion": "Leiter/in Bereich Finanzen"
+      "name": "B",
+      "funktion": "Leiter/in Finanzen & Services"
     },
     {
-      "name": "Joachim",
-      "funktion": "Leiter/in Bereich Pflege (operatives Tagesgeschäft)"
+      "name": "C",
+      "funktion": "Leiter/in Bereich Pflege"
     },
     {
-      "name": "Joachim",
-      "funktion": "Leiter/in Bereich Unternehmensentwicklung"
-    },
-    {
-      "name": "Joachim",
-      "funktion": "Leiter/in Bereich Services"
+      "name": "Belafonte",
+      "funktion": "CEO"
     }
   ]
 }

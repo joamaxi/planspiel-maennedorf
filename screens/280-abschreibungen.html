@@ -75,6 +75,18 @@
       margin: 0 0 14px;
     }
 
+    .abschr-header-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .abschr-mio-hint {
+      font-size: 0.75rem;
+      color: var(--color-label-light);
+      padding-right: 8px;
+    }
+
     .abschr-list {
       border-top: 1px solid var(--color-border);
       border-left: 1px solid var(--color-border);
@@ -150,7 +162,10 @@
 
       <!-- Rechte Spalte: Abschreibungen -->
       <section class="abschr-col">
-        <p class="section-label">Abschreibungen</p>
+        <div class="abschr-header-row">
+          <p class="section-label">Abschreibungen</p>
+          <span class="abschr-mio-hint">in Mio</span>
+        </div>
         <div class="abschr-list">
           <div class="abschr-row">
             <div>

@@ -1,29 +1,25 @@
 {
-  "klinikName": "",
+  "klinikName": "Si",
   "geschaeftsleitung": [
     {
-      "name": "",
-      "funktion": "Ärztliche/r Direktor/in"
+      "name": "Si",
+      "funktion": "Medizinische/r Direktor/in"
     },
     {
-      "name": "",
-      "funktion": "Leiter/in Bereich HRM"
+      "name": "Mi",
+      "funktion": "Leiter/in Bereich HR"
     },
     {
-      "name": "",
-      "funktion": "Leiter/in Bereich Finanzen"
+      "name": "Mi",
+      "funktion": "Leiter/in Finanzen & Services"
     },
     {
-      "name": "",
-      "funktion": "Leiter/in Bereich Pflege (operatives Tagesgeschäft)"
+      "name": "Si",
+      "funktion": "Leiter/in Bereich Pflege"
     },
     {
-      "name": "",
-      "funktion": "Leiter/in Bereich Unternehmensentwicklung"
-    },
-    {
-      "name": "",
-      "funktion": "Leiter/in Bereich Services"
+      "name": "Si",
+      "funktion": "CEO"
     }
   ]
 }

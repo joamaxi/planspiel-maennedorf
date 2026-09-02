@@ -1,11 +1,11 @@
 {
   "patienten": [
     {
-      "projektNr": 108,
+      "projektNr": 104,
       "projektName": "Projekt: Ambulante Klinik Meilen",
-      "levelBezeichnung": "mittel",
-      "levelKosten": 11,
-      "zusatzPatienten": 6
+      "levelBezeichnung": "hoch",
+      "levelKosten": 25,
+      "zusatzPatienten": 10
     }
   ]
 }

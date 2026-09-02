@@ -39,6 +39,18 @@
       margin: 0 0 14px;
     }
 
+    .kosten-header-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .kosten-mio-hint {
+      font-size: 0.75rem;
+      color: var(--color-label-light);
+      padding-right: 8px;
+    }
+
     .kosten-list {
       border-top: 1px solid var(--color-border);
       border-left: 1px solid var(--color-border);
@@ -165,7 +177,10 @@
 
       <!-- Rechte Spalte: Betriebskosten -->
       <section class="kosten-col">
-        <p class="kosten-section-label">Betriebsaufwendungen</p>
+        <div class="kosten-header-row">
+          <p class="kosten-section-label">Betriebsaufwendungen</p>
+          <span class="kosten-mio-hint">in Mio</span>
+        </div>
         <div class="kosten-list" id="kosten-list">
           <!-- per JS -->
         </div>

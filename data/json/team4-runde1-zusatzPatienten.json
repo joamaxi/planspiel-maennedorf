@@ -1,10 +1,10 @@
 {
   "patienten": [
     {
-      "projektNr": 108,
+      "projektNr": 104,
       "projektName": "Projekt: Ambulante Klinik Meilen",
       "levelBezeichnung": "mittel",
-      "levelKosten": 11,
+      "levelKosten": 13,
       "zusatzPatienten": 6
     }
   ]

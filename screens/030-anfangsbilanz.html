@@ -148,7 +148,7 @@
 
     /* Leerzeile als Abstand */
     .bl-spacer {
-      height: 10px;
+      height: 20px;
     }
 
     /* Total-Zeile */
@@ -322,7 +322,7 @@
         ${row('Darlehen Bank',                  n('Darlehen_Bank'))}
         ${row('Fremdkapital',                   fremd, 'subtotal')}
         ${spacer()}
-        ${row('Eigenkapital',                   n('Eigenkapital'))}
+        ${row('Eigenkapital',                   n('Eigenkapital'), 'subtotal')}
         ${total('TOTAL Passiven', totalPassiv)}
       `;
     })();

@@ -133,6 +133,18 @@
     .data-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
     .section-gap { height: 28px; }
+
+    .abschluss-header-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .abschluss-mio-hint {
+      font-size: 0.75rem;
+      color: var(--color-label-light);
+      padding-right: 8px;
+    }
   </style>
 </head>
 
@@ -165,7 +177,10 @@
       <section class="right-col">
 
         <!-- Variable Kostenreduktion -->
-        <p class="section-label" style="margin-top:0;">Variable Kostenreduktion</p>
+        <div class="abschluss-header-row">
+          <p class="section-label" style="margin-top:0;">Variable Kostenreduktion</p>
+          <span class="abschluss-mio-hint">in Mio</span>
+        </div>
         <div class="data-list">
           <div class="data-row">
             <div>
@@ -179,7 +194,10 @@
         <div class="section-gap"></div>
 
         <!-- Flüssige Mittel am Ende der Periode -->
-        <p class="section-label">Flüssige Mittel am Ende der Periode</p>
+        <div class="abschluss-header-row">
+          <p class="section-label">Flüssige Mittel am Ende der Periode</p>
+          <span class="abschluss-mio-hint">in Mio</span>
+        </div>
         <div class="data-list">
           <div class="data-row">
             <span class="data-label">Flüssige Mittel</span>

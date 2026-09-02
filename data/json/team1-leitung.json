@@ -3,15 +3,11 @@
   "geschaeftsleitung": [
     {
       "name": "",
+      "funktion": "CEO"
+    },
+    {
+      "name": "",
       "funktion": "Medizinische/r Direktor/in"
-    },
-    {
-      "name": "",
-      "funktion": "Leiter/in Bereich HR"
-    },
-    {
-      "name": "",
-      "funktion": "Leiter/in Finanzen & Services"
     },
     {
       "name": "",
@@ -19,7 +15,11 @@
     },
     {
       "name": "",
-      "funktion": "CEO"
+      "funktion": "Leiter/in Finanzen & Services"
+    },
+    {
+      "name": "",
+      "funktion": "Leiter/in Bereich HR"
     }
   ]
 }

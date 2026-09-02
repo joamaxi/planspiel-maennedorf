@@ -1,24 +1,16 @@
 {
-  "108": {
-    "levelIdx": 2,
-    "levelKosten": 23,
-    "levelBezeichnung": "hoch",
-    "projektName": "Projekt: Ambulante Klinik Meilen",
-    "gewaehltInRunde": 1,
-    "projektPeriode": 2
-  },
   "110": {
-    "levelIdx": 1,
-    "levelKosten": 2,
-    "levelBezeichnung": "ja",
+    "levelIdx": 0,
+    "levelKosten": 0,
+    "levelBezeichnung": "nein",
     "projektName": "Projekt: Neues KIS",
     "gewaehltInRunde": 1,
     "projektPeriode": 2
   },
-  "114": {
-    "levelIdx": 2,
-    "levelKosten": 16,
-    "levelBezeichnung": "mittel",
+  "117": {
+    "levelIdx": 3,
+    "levelKosten": 32,
+    "levelBezeichnung": "hoch",
     "projektName": "Projekt: Gebäudeinfrastruktur Standort Männedorf",
     "gewaehltInRunde": 1,
     "projektPeriode": 2
